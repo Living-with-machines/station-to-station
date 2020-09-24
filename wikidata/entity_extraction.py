@@ -1,0 +1,304 @@
+import bz2
+import json
+import pandas as pd
+import pydash
+from tqdm import tqdm
+
+def wikidata(filename):
+    with bz2.open(filename, mode='rt') as f:
+        f.read(2) # skip first two bytes: "{\n"
+        for line in f:
+            try:
+                yield json.loads(line.rstrip(',\n'))
+            except json.decoder.JSONDecodeError:
+                continue
+                
+languages = ['en', 'cy', 'sco', 'gd', 'ga', 'kw']
+
+df_record_all = pd.DataFrame(columns=['wikidata_id', 'english_label', 'instance_of', 'description_set', 'alias_dict', 'nativelabel', 'population_dict', 'area', 'hcounties', 'date_opening', 'date_closing', 'inception_date', 'dissolved_date', 'follows', 'replaces', 'adm_regions', 'countries', 'continents', 'capital_of', 'borders', 'near_water', 'latitude', 'longitude', 'wikititle', 'geonamesIDs', 'toIDs', 'vchIDs', 'vob_placeIDs', 'vob_unitIDs', 'epns', 'os_grid_ref', 'connectswith', 'street_address', 'adjacent_stations', 'ukrailcode', 'connectline'])
+
+header=True
+i = 0
+for record in tqdm(wikidata('/resources/wikidata/latest-all.json.bz2')):
+    # only extract items with geographical coordinates (P625)
+    if pydash.has(record, 'claims.P625'):
+        # if pydash.get(record, 'claims.P17[0].mainsnak.datavalue.value.id') == "Q145": # Filter: only UK
+        
+        # Wikidata ID:
+        wikidata_id = record['id']
+
+        # ==========================================
+        # Place description and definition
+        # ==========================================
+
+        # Main label:
+        english_label = pydash.get(record, 'labels.en.value')
+
+        # Location is instance of
+        instance_of_dict = pydash.get(record, 'claims.P31')
+        instance_of = None
+        if instance_of_dict:
+            instance_of = [r["mainsnak"]["datavalue"]["value"]["id"] for r in instance_of_dict]
+
+        # Descriptions in English:
+        description_set = set()
+        descriptions = pydash.get(record, 'descriptions')
+        for x in descriptions:
+            if x == 'en' or x.startswith('en-'):
+                description_set.add(descriptions[x]['value'])
+
+        # Aliases and labels:
+        aliases = pydash.get(record, 'aliases')
+        labels = pydash.get(record, 'labels')
+        alias_dict = dict()
+        for x in aliases:
+            if x in languages or x.startswith('en-'):
+                for y in aliases[x]:
+                    if not y["value"].isupper() and not y["value"].islower() and any(x.isalpha() for x in y["value"]):
+                        if x in alias_dict:
+                            if not y["value"] in alias_dict[x]:
+                                alias_dict[x].append(y["value"])
+                        else:
+                            alias_dict[x] = [y["value"]]
+        for x in labels:
+            if x in languages or x.startswith('en-'):
+                if not labels[x]["value"].isupper() and not labels[x]["value"].islower() and any(z.isalpha() for z in labels[x]["value"]):
+                    if x in alias_dict:
+                        if not labels[x]["value"] in alias_dict[x]:
+                            alias_dict[x].append(labels[x]["value"])
+                    else:
+                        alias_dict[x] = [labels[x]["value"]]
+
+        # Native label
+        nativelabel_dict = pydash.get(record, 'claims.P1705')
+        nativelabel = None
+        if nativelabel_dict:
+            nativelabel = [pydash.get(c, 'mainsnak.datavalue.value.text') for c in nativelabel_dict]
+
+        # ==========================================
+        # Geographic and demographic information
+        # ==========================================
+
+        # Population at: dictionary of year-population pairs
+        population_dump = pydash.get(record, 'claims.P1082')
+        population_dict = dict()
+        if population_dump:
+            for ppl in population_dump:
+                pop_amount = pydash.get(ppl, 'mainsnak.datavalue.value.amount')
+                pop_time = pydash.get(ppl, 'qualifiers.P585[0].datavalue.value.time')
+                pop_time = "UNKNOWN" if not pop_time else pop_time
+                population_dict[pop_time] = pop_amount
+
+        # Area of location
+        dict_area_units = {'Q712226' : 'square kilometre',
+                   'Q2737347': 'square millimetre',
+                   'Q2489298': 'square centimetre',
+                   'Q35852': 'hectare',
+                   'Q185078': 'are',
+                   'Q25343': 'square metre'}
+
+        area_loc = pydash.get(record, 'claims.P2046[0].mainsnak.datavalue.value')
+        area = None
+        if area_loc:
+            if area_loc.get("unit"):
+                area = (area_loc.get("amount"), dict_area_units.get(area_loc.get("unit").split("/")[-1]))
+
+        # ==========================================
+        # Historical information
+        # ==========================================
+
+        # Historical counties
+        hcounties_dict = pydash.get(record, 'claims.P7959')
+        hcounties = []
+        if hcounties_dict:
+            hcounties = [pydash.get(hc, 'mainsnak.datavalue.value.id') for hc in hcounties_dict]
+
+        # Date of official opening (e.g. https://www.wikidata.org/wiki/Q2011)
+        date_opening = pydash.get(record, 'claims.P1619[0].mainsnak.datavalue.value.time')
+
+        # Date of official closing
+        date_closing = pydash.get(record, 'claims.P3999[0].mainsnak.datavalue.value.time')
+
+        # Inception: date or point in time when the subject came into existence as defined
+        inception_date = pydash.get(record, 'claims.P571[0].mainsnak.datavalue.value.time')
+
+        # Dissolved, abolished or demolished: point in time at which the subject ceased to exist
+        dissolved_date = pydash.get(record, 'claims.P576[0].mainsnak.datavalue.value.time')
+
+        # Follows...: immediately prior item in a series of which the subject is a part: e.g. Vanuatu follows New Hebrides
+        follows_dict = pydash.get(record, 'claims.P155')
+        follows = []
+        if follows_dict:
+            for f in follows_dict:
+                follows.append(pydash.get(f, 'mainsnak.datavalue.value.id'))
+
+        # Replaces...: item replaced: e.g. New Hebrides is replaced by 
+        replaces_dict = pydash.get(record, 'claims.P1365')
+        replaces = []
+        if replaces_dict:
+            for r in replaces_dict:
+                replaces.append(pydash.get(r, 'mainsnak.datavalue.value.id'))
+
+        # ==========================================
+        # Neighbouring or part-of locations
+        # ==========================================
+
+        # Located in adminitrative territorial entities (Wikidata ID)
+        adm_regions_dict = pydash.get(record, 'claims.P131')
+        adm_regions = dict()
+        if adm_regions_dict:
+            for r in adm_regions_dict:
+                regname = pydash.get(r, 'mainsnak.datavalue.value.id')
+                if regname:
+                    entity_start_time = pydash.get(r, 'qualifiers.P580[0].datavalue.value.time')
+                    entity_end_time = pydash.get(r, 'qualifiers.P582[0].datavalue.value.time')
+                    adm_regions[regname] = (entity_start_time, entity_end_time)
+
+        # Country: sovereign state of this item
+        country_dict = pydash.get(record, 'claims.P17')
+        countries = dict()
+        if country_dict:
+            for r in country_dict:
+                countryname = pydash.get(r, 'mainsnak.datavalue.value.id')
+                if countryname:
+                    entity_start_time = pydash.get(r, 'qualifiers.P580[0].datavalue.value.time')
+                    entity_end_time = pydash.get(r, 'qualifiers.P582[0].datavalue.value.time')
+                    countries[countryname] = (entity_start_time, entity_end_time)
+
+        # Continents (Wikidata ID)
+        continent_dict = pydash.get(record, 'claims.P30')
+        continents = None
+        if continent_dict:
+            continents = [r["mainsnak"]["datavalue"]["value"]["id"] for r in continent_dict]
+
+        # Location is capital of
+        capital_of_dict = pydash.get(record, 'claims.P1376')
+        capital_of = None
+        if capital_of_dict:
+            capital_of = [r["mainsnak"]["datavalue"]["value"]["id"] for r in capital_of_dict]
+
+        # Shares border with:
+        shares_border_dict = pydash.get(record, 'claims.P47')
+        borders = []
+        if shares_border_dict:
+            borders = [pydash.get(t, 'mainsnak.datavalue.value.id') for t in shares_border_dict]
+
+        # Nearby waterbodies (Wikidata ID)
+        near_water_dict = pydash.get(record, 'claims.P206')
+        near_water = None
+        if near_water_dict:
+            near_water = [r["mainsnak"]["datavalue"]["value"]["id"] for r in near_water_dict]
+
+        # ==========================================
+        # Coordinates
+        # ==========================================
+
+        # Latitude and longitude:
+        latitude = pydash.get(record, 'claims.P625[0].mainsnak.datavalue.value.latitude')
+        longitude = pydash.get(record, 'claims.P625[0].mainsnak.datavalue.value.longitude')
+        if latitude and longitude:
+            latitude = round(latitude, 6)
+            longitude = round(longitude, 6)
+
+        # ==========================================
+        # External data resources IDs
+        # ==========================================
+
+        # English Wikipedia title:
+        wikititle = pydash.get(record, 'sitelinks.enwiki.title')
+
+        # Geonames ID
+        geonamesID_dict = pydash.get(record, 'claims.P1566')
+        geonamesIDs = None
+        if geonamesID_dict:
+            geonamesIDs = [pydash.get(gn, 'mainsnak.datavalue.value') for gn in geonamesID_dict]
+
+        # TOID: TOpographic IDentifier assigned by the Ordnance Survey to identify a feature in Great Britain
+        toID_dict = pydash.get(record, 'claims.P3120')
+        toIDs = None
+        if toID_dict:
+            toIDs = [pydash.get(t, 'mainsnak.datavalue.value') for t in toID_dict]
+
+        # British History Online VCH ID: identifier of a place, in the British History Online digitisation of the Victoria County History
+        vchID_dict = pydash.get(record, 'claims.P3628')
+        vchIDs = None
+        if vchID_dict:
+            vchIDs = [pydash.get(t, 'mainsnak.datavalue.value') for t in vchID_dict]
+
+        # Vision of Britain place ID: identifier of a place
+        vob_placeID_dict = pydash.get(record, 'claims.P3616')
+        vob_placeIDs = None
+        if vob_placeID_dict:
+            vob_placeIDs = [pydash.get(vobid, 'mainsnak.datavalue.value') for vobid in vob_placeID_dict]
+
+        # Vision of Britain unit ID: identifier of an administrative unit
+        vob_unitID_dict = pydash.get(record, 'claims.P3615')
+        vob_unitIDs = None
+        if vob_unitID_dict:
+            vob_unitIDs = dict()
+            for vobid in vob_unitID_dict:
+                unit_id = pydash.get(vobid, 'mainsnak.datavalue.value')
+                parish_name = pydash.get(vobid, 'qualifiers.P1810[0].datavalue.value')
+                vob_unitIDs[unit_id] = parish_name
+
+        # Identifier for a place in the Historical Gazetteer of England's Place Names website
+        epns_dict = pydash.get(record, 'claims.P3627')
+        epns = None
+        if epns_dict:
+            epns = [pydash.get(p, 'mainsnak.datavalue.value') for p in epns_dict]
+
+        # OS grid reference (Wikidata ID)
+        os_grid_ref = pydash.get(record, 'claims.P613[0].mainsnak.datavalue.value')
+
+        # ==========================================
+        # Street-related properties
+        # ==========================================
+
+        # Street connects with
+        connectswith_dict = pydash.get(record, 'claims.P2789')
+        connectswith = None
+        if connectswith_dict:
+            connectswith = [pydash.get(c, 'mainsnak.datavalue.value.id') for c in connectswith_dict]
+
+        # Street address
+        street_address = pydash.get(record, 'claims.P6375[0].mainsnak.datavalue.value.text')
+
+        # ==========================================
+        # Rail-related properties
+        # ==========================================
+
+        # Adjacent stations
+        adjacent_stations = None
+        adj_st_dump = pydash.get(record, 'claims.P197')
+        if adj_st_dump:
+            adjacent_stations = [pydash.get(adj_st, 'mainsnak.datavalue.value.id') for adj_st in adj_st_dump]
+
+        # UK railway station code
+        ukrailcode_dict = pydash.get(record, 'claims.P4755')
+        ukrailcode = None
+        if ukrailcode_dict:
+            ukrailcode = [pydash.get(ukrid, 'mainsnak.datavalue.value') for ukrid in ukrailcode_dict]
+
+        # Connecting lines
+        connectline_dict = pydash.get(record, 'claims.P81')
+        connectline = None
+        if connectline_dict:
+            connectline = [pydash.get(conline, 'mainsnak.datavalue.value.id') for conline in connectline_dict]
+
+        # ==========================================
+        # Store records in a csv
+        # ==========================================
+        df_record = {'wikidata_id': wikidata_id, 'english_label': english_label, 'instance_of': instance_of, 'description_set': description_set, 'alias_dict': alias_dict, 'nativelabel': nativelabel, 'population_dict': population_dict, 'area': area, 'hcounties': hcounties, 'date_opening': date_opening, 'date_closing': date_closing, 'inception_date': inception_date, 'dissolved_date': dissolved_date, 'follows': follows, 'replaces': replaces, 'adm_regions': adm_regions, 'countries': countries, 'continents': continents, 'capital_of': capital_of, 'borders': borders, 'near_water': near_water, 'latitude': latitude, 'longitude': longitude, 'wikititle': wikititle, 'geonamesIDs': geonamesIDs, 'toIDs': toIDs, 'vchIDs': vchIDs, 'vob_placeIDs': vob_placeIDs, 'vob_unitIDs': vob_unitIDs, 'epns': epns, 'os_grid_ref': os_grid_ref, 'connectswith': connectswith, 'street_address': street_address, 'adjacent_stations': adjacent_stations, 'ukrailcode': ukrailcode, 'connectline': connectline}
+
+        df_record_all = df_record_all.append(df_record, ignore_index=True)
+        i += 1
+        if (i % 5000 == 0):
+            pd.DataFrame.to_csv(df_record_all, path_or_buf='extracted/till_'+record['id']+'_item.csv')
+            print('i = '+str(i)+' item '+record['id']+'  Done!')
+            print('CSV exported')
+            df_record_all = pd.DataFrame(columns=['wikidata_id', 'english_label', 'instance_of', 'description_set', 'alias_dict', 'nativelabel', 'population_dict', 'area', 'hcounties', 'date_opening', 'date_closing', 'inception_date', 'dissolved_date', 'follows', 'replaces', 'adm_regions', 'countries', 'continents', 'capital_of', 'borders', 'near_water', 'latitude', 'longitude', 'wikititle', 'geonamesIDs', 'toIDs', 'vchIDs', 'vob_placeIDs', 'vob_unitIDs', 'epns', 'os_grid_ref', 'connectswith', 'street_address', 'adjacent_stations', 'ukrailcode', 'connectline'])
+        else:
+            continue
+pd.DataFrame.to_csv(df_record_all, path_or_buf='extracted/final_csv_till_'+record['id']+'_item.csv')
+print('i = '+str(i)+' item '+record['id']+'  Done!')
+print('All items finished, final CSV exported!')
