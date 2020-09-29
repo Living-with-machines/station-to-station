@@ -292,29 +292,31 @@ def parse_record(record):
 # Parse all WikiData
 # ==========================================
 
-df_record_all = pd.DataFrame(columns=['wikidata_id', 'english_label', 'instance_of', 'description_set', 'alias_dict', 'nativelabel', 'population_dict', 'area', 'hcounties', 'date_opening', 'date_closing', 'inception_date', 'dissolved_date', 'follows', 'replaces', 'adm_regions', 'countries', 'continents', 'capital_of', 'borders', 'near_water', 'latitude', 'longitude', 'wikititle', 'geonamesIDs', 'toIDs', 'vchIDs', 'vob_placeIDs', 'vob_unitIDs', 'epns', 'os_grid_ref', 'connectswith', 'street_address', 'adjacent_stations', 'ukrailcode', 'connectline'])
+### Uncomment the following to run this script:
 
-header=True
-i = 0
-for record in tqdm(wikidata('/resources/wikidata/latest-all.json.bz2')):
+# df_record_all = pd.DataFrame(columns=['wikidata_id', 'english_label', 'instance_of', 'description_set', 'alias_dict', 'nativelabel', 'population_dict', 'area', 'hcounties', 'date_opening', 'date_closing', 'inception_date', 'dissolved_date', 'follows', 'replaces', 'adm_regions', 'countries', 'continents', 'capital_of', 'borders', 'near_water', 'latitude', 'longitude', 'wikititle', 'geonamesIDs', 'toIDs', 'vchIDs', 'vob_placeIDs', 'vob_unitIDs', 'epns', 'os_grid_ref', 'connectswith', 'street_address', 'adjacent_stations', 'ukrailcode', 'connectline'])
+
+# header=True
+# i = 0
+# for record in tqdm(wikidata('/resources/wikidata/latest-all.json.bz2')):
     
-    # Only extract items with geographical coordinates (P625)
-    if pydash.has(record, 'claims.P625'):
+#     # Only extract items with geographical coordinates (P625)
+#     if pydash.has(record, 'claims.P625'):
         
-        # ==========================================
-        # Store records in a csv
-        # ==========================================
-        df_record = parse_record(record)
-        df_record_all = df_record_all.append(df_record, ignore_index=True)
-        i += 1
-        if (i % 5000 == 0):
-            pd.DataFrame.to_csv(df_record_all, path_or_buf='extracted/till_'+record['id']+'_item.csv')
-            print('i = '+str(i)+' item '+record['id']+'  Done!')
-            print('CSV exported')
-            df_record_all = pd.DataFrame(columns=['wikidata_id', 'english_label', 'instance_of', 'description_set', 'alias_dict', 'nativelabel', 'population_dict', 'area', 'hcounties', 'date_opening', 'date_closing', 'inception_date', 'dissolved_date', 'follows', 'replaces', 'adm_regions', 'countries', 'continents', 'capital_of', 'borders', 'near_water', 'latitude', 'longitude', 'wikititle', 'geonamesIDs', 'toIDs', 'vchIDs', 'vob_placeIDs', 'vob_unitIDs', 'epns', 'os_grid_ref', 'connectswith', 'street_address', 'adjacent_stations', 'ukrailcode', 'connectline'])
-        else:
-            continue
+#         # ==========================================
+#         # Store records in a csv
+#         # ==========================================
+#         df_record = parse_record(record)
+#         df_record_all = df_record_all.append(df_record, ignore_index=True)
+#         i += 1
+#         if (i % 5000 == 0):
+#             pd.DataFrame.to_csv(df_record_all, path_or_buf='extracted/till_'+record['id']+'_item.csv')
+#             print('i = '+str(i)+' item '+record['id']+'  Done!')
+#             print('CSV exported')
+#             df_record_all = pd.DataFrame(columns=['wikidata_id', 'english_label', 'instance_of', 'description_set', 'alias_dict', 'nativelabel', 'population_dict', 'area', 'hcounties', 'date_opening', 'date_closing', 'inception_date', 'dissolved_date', 'follows', 'replaces', 'adm_regions', 'countries', 'continents', 'capital_of', 'borders', 'near_water', 'latitude', 'longitude', 'wikititle', 'geonamesIDs', 'toIDs', 'vchIDs', 'vob_placeIDs', 'vob_unitIDs', 'epns', 'os_grid_ref', 'connectswith', 'street_address', 'adjacent_stations', 'ukrailcode', 'connectline'])
+#         else:
+#             continue
             
-pd.DataFrame.to_csv(df_record_all, path_or_buf='extracted/final_csv_till_'+record['id']+'_item.csv')
-print('i = '+str(i)+' item '+record['id']+'  Done!')
-print('All items finished, final CSV exported!')
+# pd.DataFrame.to_csv(df_record_all, path_or_buf='extracted/final_csv_till_'+record['id']+'_item.csv')
+# print('i = '+str(i)+' item '+record['id']+'  Done!')
+# print('All items finished, final CSV exported!')
