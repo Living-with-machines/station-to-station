@@ -1,6 +1,65 @@
 from bs4 import BeautifulSoup as bs
 import re
 
+
+# ------------------- Process BHO xml files --------------------
+# Given an xml-formatted string corresponding to a section in the
+# BHO topographical dictionaries, return:
+# * place_title: the title of the dictonary entry.
+# * content: the content of the dictionary entry (with xml tags).
+def clean_section(s):
+    has_paragraph = False
+    place_title = ""
+    clean_lines = []
+    lines = s.split("\n")
+    for line in lines:
+            
+        if re.search("s[0-9]+\">", line): # If line does not contain sth like: s1">
+            line = re.sub("s[0-9]+\">(.*)", r"\1", line)
+            line = line.strip()
+            if line:
+                clean_lines.append(line)
+        if re.search("</section>", line): # If line does not contain sth like: s1">
+            line = line.strip()
+            line = re.sub("(.*)</section>", r"\1", line)
+            if line:
+                clean_lines.append(line)
+        else:
+            clean_lines.append(line)
+                
+    lines = clean_lines
+    clean_lines = []
+                
+    for line in lines:
+        line = line.strip()
+        if not re.match("s[0-9]+\">", line) and not line == "</section>": # If line does not have this shape: s1">
+            if line.startswith("<para"):
+                has_paragraph = True
+                clean_lines.append(line)
+            else:
+                if has_paragraph == False:
+                    place_title = line
+                else:
+                    clean_lines.append(line)
+    content = " ".join(clean_lines)
+    return place_title, content
+
+
+
+# ------------------- Preprocess title --------------------
+# This function takes the title of an entry and processes
+# it, and outputs:
+# * alts_toponym: a list of toponym and alternate names.
+# * alts_context: a list of disambiguators, i.e. words that
+#                 are neither parts of the toponym or alternate
+#                 names but that are present in the entry
+#                 title and can help disambiguate.
+#
+# Example:
+# * Input: "Abbas-Combe, or Temple-Combe (St. Mary)"
+# * Output:
+#     * alts_toponym: ['Abbas-Combe', 'Temple-Combe']
+#     # alts_context: ['St. Mary']
 def preprocess_title(tp):
     t = tp
     
@@ -99,6 +158,12 @@ def preprocess_title(tp):
 
     return alts_toponym, alts_context
 
+
+
+# ------------------- Preprocess content --------------------
+# Given an xml-formatted string (in this case the content/description
+# of an entry), return a list of clean-text strings, corresponding to
+# where each string corresponds to a paragraph.
 def process_content(ctnt):
     clean_text = []
     ctnt_bs = bs(ctnt, 'lxml')
