@@ -13,7 +13,7 @@ matches = ["xix century","xviii century","19th century","18th century","19thc","
 def keep_only_19_century(content):
     paras = []
     for para in content:
-        if any([True for match in matches if match in para.lower()]):
+        if any([True if match in para.lower() else False for match in matches]):
             paras.append(para)
         else:
             doc = nlp(para)
