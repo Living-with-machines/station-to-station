@@ -3,11 +3,12 @@
 import json
 import spacy
 import dateparser
+from urllib.parse import quote
 from argparse import ArgumentParser
 
 nlp = spacy.load("en_core_web_sm")
 
-matches = ["xix century","xviii century","19th century","18th century","19thc","18thc","19th c","18th c","nineteenth century","eigthteen century", "turn of the century", "fin de siècle"]
+matches = ["xix century","xviii century","19th century","18th century","19thc","18thc","19th c","18th c","nineteenth century","eighteenth century", "turn of the century", "fin de siècle"]
 
 def keep_only_19_century(content):
     paras = []
@@ -55,7 +56,7 @@ def get_XIX_sections (aspects):
 if __name__ == "__main__":
 
     entity = parse_input_commands()
-
+    entity = quote(entity)
     with open("/resources/wikipedia/extractedResources/Aspects/"+entity+".json") as json_file:   
         aspects = json.load(json_file)
     XIX_sections = get_XIX_sections (aspects)
