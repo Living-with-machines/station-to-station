@@ -309,6 +309,9 @@ if __name__ == '__main__':
     path2wikigaz_filtered = Path("/resources/wikigazetteer")
     path2wikigaz_filtered = path2wikigaz_filtered / f"wikiGaz_{language}_filtered.pkl"
     wikigaz_df = pd.read_pickle(path2wikigaz_filtered)
+    
+    if not os.path.exists('gazetteers/'):
+        os.makedirs("gazetteers/")
 
     wikigaz_df["name"] = wikigaz_df['name'].str.replace('(','')
     wikigaz_df["name"] = wikigaz_df['name'].str.replace(')','')
