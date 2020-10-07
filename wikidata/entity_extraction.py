@@ -362,4 +362,4 @@ def filter_britisles(lat, lon, countries):
         return False
     
 mask = df.apply(lambda x: filter_britisles(x['latitude'], x['longitude'], x['countries']), axis=1)
-df[mask].to_csv("britwikidata/british_isles.csv")
+df[mask].to_csv("british_isles.csv")
