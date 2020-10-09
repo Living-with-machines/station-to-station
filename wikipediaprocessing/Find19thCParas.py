@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import json
+import os
 import spacy
 import dateparser
 from urllib.parse import quote
@@ -63,8 +64,20 @@ if __name__ == "__main__":
 
     sorted_sections = {k: v for k, v in sorted(XIX_sections.items(), key=lambda item: item[1]["order"])}
 
+    if os.path.exists(entity+".txt"):
+        os.remove(entity+".txt")
+
     for k,v in sorted_sections.items():
         print (k)
+        f = open(entity+".txt", "a+")
+        f.write(k+"\n")
+    
         for line in v["content"]:
             print (line)
+            f = open(entity+".txt", "a+")
+            f.write("-"+line+"\n")
         print ()
+        f = open(entity+".txt", "a+")
+        f.write("\n")
+        f.close()
+        
