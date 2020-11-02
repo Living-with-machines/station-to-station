@@ -132,3 +132,4 @@ wikidata/extracted/*.csv
 wikidata/extracted_firstpass/
 bho/bho_parsed.json
 wikidata/britwikidata/
+wikipediaprocessing/outputs/*.txt
