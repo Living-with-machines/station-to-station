@@ -132,3 +132,12 @@ wikidata/extracted/*.csv
 wikidata/extracted_firstpass/
 bho/bho_parsed.json
 wikidata/britwikidata/
+toponym_matching/models/
+toponym_matching/gazetteers/
+wikidata/*.csv
+bho/*.csv
+toponym_matching/candidates/
+toponym_matching/combined/
+toponym_matching/queries/
+toponym_matching/ranker_results/
+

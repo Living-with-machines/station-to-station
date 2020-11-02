@@ -171,3 +171,18 @@ def process_content(ctnt):
     for p in paragraphs:
         clean_text.append(p.get_text())
     return clean_text
+
+
+
+# ------------------- Format queries for DeezyMatch candranker --------------------
+def format_for_candranker(gazname, unique_placenames_array):
+    """
+    This function returns the unique alternate names in a given gazetteer
+    in the format required by DeezyMatch candidate ranker."""
+    with open(gazname + ".txt", "w") as fw:
+        for pl in unique_placenames_array:
+            pl = pl.strip()
+            if pl:
+                if not any(char.islower() for char in pl):
+                    pl = pl.title()
+                fw.write(pl.strip() + "\t0\tfalse\n")
