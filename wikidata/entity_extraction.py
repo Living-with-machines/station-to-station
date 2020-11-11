@@ -1,11 +1,17 @@
 import bz2
 import json
+import glob
 import pandas as pd
 import pydash
+import ast
 from tqdm import tqdm
 
 languages = ['en', 'cy', 'sco', 'gd', 'ga', 'kw']
 
+
+# ==========================================
+# Process bz2 wikidata dump
+# ==========================================
 def wikidata(filename):
     with bz2.open(filename, mode='rt') as f:
         f.read(2) # skip first two bytes: "{\n"
@@ -15,6 +21,10 @@ def wikidata(filename):
             except json.decoder.JSONDecodeError:
                 continue
                 
+
+# ==========================================
+# Parse wikidata entry
+# ==========================================
 def parse_record(record):
     # Wikidata ID:
     wikidata_id = record['id']
@@ -288,6 +298,7 @@ def parse_record(record):
     df_record = {'wikidata_id': wikidata_id, 'english_label': english_label, 'instance_of': instance_of, 'description_set': description_set, 'alias_dict': alias_dict, 'nativelabel': nativelabel, 'population_dict': population_dict, 'area': area, 'hcounties': hcounties, 'date_opening': date_opening, 'date_closing': date_closing, 'inception_date': inception_date, 'dissolved_date': dissolved_date, 'follows': follows, 'replaces': replaces, 'adm_regions': adm_regions, 'countries': countries, 'continents': continents, 'capital_of': capital_of, 'borders': borders, 'near_water': near_water, 'latitude': latitude, 'longitude': longitude, 'wikititle': wikititle, 'geonamesIDs': geonamesIDs, 'toIDs': toIDs, 'vchIDs': vchIDs, 'vob_placeIDs': vob_placeIDs, 'vob_unitIDs': vob_unitIDs, 'epns': epns, 'os_grid_ref': os_grid_ref, 'connectswith': connectswith, 'street_address': street_address, 'adjacent_stations': adjacent_stations, 'ukrailcode': ukrailcode, 'connectline': connectline}
     return df_record
 
+
 # ==========================================
 # Parse all WikiData
 # ==========================================
@@ -320,3 +331,35 @@ def parse_record(record):
 # pd.DataFrame.to_csv(df_record_all, path_or_buf='extracted/final_csv_till_'+record['id']+'_item.csv')
 # print('i = '+str(i)+' item '+record['id']+'  Done!')
 # print('All items finished, final CSV exported!')
+
+
+# ====================================================
+# Create a subset with entities from the British Isles
+# ====================================================
+
+path = r"extracted/"
+all_files = glob.glob(path + "/*.csv")
+
+li = []
+for filename in all_files:
+    df_temp = pd.read_csv(filename, index_col=None, header=0)
+    li.append(df_temp)
+
+df = pd.concat(li, axis=0, ignore_index=True)
+df = df.drop(columns=['Unnamed: 0'])
+
+def filter_britisles(lat, lon, countries):
+    bbox = (-11.31,48.78,2.41,61.28)
+    countries = ast.literal_eval(countries)
+    for c in countries:
+        if c == "Q145" or c == "Q27": # United Kingdom and Ireland
+            return True
+        if c == "Q142" or c == "Q31": # France and Belgium
+            return False
+    if float(lat) >= bbox[1] and float(lat) <= bbox[3] and float(lon) >= bbox[0] and float(lon) <= bbox[2]:
+        return True
+    else:
+        return False
+    
+mask = df.apply(lambda x: filter_britisles(x['latitude'], x['longitude'], x['countries']), axis=1)
+df[mask].to_csv("british_isles.csv")
