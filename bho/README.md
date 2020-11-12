@@ -19,7 +19,7 @@ The xml format is basic but a bit messy.
 
 A copy of the data is in [Azure](https://lwmincomingbho.blob.core.windows.net/topodictionariesbho/topographical%20dictionaries.zip), and in the `toponymVM` virtual machine, in `/resources/bho/`.
 
-Notebook [parse_bho_xml.ipynb](https://github.com/Living-with-machines/PlaceLinking/blob/dev/bho/parse_bho_xml.ipynb) takes the unzipped `topographical_dictionaries` directory as input (stored in `/resources/bho/`) and outputs a nested dictionary, e.g.:
+Notebook [bho/process_bho.ipynb](https://github.com/Living-with-machines/PlaceLinking/blob/dev/bho/process_bho.ipynb) takes the unzipped `topographical_dictionaries` directory as input (stored in `/resources/bho/`) and outputs a nested dictionary, e.g.:
 ```
 {5:
   {'report_title': 'Abbas-Combe - Aberystwith',
