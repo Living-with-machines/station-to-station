@@ -141,3 +141,4 @@ toponym_matching/candidates/
 toponym_matching/combined/
 toponym_matching/queries/
 toponym_matching/ranker_results/
+bho/*.pkl
