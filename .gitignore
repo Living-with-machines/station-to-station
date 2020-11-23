@@ -142,3 +142,5 @@ toponym_matching/combined/
 toponym_matching/queries/
 toponym_matching/ranker_results/
 bho/*.pkl
+.vscode/settings.json
+wikipediaprocessing/testing/*
