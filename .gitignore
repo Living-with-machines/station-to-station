@@ -144,3 +144,5 @@ toponym_matching/ranker_results/
 toponym_matching/toponyms/
 *.pkl
 *.json
+wikipediaprocessing/outputs/*
+wikipediaprocessing/testing/*
