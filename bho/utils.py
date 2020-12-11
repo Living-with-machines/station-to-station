@@ -75,7 +75,7 @@ def preprocess_title(tp):
     re_appo = r".+(\(.+\))"
     
     # Common location descriptors:
-    descr = ["Great", "Little", "Low", "High", "Higher", "East", "West", "North", "South", "Lower", "Upper", "New", "Old", "Castle", "Church", "The", "Street"]
+    descr = ["Great", "Little", "Low", "High", "Higher", "East", "West", "North", "South", "Lower", "Upper", "New", "Old", "Castle", "Church", "The", "Street", "Above", "Below"]
     
     context = []
     apposition = ""
@@ -100,11 +100,26 @@ def preprocess_title(tp):
     # Text in parentheses is moved to the apposition:
     if re.match(re_appo, t):
         apposition = re.match(re_appo, t).group(1)
-        toponym = t.replace(apposition, "")
-        toponym = re.sub(" +", " ", toponym)
-        apposition = apposition.replace("(", "")
-        apposition = apposition.replace(")", "")
-        apposition = apposition.strip()
+        # If apposition stripped of paretheses is one of common location descriptors,
+        # remove it as apposition and make it part of toponym, e.g. "Mawr (Higher)"
+        # becomes "Higher Mawr":
+        stripped_appo = apposition.strip()[1:-1]
+        if stripped_appo in descr:
+            ttmp = t.replace(apposition, "").strip()
+            # Apposition is attached at the end of the string if it's one of the following:
+            if stripped_appo in ["Above", "Below", "Street", "Castle", "Church"]:
+                toponym = ttmp + " " + stripped_appo
+            # Otherwise it's attached at the beginning of the string:
+            else:
+                toponym = stripped_appo + " " + ttmp
+            t = toponym
+            apposition = ""
+        else:
+            toponym = t.replace(apposition, "")
+            toponym = re.sub(" +", " ", toponym)
+            apposition = apposition.replace("(", "")
+            apposition = apposition.replace(")", "")
+            apposition = apposition.strip()
     else:
         toponym = t
         
