@@ -143,3 +143,4 @@ toponym_matching/queries/
 toponym_matching/ranker_results/
 toponym_matching/toponyms/
 *.pkl
+*.json

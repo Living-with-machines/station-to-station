@@ -66,12 +66,16 @@ def preprocess_title(tp):
     # Initial preprocessing
     t = t.strip()
     t = re.sub(r",$", "", t)
+    t = str(t.encode().decode("utf-8")).replace("&amp;ygrave;", "y")
+    t = str(t.encode().decode("utf-8")).replace("&amp;Ygrave;", "Y")
+    t = str(t.encode().decode("utf-8")).replace(" &amp;c.", " etc")
+    t = str(t.encode().decode("utf-8")).replace(" &amp; ", " and ")
     
     # Regex to capture appositions
     re_appo = r".+(\(.+\))"
     
     # Common location descriptors:
-    descr = ["Great", "Little", "Low", "High", "Higher", "East", "West", "North", "South", "Lower", "Upper", "New", "Old", "Castle", "Church", "The"]
+    descr = ["Great", "Little", "Low", "High", "Higher", "East", "West", "North", "South", "Lower", "Upper", "New", "Old", "Castle", "Church", "The", "Street"]
     
     context = []
     apposition = ""
@@ -84,6 +88,14 @@ def preprocess_title(tp):
     # Specific case of formatting with "St.": "Bride's (St.) Netherwent" into "St. Bride's Netherwent"
     if re.match("^(.+ )\(St\.\) ?(.*)", t):
         t = "St. " + "".join(re.match("^(.+ )\(St\.\) ?(.*)", t).groups())
+    
+    # Specific case of formatting with "St.": "Michael, St., Caerhays" into "St. Michael Caerhays"
+    if re.match("^(.+ )St\., ?(.*)", t):
+        groups = re.match("^(.+ )St\., ?(.*)", t).groups()
+        ttmp = "St. "
+        for g in groups:
+            ttmp += g
+        t = ttmp
     
     # Text in parentheses is moved to the apposition:
     if re.match(re_appo, t):
@@ -134,8 +146,9 @@ def preprocess_title(tp):
     # 6. Split any remaining comma-separated altname and flatten resulting list of lists:
     alts_toponym = [a.split(", ") for a in alts_toponym if a]
     alts_toponym = [item for sublist in alts_toponym for item in sublist]
-    # 7. Filter out if toponym is exactly one of common specifying adjectives:
-    alts_toponym = [a for a in alts_toponym if not a in descr]
+    # 7. Filter out if toponym is exactly one of common specifying adjectives, unless
+    # this is the full name of the location:
+    alts_toponym = [a for a in alts_toponym if not (a in descr and not t == a and len(alts_toponym) > 1)]
     
     # Clean the context with similar steps
     # ====================================
@@ -154,7 +167,7 @@ def preprocess_title(tp):
     alts_context = [a.split(", ") for a in alts_context if a]
     alts_context = [item for sublist in alts_context for item in sublist]
     # 5. Remove altname if it's just a descriptor:
-    alts_context = [a for a in alts_context if not a in descr]
+    alts_context = [a for a in alts_context if not (a in descr and not t == a)]
 
     return alts_toponym, alts_context
 
