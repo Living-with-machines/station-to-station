@@ -38,7 +38,7 @@ def clean_section(s):
                 clean_lines.append(line)
             else:
                 if has_paragraph == False:
-                    place_title = line
+                    place_title += line
                 else:
                     clean_lines.append(line)
     content = " ".join(clean_lines)
