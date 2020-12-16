@@ -146,3 +146,4 @@ toponym_matching/toponyms/
 *.docx
 quick/*/
 *.xlsx
+quick/output.csv
