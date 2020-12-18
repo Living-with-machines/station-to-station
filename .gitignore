@@ -146,3 +146,4 @@ toponym_matching/toponyms/
 *.json
 wikipediaprocessing/outputs/*
 wikipediaprocessing/testing/*
+annotations/

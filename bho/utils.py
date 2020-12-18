@@ -38,7 +38,9 @@ def clean_section(s):
                 clean_lines.append(line)
             else:
                 if has_paragraph == False:
-                    place_title += line
+                    # To avoid duplication of the first entry of an xml file.
+                    if line.strip() != place_title.strip():
+                        place_title += line
                 else:
                     clean_lines.append(line)
     content = " ".join(clean_lines)
@@ -60,7 +62,7 @@ def clean_section(s):
 # * Output:
 #     * alts_toponym: ['Abbas-Combe', 'Temple-Combe']
 #     # alts_context: ['St. Mary']
-def preprocess_title(tp):
+def preprocess_title(tp, country):
     t = tp
     
     # Initial preprocessing
@@ -75,7 +77,7 @@ def preprocess_title(tp):
     re_appo = r".+(\(.+\))"
     
     # Common location descriptors:
-    descr = ["Great", "Little", "Low", "High", "Higher", "East", "West", "North", "South", "Lower", "Upper", "New", "Old", "Castle", "Church", "The", "Street", "Above", "Below"]
+    descr = ["Great", "Little", "Low", "High", "Higher", "East", "West", "North", "South", "Lower", "Upper", "New", "Old", "Castle", "Church", "The", "Street", "Above", "Below", "Middle"]
     
     context = []
     apposition = ""
@@ -183,9 +185,18 @@ def preprocess_title(tp):
     alts_context = [item for sublist in alts_context for item in sublist]
     # 5. Remove altname if it's just a descriptor:
     alts_context = [a for a in alts_context if not (a in descr and not t == a)]
+             
+    # Wales is formatted a bit different, with alternate names in parentheses:
+    if country == "Wales":
+        tmp_alts = alts_context
+        for altc in alts_context:
+             if not any([x in altc for x in descr]):
+                 tmp_alts.remove(altc)
+                 if altc not in alts_toponym:
+                     alts_toponym.append(altc)
+        alts_context = tmp_alts
 
     return alts_toponym, alts_context
-
 
 
 # ------------------- Preprocess content --------------------
