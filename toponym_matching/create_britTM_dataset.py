@@ -282,8 +282,6 @@ def main():
 if __name__ == '__main__':
     
     parser = argparse.ArgumentParser()
-    parser.add_argument("-l", "--language", default="en", 
-                    help="Choose between: 'en' (English), 'es' (Spanish) and 'el' (Greek)")
     parser.add_argument("-n", "--number_cpus", default=-1, 
                     help="Number of CPUs to be used for processing. Default: -1 (use all)")
     parser.add_argument("-tc", "--titles_per_chunk", default=20, 
@@ -291,10 +289,6 @@ if __name__ == '__main__':
     parser.add_argument("-km", "--kilometre_distance", default=50, 
                     help="Minimum distance of negative toponym pair")
     args = parser.parse_args()
-
-    if not args.language in ["en", "es", "el"]:
-        sys.exit(f"Selected language {args.language} is not supported. See the help message.")
-    language = args.language
 
     kilometre_distance = args.kilometre_distance
 
@@ -307,7 +301,7 @@ if __name__ == '__main__':
     titles_per_chunk = int(args.titles_per_chunk)
 
     path2wikigaz_filtered = Path("/resources/wikigazetteer")
-    path2wikigaz_filtered = path2wikigaz_filtered / f"wikiGaz_{language}_filtered.pkl"
+    path2wikigaz_filtered = path2wikigaz_filtered / f"brit_wikigazetteer.pkl"
     wikigaz_df = pd.read_pickle(path2wikigaz_filtered)
     
     if not os.path.exists('gazetteers/'):
@@ -315,12 +309,12 @@ if __name__ == '__main__':
 
     wikigaz_df["name"] = wikigaz_df['name'].str.replace('(','')
     wikigaz_df["name"] = wikigaz_df['name'].str.replace(')','')
-    wikigaz_df.to_csv("gazetteers/wikigaz_" + language + ".tsv", sep = "\t", 
+    wikigaz_df.to_csv("gazetteers/wikigaz.tsv", sep = "\t", 
                       columns = ["wikititle", "name", "latitude", "longitude", "source"], 
                       header=False, index=False)
     
     # we retrieve wiki_ids and altnames and we structure them in two dictionaries (wiki_title -> altnames and altname -> wiki_titles)
-    wiki_variations = open("gazetteers/wikigaz_" + language + ".tsv", "r").read().strip().split("\n")
+    wiki_variations = open("gazetteers/wikigaz.tsv", "r").read().strip().split("\n")
     wiki_variations = [x.split("\t") for x in wiki_variations]
     wiki_variations = [[x[0]]+[x[0].replace("_"," ").replace('"','')]+x[1:] for x in wiki_variations]
 
@@ -347,7 +341,7 @@ if __name__ == '__main__':
     wiki_titles_splits = list(chunks(wiki_titles, titles_per_chunk))
     n_splits = len(wiki_titles_splits)
 
-    out = open("gazetteers/wikigaz_" + language + "_dataset.txt","w")    
+    out = open("gazetteers/britwikigaz_dataset.txt","w")    
 
     main()
 

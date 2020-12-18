@@ -38,7 +38,9 @@ def clean_section(s):
                 clean_lines.append(line)
             else:
                 if has_paragraph == False:
-                    place_title = line
+                    # To avoid duplication of the first entry of an xml file.
+                    if line.strip() != place_title.strip():
+                        place_title += line
                 else:
                     clean_lines.append(line)
     content = " ".join(clean_lines)
@@ -60,18 +62,22 @@ def clean_section(s):
 # * Output:
 #     * alts_toponym: ['Abbas-Combe', 'Temple-Combe']
 #     # alts_context: ['St. Mary']
-def preprocess_title(tp):
+def preprocess_title(tp, country):
     t = tp
     
     # Initial preprocessing
     t = t.strip()
     t = re.sub(r",$", "", t)
+    t = str(t.encode().decode("utf-8")).replace("&amp;ygrave;", "y")
+    t = str(t.encode().decode("utf-8")).replace("&amp;Ygrave;", "Y")
+    t = str(t.encode().decode("utf-8")).replace(" &amp;c.", " etc")
+    t = str(t.encode().decode("utf-8")).replace(" &amp; ", " and ")
     
     # Regex to capture appositions
     re_appo = r".+(\(.+\))"
     
     # Common location descriptors:
-    descr = ["Great", "Little", "Low", "High", "Higher", "East", "West", "North", "South", "Lower", "Upper", "New", "Old", "Castle", "Church", "The"]
+    descr = ["Great", "Little", "Low", "High", "Higher", "East", "West", "North", "South", "Lower", "Upper", "New", "Old", "Castle", "Church", "The", "Street", "Above", "Below", "Middle"]
     
     context = []
     apposition = ""
@@ -85,14 +91,37 @@ def preprocess_title(tp):
     if re.match("^(.+ )\(St\.\) ?(.*)", t):
         t = "St. " + "".join(re.match("^(.+ )\(St\.\) ?(.*)", t).groups())
     
+    # Specific case of formatting with "St.": "Michael, St., Caerhays" into "St. Michael Caerhays"
+    if re.match("^(.+ )St\., ?(.*)", t):
+        groups = re.match("^(.+ )St\., ?(.*)", t).groups()
+        ttmp = "St. "
+        for g in groups:
+            ttmp += g
+        t = ttmp
+    
     # Text in parentheses is moved to the apposition:
     if re.match(re_appo, t):
         apposition = re.match(re_appo, t).group(1)
-        toponym = t.replace(apposition, "")
-        toponym = re.sub(" +", " ", toponym)
-        apposition = apposition.replace("(", "")
-        apposition = apposition.replace(")", "")
-        apposition = apposition.strip()
+        # If apposition stripped of paretheses is one of common location descriptors,
+        # remove it as apposition and make it part of toponym, e.g. "Mawr (Higher)"
+        # becomes "Higher Mawr":
+        stripped_appo = apposition.strip()[1:-1]
+        if stripped_appo in descr:
+            ttmp = t.replace(apposition, "").strip()
+            # Apposition is attached at the end of the string if it's one of the following:
+            if stripped_appo in ["Above", "Below", "Street", "Castle", "Church"]:
+                toponym = ttmp + " " + stripped_appo
+            # Otherwise it's attached at the beginning of the string:
+            else:
+                toponym = stripped_appo + " " + ttmp
+            t = toponym
+            apposition = ""
+        else:
+            toponym = t.replace(apposition, "")
+            toponym = re.sub(" +", " ", toponym)
+            apposition = apposition.replace("(", "")
+            apposition = apposition.replace(")", "")
+            apposition = apposition.strip()
     else:
         toponym = t
         
@@ -134,8 +163,9 @@ def preprocess_title(tp):
     # 6. Split any remaining comma-separated altname and flatten resulting list of lists:
     alts_toponym = [a.split(", ") for a in alts_toponym if a]
     alts_toponym = [item for sublist in alts_toponym for item in sublist]
-    # 7. Filter out if toponym is exactly one of common specifying adjectives:
-    alts_toponym = [a for a in alts_toponym if not a in descr]
+    # 7. Filter out if toponym is exactly one of common specifying adjectives, unless
+    # this is the full name of the location:
+    alts_toponym = [a for a in alts_toponym if not (a in descr and not t == a and len(alts_toponym) > 1)]
     
     # Clean the context with similar steps
     # ====================================
@@ -154,10 +184,19 @@ def preprocess_title(tp):
     alts_context = [a.split(", ") for a in alts_context if a]
     alts_context = [item for sublist in alts_context for item in sublist]
     # 5. Remove altname if it's just a descriptor:
-    alts_context = [a for a in alts_context if not a in descr]
+    alts_context = [a for a in alts_context if not (a in descr and not t == a)]
+             
+    # Wales is formatted a bit different, with alternate names in parentheses:
+    if country == "Wales":
+        tmp_alts = alts_context
+        for altc in alts_context:
+             if not any([x in altc for x in descr]):
+                 tmp_alts.remove(altc)
+                 if altc not in alts_toponym:
+                     alts_toponym.append(altc)
+        alts_context = tmp_alts
 
     return alts_toponym, alts_context
-
 
 
 # ------------------- Preprocess content --------------------

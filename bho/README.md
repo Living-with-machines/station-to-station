@@ -19,7 +19,7 @@ The xml format is basic but a bit messy.
 
 A copy of the data is in [Azure](https://lwmincomingbho.blob.core.windows.net/topodictionariesbho/topographical%20dictionaries.zip), and in the `toponymVM` virtual machine, in `/resources/bho/`.
 
-Notebook [parse_bho_xml.ipynb](https://github.com/Living-with-machines/PlaceLinking/blob/dev/bho/parse_bho_xml.ipynb) takes the unzipped `topographical_dictionaries` directory as input (stored in `/resources/bho/`) and outputs a nested dictionary, e.g.:
+Notebook [bho/process_bho.ipynb](https://github.com/Living-with-machines/PlaceLinking/blob/dev/bho/process_bho.ipynb) takes the unzipped `topographical_dictionaries` directory as input (stored in `/resources/bho/`) and outputs a nested dictionary, e.g.:
 ```
 {5:
   {'report_title': 'Abbas-Combe - Aberystwith',
@@ -30,7 +30,7 @@ Notebook [parse_bho_xml.ipynb](https://github.com/Living-with-machines/PlaceLink
 ```
 ... where the outer key is the id of the entry (incremental, not provided by BHO). In the inner dictionary, `report_title` is the first and last entry in the section (see section title in https://www.british-history.ac.uk/topographical-dict/england/pp1-5), `place_name` is the name of the location in the entry, `description` is the text of the entry, the actual content (I haven't cleaned the xml tags in case we need them later), and `filepath` keeps the path of the file where the entry comes from.
 
-This is then cleaned, resultin in a csv file with 18631 rows and with the following columns:
+This is then cleaned, resulting in a csv file with 18631 rows and with the following columns:
 * **id:** incremental id (there is no ID in the original dataset)
 * **title:** title of the dictionary entry (it's not unique, therefore can't be used as ID)
 * **toponyms:** toponyms of the location in this dictionary entry, extracted from the entry itself.
