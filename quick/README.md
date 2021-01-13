@@ -2,7 +2,7 @@
 
 This dataset is a chronology of railway stations in Great Britain containing information on opening and closing dates, companies operating at the stations, railway lines, alternate names, station types, etc.
 
-The pdf is available [online](https://rchs.org.uk/wp-content/uploads/2019/09/Railway-Passenger-Stations-v5.01-2.pdf) and a docx file is available upon request (stored [here](https://lwmincomingquicks.blob.core.windows.net/quicks/quick.docx) for internal use within LwM).
+The pdf is available [online](https://rchs.org.uk/wp-content/uploads/2020/09/Railway-Passenger-Stations-v5.02.pdf) and a docx file is available upon request (stored [here](https://lwmincomingquicks.blob.core.windows.net/quicks/quick.docx) for internal use within LwM).
 
 We have manually cropped section 4 out of the Word document and created a new Word document with it, making sure we keep the same format. The resulting Word document has 433 pages and is stored [here](https://lwmincomingquicks.blob.core.windows.net/quicks/quick_section4.docx), for internal LwM use.
 
