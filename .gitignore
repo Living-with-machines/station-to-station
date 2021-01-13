@@ -147,3 +147,7 @@ toponym_matching/toponyms/
 wikipediaprocessing/outputs/*
 wikipediaprocessing/testing/*
 annotations/
+*.docx
+quick/*/
+*.xlsx
+resources/
