@@ -10,20 +10,20 @@ In the README and code we assume the Quick's Section 4 Word document is stored i
 
 Notebook `process_railway_stations.ipynb` reads the Quick's Section 4 Word document and identifies main stations, substations, and their description.
 
-It returns a dataframe with the following columns:
+It returns a dataframe `quicks_processed.pkl` with the following columns:
 
 |   | MainId | MainStation          | SubId | SubStation           | Description                                       | SubStFormatted         |
 |---|--------|----------------------|-------|----------------------|---------------------------------------------------|------------------------|
 | 0 | 1      | ABBEY                | 1     | A TOWN               | [NB] op 3 September 1856** as A; TOWN added 18... | ABBEY TOWN             |
 | 1 | 1      | ABBEY                | 2     | A JUNCTION           | [Cal] op 31 August 1870 (co ½ T 26 September)...  | ABBEY JUNCTION         |
 | 2 | 1      | ABBEY                | 3     | A JUNCTION           | [NB] op 8 August 1870 (D&C 14) ; clo 1 Septem...  | ABBEY JUNCTION         |
-| 3 | 2      | ABBEY & WEST DEREHAM | 0     | ABBEY & WEST DEREHAM | [GE] op 1 August 1882 (Thetford & Watton Times... | ABBEY AND WEST DEREHAM |
-| 4 | 3      | ABBEY FOREGATE       | 0     | ABBEY FOREGATE       | – see SHREWSBURY.                                 | ABBEY FOREGATE         |
+| 3 | 2      | ABBEY & WEST DEREHAM | 4     | ABBEY & WEST DEREHAM | [GE] op 1 August 1882 (Thetford & Watton Times... | ABBEY AND WEST DEREHAM |
+| 4 | 3      | ABBEY FOREGATE       | 5     | ABBEY FOREGATE       | – see SHREWSBURY.                                 | ABBEY FOREGATE         |
 
 Column description:
-* **MainId:** Main station ID (autoincremental)
+* **MainId:** Main station ID
 * **MainStation:** Name of main station
-* **SubId:** Substation ID (complements MainID)
+* **SubId:** Substation ID
 * **SubStation:** Name of the substation as appears in Quick's (often abbreviated, e.g. "A TOWN" for "ABBEY TOWN")
 * **Description:** Text that accompanies a station or substation
 * **SubStFormatted:** String-formatted name of the substation.
