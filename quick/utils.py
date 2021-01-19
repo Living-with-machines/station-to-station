@@ -19,10 +19,9 @@ keywords = ["PLATFORM", "PLATFORMS", "HALT", "INTERNATIONAL", "JUNCTION", "CAMP"
 # Main station XPATHs:
 mainstation_xpath = './w:r[not(preceding-sibling::w:r//w:t)][not(w:rPr/w:sz[@w:val=\"16\"])][..//w:b[not(@w:val=\"0\")]]/w:t[1]'
 mainstation_xpath2 = './w:r[not(preceding-sibling::w:r//w:t)][not(w:rPr/w:sz[@w:val=\"16\"])][../w:pPr[w:pStyle]/w:rPr/w:b[@w:val=\"0\"]]/w:t[1]'
-mainstation_xpath3 = './w:r[not(preceding-sibling::w:r//w:t)][not(w:rPr/w:sz[@w:val=\"16\"])][../w:pPr[w:pStyle[@w:val=\"Heading1\"]]/w:rPr]/w:t[1]'
-mainstation_xpath4 = './w:r[not(preceding-sibling::w:r//w:t)][not(w:rPr/w:sz[@w:val=\"16\"])][../w:pPr[w:pStyle[@w:val=\"Heading2\"]]/w:rPr]/w:t[1]'
-mainstation_xpath5 = './w:r[not(preceding-sibling::w:r//w:t)][not(w:rPr/w:sz[@w:val=\"16\"])][../w:pPr[w:pStyle[@w:val=\"Heading3\"]]/w:rPr]/w:t[1]'
-mainstation_xpath6 = './w:r[not(preceding-sibling::w:r//w:t)][not(w:rPr/w:sz[@w:val=\"16\"])][../w:pPr[w:pStyle[@w:val=\"Heading4\"]]/w:rPr]/w:t[1]'
+mainstation_xpath3 = './w:r[not(preceding-sibling::w:r//w:t)][not(w:rPr/w:sz[@w:val=\"16\"])][../w:pPr[w:pStyle[@w:val=\"Heading1\" or @w:val=\"Heading2\" or @w:val=\"Heading3\" or @w:val=\"Heading4\"]]/w:rPr]/w:t[1]'
+
+# The first "w:r" of a paragraph has a child w:text:
 first_token_para_xpath = './w:r[//w:t]/w:t[1]'
         
 
@@ -64,12 +63,6 @@ def is_mainst(para, mainstation, counter, ns):
                 mainxpath = para.xpath(mainstation_xpath2, namespaces=ns)
             if not mainxpath:
                 mainxpath = para.xpath(mainstation_xpath3, namespaces=ns)
-            if not mainxpath:
-                mainxpath = para.xpath(mainstation_xpath4, namespaces=ns)
-            if not mainxpath:
-                mainxpath = para.xpath(mainstation_xpath5, namespaces=ns)
-            if not mainxpath:
-                mainxpath = para.xpath(mainstation_xpath6, namespaces=ns)
                 
             # Filter out:
             #   * station names of length 1,
