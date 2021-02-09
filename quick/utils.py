@@ -55,7 +55,7 @@ def is_mainst(para, mainstation, counter, ns):
     if paraxp:
         
         # If text is capitalized (with exception for stations starting with "Mc"):
-        if paraxp[0].text.isupper() or paraxp[0].text.startswith("Mc") and paraxp[0].text[2:].isupper():
+        if paraxp[0].text.isupper() or (paraxp[0].text.startswith("Mc") and paraxp[0].text[2:].isupper()):
             
             # See if xpath matches a mainstation xpath:
             mainxpath = para.xpath(mainstation_xpath, namespaces=ns)
