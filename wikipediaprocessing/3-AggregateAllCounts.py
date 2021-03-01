@@ -5,9 +5,9 @@ import time,os,json
 from collections import Counter
 import pickle
 
-def fill_dicts(res):
+def fill_dicts(res):    
     global mentions_freq, entity_freq, ngrams_freq, mention_overall_dict
-    
+
     url,box_mentions, content_ngrams, box_entities, mentions_dict = res[0],res[1],res[2],res[3],res[4]
     mentions_freq+= box_mentions
     ngrams_freq+= content_ngrams
