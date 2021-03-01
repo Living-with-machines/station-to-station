@@ -18,9 +18,14 @@ This script is adapted from https://github.com/Living-with-machines/LwM_SIGSPATI
 
 Run [train_DMmodels.ipynb](https://github.com/Living-with-machines/PlaceLinking/blob/fuzzy_matching/toponym_matching/train_DMmodels.ipynb) to train the models.
 
-## Find candidates with DeezyMatch
+## Find candidates with DeezyMatch: Quicks to Wikidata
 
-Run [candidate_selection.ipynb](https://github.com/Living-with-machines/PlaceLinking/blob/fuzzy_matching/toponym_matching/candidate_selection.ipynb) to find candidates, given a model, a set of queries and a set of candidates. In this particular example, these are the inputs:
-* **Model:** `models/wikigaz_en_001` or `models/wikigaz_en_002`, trained in [train_DMmodels.ipynb](https://github.com/Living-with-machines/PlaceLinking/blob/fuzzy_matching/toponym_matching/train_DMmodels.ipynb).
-* **Set of queries:** `toponyms/bho_queries.txt`, obtained following [these instructions](https://github.com/Living-with-machines/PlaceLinking/tree/fuzzy_matching/bho).
-* **Set of candidates:** `gazetteers/britwikidata_candidates.txt`, obtained following [these instructions](https://github.com/Living-with-machines/PlaceLinking/blob/fuzzy_matching/wikidata/README.md).
+Run [`candidate_selection_quicks_wikidata.py`](https://github.com/Living-with-machines/PlaceLinking/blob/quicks_wiki_alignment/toponym_matching/candidate_selection_quicks_wikidata.py) to find the best ranking of candidates, given a model, a set of queries and a set of candidates.
+
+This script runs four different DeezyMatch scenarios, query/candidate rankings are stored in `toponym_matching/ranker_results/`:
+    * Quick's main entries as queries; Wikidata British railway station gazetteer entries as candidates.
+    * Quick's sub entries as queries; Wikidata British railway station gazetteer entries as candidates.
+    * Quick's alternate names as queries; Wikidata British railway station gazetteer entries as candidates.
+    * Quick's main entries as queries; Wikidata British full gazetteer entries as candidates.
+
+Note that this will require that you have already trained a DeezyMatch model, e.g. `models/wikigaz_en_001`, `models/wikigaz_en_002`, or `models/wikigaz_en_003`, trained in [train_DMmodels.ipynb](https://github.com/Living-with-machines/PlaceLinking/blob/fuzzy_matching/toponym_matching/train_DMmodels.ipynb).

@@ -78,60 +78,45 @@ def findcandidates(candidates, queries, dm_model, inputfile, candrank_metric, ca
         elapsed = time.time() - start_time
         print("Rank candidates: %s" % elapsed)
 
+
 # -------------------------------------------------
-# Setting:
-candidates = "stnwikidata_candidates"
-queries = "quicks_mainst_queries"
+# Candidate ranking parameters:
+# -------------------------------------------------
+
 dm_model = "wikigaz_en_003"
 inputfile = "input_dfm_003"
 candrank_metric = "faiss" # 'faiss', 'cosine', 'conf'
 candrank_thr = 50
 num_candidates = 10
+        
+# -------------------------------------------------
+# Setting: Quick's main entries as queries; Wikidata British railway station gazetteer entries as candidates.
+candidates = "stnwikidata_candidates"
+queries = "quicks_mainst_queries"
 overwrite = True
 
 findcandidates(candidates, queries, dm_model, inputfile, candrank_metric, candrank_thr, num_candidates, overwrite)
 
-print("Done")
-
 # -------------------------------------------------
-# Setting:
+# Setting: Quick's sub entries as queries; Wikidata British railway station gazetteer entries as candidates.
 candidates = "stnwikidata_candidates"
 queries = "quicks_subst_queries"
-dm_model = "wikigaz_en_003"
-inputfile = "input_dfm_003"
-candrank_metric = "faiss" # 'faiss', 'cosine', 'conf'
-candrank_thr = 50
-num_candidates = 10
 overwrite = True
 
 findcandidates(candidates, queries, dm_model, inputfile, candrank_metric, candrank_thr, num_candidates, overwrite)
 
-print("Done")
-
 # -------------------------------------------------
-# Setting:
+# Setting: Quick's alternate names as queries; Wikidata British railway station gazetteer entries as candidates.
 candidates = "stnwikidata_candidates"
 queries = "quicks_altnames_queries"
-dm_model = "wikigaz_en_003"
-inputfile = "input_dfm_003"
-candrank_metric = "faiss" # 'faiss', 'cosine', 'conf'
-candrank_thr = 50
-num_candidates = 10
 overwrite = True
 
 findcandidates(candidates, queries, dm_model, inputfile, candrank_metric, candrank_thr, num_candidates, overwrite)
 
-print("Done")
-
 # -------------------------------------------------
-# Setting:
+# Setting: Quick's main entries as queries; Wikidata British full gazetteer entries as candidates.
 candidates = "britwikidata_candidates"
 queries = "quicks_mainst_queries"
-dm_model = "wikigaz_en_003"
-inputfile = "input_dfm_003"
-candrank_metric = "faiss" # 'faiss', 'cosine', 'conf'
-candrank_thr = 50
-num_candidates = 10
 overwrite = True
 
 findcandidates(candidates, queries, dm_model, inputfile, candrank_metric, candrank_thr, num_candidates, overwrite)
