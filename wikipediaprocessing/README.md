@@ -25,6 +25,6 @@ The second step will extract mention, ngrams and entity counts as well as mentio
 
 The final pre-processing script will aggregate all counts in single .pickle files and save them in the "Resources/" folder. You can do this by running:
 ```
-3-AggregateCounts.py
+3-AggregateAllCounts.py
 ```
 Note that after having processed each json from "Store-Counts/", the script will save an intermediate count in "extractedResources/".
