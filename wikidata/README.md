@@ -20,10 +20,8 @@ This script also outputs another file: `british_isles.csv`, which is a subset of
 
 The [wikidata_candidate_processing.ipynb](https://github.com/Living-with-machines/PlaceLinking/blob/fuzzy_matching/wikidata/wikidata_candidate_processing.ipynb) notebook takes `british_isles.csv` as input, and produces two outputs:
 * An altname-centric British Wikidata gazetteer: `../toponym_matching/gazetteers/britwikidata_gazetteer.pkl`
-* The candidates (aka unique altnames) input file for candidate ranker: `../toponym_matching/gazetteers/britwikidata_candidates.txt`
+* The corresponding candidates (aka unique altnames) input file for candidate ranker: `../toponym_matching/gazetteers/britwikidata_candidates.txt`
 
-## Exploratory notebooks
-
-The other two notebooks in this folder are exploratory:
-* [wd_feature_exploration.ipynb](https://github.com/Living-with-machines/PlaceLinking/blob/fuzzy_matching/wikidata/wd_feature_exploration.ipynb): Wikidata features exploration.
-* [wd_instanceof_exploration.ipynb](https://github.com/Living-with-machines/PlaceLinking/blob/fuzzy_matching/wikidata/wd_instanceof_exploration.ipynb): exploration of Wikidata `instance_of` feature.
+The notebook also produces the following two outputs:
+* An altname-centric British Wikidata gazetteer with only railway stations: `../toponym_matching/gazetteers/stnwikidata_gazetteer.pkl`
+* The corresponding candidates (aka unique altnames) input file for candidate ranker: `../toponym_matching/gazetteers/stnwikidata_candidates.txt`
