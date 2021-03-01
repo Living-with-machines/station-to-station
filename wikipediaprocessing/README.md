@@ -18,7 +18,7 @@ Having the Wiki dump processed by the WikiExtractor in the "processedWiki/" fold
 ```
 that will produce a all_mentions.pickle file. 
 
-The second step will extract mention, ngrams and entity counts as well as mention_to_entities statistics (e.g., how many times the mention "Obama" is pointing to "Barack_Obama" and how many times to "Michele_Obama"). Statistics are still divided in the n-folders consituting the output of the WikiExtractor and will be saved in the "Store-Counts/" folder as json files. The script will also store a .json file for each entity, with all its aspects (i.e., sections, see [here](https://madoc.bib.uni-mannheim.de/49596/1/EAL.pdf) to know more about Entity-Aspect Linking). 
+The second step will extract mention, ngrams and entity counts as well as mention_to_entities statistics (e.g., how many times the mention "Obama" is pointing to "Barack_Obama" and how many times to "Michele_Obama"). Statistics are still divided in the n-folders consituting the output of the WikiExtractor and will be saved in the `extractedResources/Store-Counts/` folder as json files. The script will also store a .json file for each entity, with all its aspects (i.e., sections, see [here](https://madoc.bib.uni-mannheim.de/49596/1/EAL.pdf) to know more about Entity-Aspect Linking). 
 ```
 2-ExtractingFreqAndPages.py
 ```
@@ -27,4 +27,4 @@ The final pre-processing script will aggregate all counts in single .pickle file
 ```
 3-AggregateAllCounts.py
 ```
-Note that after having processed each json from "Store-Counts/", the script will save an intermediate count in "extractedResources/".
+Note that after having processed each json from `extractedResources/Store-Counts/`, the script will save an intermediate count in `extractedResources/`.
