@@ -32,4 +32,4 @@ It also returns two `.txt` files with the queries prepared in the format require
 
 Besides, the notebook uses regular expressions and other text matching functions on the Description, to extract information on disambiguators (e.g. "near London") and railway companies (e.g. "[LY]" for Lancashire and Yorkshire Railway), map location information (e.g. "{Saffron Walden - Ashdon}" or "{map 16}"), alternate names (e.g. "GRAHAMSTON" for Barrhead), cross-referenced stations (e.g. "HEREFORD" for Barrs Court Junction), and opening and closing dates. This expanded dataset is stored as `outputs/quicks_parsed.tsv` and `outputs/quicks_parsed.pkl`.
 
-The alternate names are prepared in the format required by DeezyMatch as well, under
+The alternate names are prepared in the format required by DeezyMatch as well, as `PlaceLinking/toponym_matching/toponyms/quicks_altnames_queries`.
