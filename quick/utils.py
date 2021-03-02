@@ -3,6 +3,7 @@ import json
 import string
 import pandas as pd
 import numpy as np
+from pathlib import Path
 from difflib import SequenceMatcher
 
 # Load dictionary of companies from Quicks intro:
@@ -584,6 +585,8 @@ def format_for_candranker(gazname, unique_placenames_array):
         unique_placenames_array (list): unique names that will be Deezy
                                         Match queries.
     """
+    Path(gazname).mkdir(parents=True, exist_ok=True)
+
     with open(gazname + ".txt", "w") as fw:
         for pl in unique_placenames_array:
             pl = pl.strip()
