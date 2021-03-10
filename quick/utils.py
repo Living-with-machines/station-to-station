@@ -3,6 +3,7 @@ import json
 import string
 import pandas as pd
 import numpy as np
+from pathlib import Path
 from difflib import SequenceMatcher
 
 # Load dictionary of companies from Quicks intro:
@@ -574,16 +575,19 @@ def capture_dates(description):
     
     
 # -----------------------------------------------
-def format_for_candranker(gazname, unique_placenames_array):
+def format_for_candranker(output_dir, output_filename,  unique_placenames_array):
     """
     This function returns the unique alternate names in a given gazetteer
     in the format required by DeezyMatch candidate ranker.
     
     Arguments:
-        gazname (str): output name of the DeezyMatch query file.
+        output_dir (str): directory where DeezyMatch query files are stored.
+        outpuf_filename (str): filename of the query file.
         unique_placenames_array (list): unique names that will be Deezy
                                         Match queries.
     """
+    gazname = output_dir + output_filename
+
     with open(gazname + ".txt", "w") as fw:
         for pl in unique_placenames_array:
             pl = pl.strip()
@@ -611,4 +615,7 @@ def prepare_alt_queries(parsedf, scen):
     df_tmp.to_pickle("outputs/quicks_" + scen.lower() + "_df.pkl")
     
     unique_placenames_array = list(set(list(np.array(df_tmp[scen]))))
-    format_for_candranker("../toponym_matching/toponyms/quicks_" + scen.lower() + "_queries", unique_placenames_array)
+    
+    output_dir = "../toponym_matching/toponyms/"
+    output_filename = "quicks_" + scen.lower() + "_queries.txt"
+    format_for_candranker(output_dir, output_filename, unique_placenames_array)
