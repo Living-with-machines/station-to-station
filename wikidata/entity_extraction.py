@@ -146,6 +146,9 @@ def parse_record(record):
         for r in replaces_dict:
             replaces.append(pydash.get(r, 'mainsnak.datavalue.value.id'))
 
+    # Heritage designation
+    heritage_designation = pydash.get(record, 'claims.P1435[0].mainsnak.datavalue.value.id')
+
     # ==========================================
     # Neighbouring or part-of locations
     # ==========================================
@@ -195,6 +198,13 @@ def parse_record(record):
     near_water = None
     if near_water_dict:
         near_water = [pydash.get(r, 'mainsnak.datavalue.value.id') for r in near_water_dict]
+
+    # Nearby waterbodies (Wikidata ID)
+    part_of_dict = pydash.get(record, 'claims.P361')
+    part_of = None
+    if part_of_dict:
+        part_of = [pydash.get(r, 'mainsnak.datavalue.value.id') for r in part_of_dict] 
+    
 
     # ==========================================
     # Coordinates
@@ -254,6 +264,12 @@ def parse_record(record):
     if epns_dict:
         epns = [pydash.get(p, 'mainsnak.datavalue.value') for p in epns_dict]
 
+    # Identifier in the Getty Thesaurus of Geographic Names
+    getty_dict = pydash.get(record, 'claims.P1667')
+    getty = None
+    if getty_dict:
+        getty = [pydash.get(p, 'mainsnak.datavalue.value') for p in getty_dict]
+
     # OS grid reference (Wikidata ID)
     os_grid_ref = pydash.get(record, 'claims.P613[0].mainsnak.datavalue.value')
 
@@ -269,6 +285,15 @@ def parse_record(record):
 
     # Street address
     street_address = pydash.get(record, 'claims.P6375[0].mainsnak.datavalue.value.text')
+
+    # Located on street
+    street_located = pydash.get(record, 'claims.P669[0].mainsnak.datavalue.value.id')
+
+    # Postal code
+    postal_code_dict = pydash.get(record, 'claims.P281')
+    postal_code = None
+    if postal_code_dict:
+        postal_code = [pydash.get(c, 'mainsnak.datavalue.value') for c in postal_code_dict]
 
     # ==========================================
     # Rail-related properties
@@ -292,10 +317,41 @@ def parse_record(record):
     if connectline_dict:
         connectline = [pydash.get(conline, 'mainsnak.datavalue.value.id') for conline in connectline_dict]
 
+    # Owned by
+    ownedby_dict = pydash.get(record, 'claims.P127')
+    ownedby = None
+    if ownedby_dict:
+        ownedby = [pydash.get(conline, 'mainsnak.datavalue.value.id') for conline in ownedby_dict]
+
+    # Connecting service
+    connectservice_dict = pydash.get(record, 'claims.P1192')
+    connectservice = None
+    if connectservice_dict:
+        connectservice = [pydash.get(conline, 'mainsnak.datavalue.value.id') for conline in connectservice_dict]
+
     # ==========================================
     # Store records in a dictionary
     # ==========================================
-    df_record = {'wikidata_id': wikidata_id, 'english_label': english_label, 'instance_of': instance_of, 'description_set': description_set, 'alias_dict': alias_dict, 'nativelabel': nativelabel, 'population_dict': population_dict, 'area': area, 'hcounties': hcounties, 'date_opening': date_opening, 'date_closing': date_closing, 'inception_date': inception_date, 'dissolved_date': dissolved_date, 'follows': follows, 'replaces': replaces, 'adm_regions': adm_regions, 'countries': countries, 'continents': continents, 'capital_of': capital_of, 'borders': borders, 'near_water': near_water, 'latitude': latitude, 'longitude': longitude, 'wikititle': wikititle, 'geonamesIDs': geonamesIDs, 'toIDs': toIDs, 'vchIDs': vchIDs, 'vob_placeIDs': vob_placeIDs, 'vob_unitIDs': vob_unitIDs, 'epns': epns, 'os_grid_ref': os_grid_ref, 'connectswith': connectswith, 'street_address': street_address, 'adjacent_stations': adjacent_stations, 'ukrailcode': ukrailcode, 'connectline': connectline}
+    df_record = {'wikidata_id': wikidata_id, 'english_label': english_label,
+                 'instance_of': instance_of, 'description_set': description_set,
+                 'alias_dict': alias_dict, 'nativelabel': nativelabel,
+                 'population_dict': population_dict, 'area': area,
+                 'hcounties': hcounties, 'date_opening': date_opening,
+                 'date_closing': date_closing, 'inception_date': inception_date,
+                 'dissolved_date': dissolved_date, 'follows': follows,
+                 'replaces': replaces, 'adm_regions': adm_regions,
+                 'countries': countries, 'continents': continents,
+                 'capital_of': capital_of, 'borders': borders, 'near_water': near_water,
+                 'latitude': latitude, 'longitude': longitude, 'wikititle': wikititle,
+                 'geonamesIDs': geonamesIDs, 'toIDs': toIDs, 'vchIDs': vchIDs,
+                 'vob_placeIDs': vob_placeIDs, 'vob_unitIDs': vob_unitIDs,
+                 'epns': epns, 'os_grid_ref': os_grid_ref, 'connectswith': connectswith,
+                 'street_address': street_address, 'adjacent_stations': adjacent_stations,
+                 'ukrailcode': ukrailcode, 'connectline': connectline,
+                 'heritage_designation': heritage_designation, 'getty': getty,
+                 'street_located': street_located, 'postal_code': postal_code,
+                 'ownedby': ownedby, 'connectservice': connectservice
+                }
     return df_record
 
 
