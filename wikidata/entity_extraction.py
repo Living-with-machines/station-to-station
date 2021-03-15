@@ -5,6 +5,7 @@ import pandas as pd
 import pydash
 import ast
 from tqdm import tqdm
+import pathlib
 
 languages = ['en', 'cy', 'sco', 'gd', 'ga', 'kw']
 
@@ -361,39 +362,44 @@ def parse_record(record):
 
 ### Uncomment the following to run this script (WARNING: This will take days to run):
 
-# df_record_all = pd.DataFrame(columns=['wikidata_id', 'english_label', 'instance_of', 'description_set', 'alias_dict', 'nativelabel', 'population_dict', 'area', 'hcounties', 'date_opening', 'date_closing', 'inception_date', 'dissolved_date', 'follows', 'replaces', 'adm_regions', 'countries', 'continents', 'capital_of', 'borders', 'near_water', 'latitude', 'longitude', 'wikititle', 'geonamesIDs', 'toIDs', 'vchIDs', 'vob_placeIDs', 'vob_unitIDs', 'epns', 'os_grid_ref', 'connectswith', 'street_address', 'adjacent_stations', 'ukrailcode', 'connectline'])
+path = r"../resources/wikidata/extracted/"
+pathlib.Path(path).mkdir(parents=True, exist_ok=True)
 
-# header=True
-# i = 0
-# for record in tqdm(wikidata('/resources/wikidata/latest-all.json.bz2')):
+df_record_all = pd.DataFrame(columns=['wikidata_id', 'english_label', 'instance_of', 'description_set', 'alias_dict', 'nativelabel', 'population_dict', 'area', 'hcounties', 'date_opening', 'date_closing', 'inception_date', 'dissolved_date', 'follows', 'replaces', 'adm_regions', 'countries', 'continents', 'capital_of', 'borders', 'near_water', 'latitude', 'longitude', 'wikititle', 'geonamesIDs', 'toIDs', 'vchIDs', 'vob_placeIDs', 'vob_unitIDs', 'epns', 'os_grid_ref', 'connectswith', 'street_address', 'adjacent_stations', 'ukrailcode', 'connectline', 'heritage_designation', 'getty', 'street_located', 'postal_code', 'ownedby', 'connectservice'])
+
+header=True
+i = 0
+for record in tqdm(wikidata('/resources/wikidata/latest-all.json.bz2')):
     
-#     # Only extract items with geographical coordinates (P625)
-#     if pydash.has(record, 'claims.P625'):
+    # Only extract items with geographical coordinates (P625)
+    if pydash.has(record, 'claims.P625'):
         
-#         # ==========================================
-#         # Store records in a csv
-#         # ==========================================
-#         df_record = parse_record(record)
-#         df_record_all = df_record_all.append(df_record, ignore_index=True)
-#         i += 1
-#         if (i % 5000 == 0):
-#             pd.DataFrame.to_csv(df_record_all, path_or_buf='extracted/till_'+record['id']+'_item.csv')
-#             print('i = '+str(i)+' item '+record['id']+'  Done!')
-#             print('CSV exported')
-#             df_record_all = pd.DataFrame(columns=['wikidata_id', 'english_label', 'instance_of', 'description_set', 'alias_dict', 'nativelabel', 'population_dict', 'area', 'hcounties', 'date_opening', 'date_closing', 'inception_date', 'dissolved_date', 'follows', 'replaces', 'adm_regions', 'countries', 'continents', 'capital_of', 'borders', 'near_water', 'latitude', 'longitude', 'wikititle', 'geonamesIDs', 'toIDs', 'vchIDs', 'vob_placeIDs', 'vob_unitIDs', 'epns', 'os_grid_ref', 'connectswith', 'street_address', 'adjacent_stations', 'ukrailcode', 'connectline'])
-#         else:
-#             continue
+        # ==========================================
+        # Store records in a csv
+        # ==========================================
+        df_record = parse_record(record)
+        df_record_all = df_record_all.append(df_record, ignore_index=True)
+        i += 1
+        if (i % 5000 == 0):
+            pd.DataFrame.to_csv(df_record_all, path_or_buf=path + '/till_'+record['id']+'_item.csv')
+            print('i = '+str(i)+' item '+record['id']+'  Done!')
+            print('CSV exported')
+            df_record_all = pd.DataFrame(columns=['wikidata_id', 'english_label', 'instance_of', 'description_set', 'alias_dict', 'nativelabel', 'population_dict', 'area', 'hcounties', 'date_opening', 'date_closing', 'inception_date', 'dissolved_date', 'follows', 'replaces', 'adm_regions', 'countries', 'continents', 'capital_of', 'borders', 'near_water', 'latitude', 'longitude', 'wikititle', 'geonamesIDs', 'toIDs', 'vchIDs', 'vob_placeIDs', 'vob_unitIDs', 'epns', 'os_grid_ref', 'connectswith', 'street_address', 'adjacent_stations', 'ukrailcode', 'connectline'])
+        else:
+            continue
             
-# pd.DataFrame.to_csv(df_record_all, path_or_buf='extracted/final_csv_till_'+record['id']+'_item.csv')
-# print('i = '+str(i)+' item '+record['id']+'  Done!')
-# print('All items finished, final CSV exported!')
+pd.DataFrame.to_csv(df_record_all, path_or_buf=path + 'final_csv_till_'+record['id']+'_item.csv')
+print('i = '+str(i)+' item '+record['id']+'  Done!')
+print('All items finished, final CSV exported!')
 
 
-# ====================================================
-# Create a subset with entities from the British Isles
-# ====================================================
+# # ====================================================
+# # Create an approximate subset with entities from the British Isles
+# # ====================================================
 
-path = r"extracted/"
+path = r"../resources/wikidata/extracted/"
+pathlib.Path(path).mkdir(parents=True, exist_ok=True)
+
 all_files = glob.glob(path + "/*.csv")
 
 li = []
@@ -418,4 +424,28 @@ def filter_britisles(lat, lon, countries):
         return False
     
 mask = df.apply(lambda x: filter_britisles(x['latitude'], x['longitude'], x['countries']), axis=1)
-df[mask].to_csv("british_isles.csv")
+df[mask].to_csv("british_isles_gazetteer.csv", index=False)
+
+
+# ====================================================
+# Create an approximate subset with railway station entities from the British Isles
+# ====================================================
+
+britdf = pd.read_csv("british_isles_gazetteer.csv", header=0, index_col=None, low_memory=False)
+
+# From: https://docs.google.com/spreadsheets/d/1sREU_TKBU0HXoSSm7nyOw-4kId_bfu6OTEXxtdZeLl0/edit#gid=0
+stn_wkdt_classes = ["Q55488", "Q4663385", "Q55491", "Q18516630", "Q1335652", "Q28109487",
+                    "Q55678", "Q1567913", "Q39917125", "Q11424045", "Q14562709", "Q27020748",
+                    "Q22808403", "Q85641138", "Q928830", "Q1339195", "Q27030992", "Q55485",
+                    "Q17158079", "Q55493", "Q325358", "Q168565", "Q18543139", "Q11606300",
+                    "Q2175765", "Q2298537", "Q19563580"]
+
+stationgaz = pd.DataFrame(columns=['wikidata_id', 'english_label', 'instance_of', 'description_set', 'alias_dict', 'nativelabel', 'population_dict', 'area', 'hcounties', 'date_opening', 'date_closing', 'inception_date', 'dissolved_date', 'follows', 'replaces', 'adm_regions', 'countries', 'continents', 'capital_of', 'borders', 'near_water', 'latitude', 'longitude', 'wikititle', 'geonamesIDs', 'toIDs', 'vchIDs', 'vob_placeIDs', 'vob_unitIDs', 'epns', 'os_grid_ref', 'connectswith', 'street_address', 'adjacent_stations', 'ukrailcode', 'connectline', 'heritage_designation', 'getty', 'street_located', 'postal_code', 'ownedby', 'connectservice'])
+
+for i, row in tqdm(britdf.iterrows()):
+    if type(row["instance_of"]) == str:
+        wkdtcl = ast.literal_eval(row["instance_of"])
+        if any(x in wkdtcl for x in stn_wkdt_classes):
+            stationgaz = stationgaz.append(row, ignore_index=True)
+
+stationgaz.to_csv("british_isles_stations_gazetteer.csv", index=False)
