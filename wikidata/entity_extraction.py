@@ -362,35 +362,35 @@ def parse_record(record):
 
 ### Uncomment the following to run this script (WARNING: This will take days to run):
 
-path = r"../resources/wikidata/extracted/"
-pathlib.Path(path).mkdir(parents=True, exist_ok=True)
+# path = r"../resources/wikidata/extracted/"
+# pathlib.Path(path).mkdir(parents=True, exist_ok=True)
 
-df_record_all = pd.DataFrame(columns=['wikidata_id', 'english_label', 'instance_of', 'description_set', 'alias_dict', 'nativelabel', 'population_dict', 'area', 'hcounties', 'date_opening', 'date_closing', 'inception_date', 'dissolved_date', 'follows', 'replaces', 'adm_regions', 'countries', 'continents', 'capital_of', 'borders', 'near_water', 'latitude', 'longitude', 'wikititle', 'geonamesIDs', 'toIDs', 'vchIDs', 'vob_placeIDs', 'vob_unitIDs', 'epns', 'os_grid_ref', 'connectswith', 'street_address', 'adjacent_stations', 'ukrailcode', 'connectline', 'heritage_designation', 'getty', 'street_located', 'postal_code', 'ownedby', 'connectservice'])
+# df_record_all = pd.DataFrame(columns=['wikidata_id', 'english_label', 'instance_of', 'description_set', 'alias_dict', 'nativelabel', 'population_dict', 'area', 'hcounties', 'date_opening', 'date_closing', 'inception_date', 'dissolved_date', 'follows', 'replaces', 'adm_regions', 'countries', 'continents', 'capital_of', 'borders', 'near_water', 'latitude', 'longitude', 'wikititle', 'geonamesIDs', 'toIDs', 'vchIDs', 'vob_placeIDs', 'vob_unitIDs', 'epns', 'os_grid_ref', 'connectswith', 'street_address', 'adjacent_stations', 'ukrailcode', 'connectline', 'heritage_designation', 'getty', 'street_located', 'postal_code', 'ownedby', 'connectservice'])
 
-header=True
-i = 0
-for record in tqdm(wikidata('/resources/wikidata/latest-all.json.bz2')):
+# header=True
+# i = 0
+# for record in tqdm(wikidata('/resources/wikidata/latest-all.json.bz2')):
     
-    # Only extract items with geographical coordinates (P625)
-    if pydash.has(record, 'claims.P625'):
+#     # Only extract items with geographical coordinates (P625)
+#     if pydash.has(record, 'claims.P625'):
         
-        # ==========================================
-        # Store records in a csv
-        # ==========================================
-        df_record = parse_record(record)
-        df_record_all = df_record_all.append(df_record, ignore_index=True)
-        i += 1
-        if (i % 5000 == 0):
-            pd.DataFrame.to_csv(df_record_all, path_or_buf=path + '/till_'+record['id']+'_item.csv')
-            print('i = '+str(i)+' item '+record['id']+'  Done!')
-            print('CSV exported')
-            df_record_all = pd.DataFrame(columns=['wikidata_id', 'english_label', 'instance_of', 'description_set', 'alias_dict', 'nativelabel', 'population_dict', 'area', 'hcounties', 'date_opening', 'date_closing', 'inception_date', 'dissolved_date', 'follows', 'replaces', 'adm_regions', 'countries', 'continents', 'capital_of', 'borders', 'near_water', 'latitude', 'longitude', 'wikititle', 'geonamesIDs', 'toIDs', 'vchIDs', 'vob_placeIDs', 'vob_unitIDs', 'epns', 'os_grid_ref', 'connectswith', 'street_address', 'adjacent_stations', 'ukrailcode', 'connectline'])
-        else:
-            continue
+#         # ==========================================
+#         # Store records in a csv
+#         # ==========================================
+#         df_record = parse_record(record)
+#         df_record_all = df_record_all.append(df_record, ignore_index=True)
+#         i += 1
+#         if (i % 5000 == 0):
+#             pd.DataFrame.to_csv(df_record_all, path_or_buf=path + '/till_'+record['id']+'_item.csv')
+#             print('i = '+str(i)+' item '+record['id']+'  Done!')
+#             print('CSV exported')
+#             df_record_all = pd.DataFrame(columns=['wikidata_id', 'english_label', 'instance_of', 'description_set', 'alias_dict', 'nativelabel', 'population_dict', 'area', 'hcounties', 'date_opening', 'date_closing', 'inception_date', 'dissolved_date', 'follows', 'replaces', 'adm_regions', 'countries', 'continents', 'capital_of', 'borders', 'near_water', 'latitude', 'longitude', 'wikititle', 'geonamesIDs', 'toIDs', 'vchIDs', 'vob_placeIDs', 'vob_unitIDs', 'epns', 'os_grid_ref', 'connectswith', 'street_address', 'adjacent_stations', 'ukrailcode', 'connectline'])
+#         else:
+#             continue
             
-pd.DataFrame.to_csv(df_record_all, path_or_buf=path + 'final_csv_till_'+record['id']+'_item.csv')
-print('i = '+str(i)+' item '+record['id']+'  Done!')
-print('All items finished, final CSV exported!')
+# pd.DataFrame.to_csv(df_record_all, path_or_buf=path + 'final_csv_till_'+record['id']+'_item.csv')
+# print('i = '+str(i)+' item '+record['id']+'  Done!')
+# print('All items finished, final CSV exported!')
 
 
 # # ====================================================
