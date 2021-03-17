@@ -134,8 +134,8 @@ def get_XIX_sections (aspects,testing):
 if __name__ == "__main__":
 
     entity,testing = parse_input_commands()
-    entity = quote(entity)
-    with open("/resources/wikipedia/extractedResources/Aspects/"+entity+".json") as json_file:   
+    entity = entity.replace("_"," ")
+    with open("/resources/wikipedia/extractedResources/Pages/"+entity+".json") as json_file:   
         aspects = json.load(json_file)
     XIX_sections = get_XIX_sections(aspects,testing)
 
