@@ -6,6 +6,7 @@ import pydash
 import ast
 from tqdm import tqdm
 import pathlib
+import re
 
 languages = ['en', 'cy', 'sco', 'gd', 'ga', 'kw']
 
@@ -360,7 +361,7 @@ def parse_record(record):
 # Parse all WikiData
 # ==========================================
 
-### Uncomment the following to run this script (WARNING: This will take days to run):
+### Uncomment the following to run this script (WARNING: This will take days to run, 40 hours on a machine with 64GiB of RAM):
 
 # path = r"../resources/wikidata/extracted/"
 # pathlib.Path(path).mkdir(parents=True, exist_ok=True)
@@ -393,9 +394,11 @@ def parse_record(record):
 # print('All items finished, final CSV exported!')
 
 
-# # ====================================================
-# # Create an approximate subset with entities from the British Isles
-# # ====================================================
+# ====================================================
+# Create an approximate subset with entities from the British Isles
+# ====================================================
+
+print("\nCreating the British Isles gazetteer.")
 
 path = r"../resources/wikidata/extracted/"
 pathlib.Path(path).mkdir(parents=True, exist_ok=True)
@@ -424,12 +427,14 @@ def filter_britisles(lat, lon, countries):
         return False
     
 mask = df.apply(lambda x: filter_britisles(x['latitude'], x['longitude'], x['countries']), axis=1)
-df[mask].to_csv("british_isles_gazetteer.csv", index=False)
+df[mask].to_csv("../resources/wikidata/british_isles_gazetteer.csv", index=False)
 
 
 # ====================================================
 # Create an approximate subset with railway station entities from the British Isles
 # ====================================================
+
+print("Done.\n\nCreating the British Isles stations gazetteer.")
 
 britdf = pd.read_csv("british_isles_gazetteer.csv", header=0, index_col=None, low_memory=False)
 
@@ -440,12 +445,18 @@ stn_wkdt_classes = ["Q55488", "Q4663385", "Q55491", "Q18516630", "Q1335652", "Q2
                     "Q17158079", "Q55493", "Q325358", "Q168565", "Q18543139", "Q11606300",
                     "Q2175765", "Q2298537", "Q19563580"]
 
+# Most railway stations end with "railway station" in Wikidata.
+re_station = r"(.*)\b(([Hh]alt)|([Ss]top)|([Ss]tation))((\, .*)|( \(.*))?$"
+
+# Most common non-railway stations in Wikidata:
+re_nostation = r".*\b(([Pp]olice [Ss]tation)|([Ss]ignal [Ss]tation)|([Pp]ower [Ss]tation)|([Ll]ifeboat [Ss]tation)|([Pp]umping [Ss]tation)|([Tt]ransmitting [Ss]tation)).*$"
+
 stationgaz = pd.DataFrame(columns=['wikidata_id', 'english_label', 'instance_of', 'description_set', 'alias_dict', 'nativelabel', 'population_dict', 'area', 'hcounties', 'date_opening', 'date_closing', 'inception_date', 'dissolved_date', 'follows', 'replaces', 'adm_regions', 'countries', 'continents', 'capital_of', 'borders', 'near_water', 'latitude', 'longitude', 'wikititle', 'geonamesIDs', 'toIDs', 'vchIDs', 'vob_placeIDs', 'vob_unitIDs', 'epns', 'os_grid_ref', 'connectswith', 'street_address', 'adjacent_stations', 'ukrailcode', 'connectline', 'heritage_designation', 'getty', 'street_located', 'postal_code', 'ownedby', 'connectservice'])
 
 for i, row in tqdm(britdf.iterrows()):
-    if type(row["instance_of"]) == str:
+    if type(row["instance_of"]) == str and type(row["english_label"]) == str:
         wkdtcl = ast.literal_eval(row["instance_of"])
-        if any(x in wkdtcl for x in stn_wkdt_classes):
+        if any(x in wkdtcl for x in stn_wkdt_classes) or (re.match(re_station, row["english_label"]) and not re.match(re_nostation, row["english_label"])):
             stationgaz = stationgaz.append(row, ignore_index=True)
 
-stationgaz.to_csv("british_isles_stations_gazetteer.csv", index=False)
+stationgaz.to_csv("../resources/wikidata/british_isles_stations_gazetteer.csv", index=False)
