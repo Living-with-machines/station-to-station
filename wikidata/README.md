@@ -2,7 +2,11 @@
 
 The scripts in this folder create Wikidata-derived gazetteers that are used in the experiments.
 
-## 1. Extract relevant entities
+Run the following two scripts:
+1. Run [entity_extraction.py](https://github.com/Living-with-machines/PlaceLinking/blob/18-refactor-wiki-pipeline/wikidata/entity_extraction.py) to extract relevant entities and create Wikidata gazetteers, see [below](https://github.com/Living-with-machines/PlaceLinking/tree/18-refactor-wiki-pipeline/wikidata#1-extract-relevant-entities) for more information.
+2. Run [extend_altnames.py](https://github.com/Living-with-machines/PlaceLinking/blob/18-refactor-wiki-pipeline/wikidata/extend_altnames.py) to expand the alternate names in the gazetteers, see [below](https://github.com/Living-with-machines/PlaceLinking/tree/18-refactor-wiki-pipeline/wikidata#2-extending-altnames) for more information.
+
+## Extracting relevant entities
 
 Run [entity_extraction.py](https://github.com/Living-with-machines/PlaceLinking/blob/18-refactor-wiki-pipeline/wikidata/entity_extraction.py) to create gazetteers from Wikidata. 
 
@@ -51,7 +55,7 @@ The result is stored as `../resources/wikidata/british_isles_stations_gazetteer.
 | 4 | Q5601497    | Greatstone-on-Sea Halt railway station    | ['Q55488']  | set()                                             | {'en': ['Greatstone-on-Sea Halt railway statio... | ... | NaN            | NaN         |
 
 
-## 2. Extending altnames
+## Expanding the altnames
 
 Run [extend_altnames.py](https://github.com/Living-with-machines/PlaceLinking/blob/18-refactor-wiki-pipeline/wikidata/extend_altnames.py) to extend the altnames of the British Isles gazetteer and the British Isles stations gazetteer, and to create altname-centric gazetteers (i.e. not WikidataID-centric).
 
