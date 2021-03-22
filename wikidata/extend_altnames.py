@@ -245,9 +245,8 @@ penultimate_tokens = []
 antepenultimate_tokens = []
 for i, row in wkdtgazetteer_stn.iterrows():
     
-    if row["source"] in ["english_label", "wikidata_alias", "native_label"] and re.match(re_station, row["altname"]) and not re.match(re_nostation, row["altname"]):
-        newaltname = re.sub(re_station, r"\1", row["altname"])
-#         print(row["altname"], "\t:::\t", newaltname)
+    if re.match(re_station, row["altname"]) and not re.match(re_nostation, row["altname"]):
+        newaltname = re.sub(re_station, r"\1", row["altname"]).strip()
         if newaltname:
             wkdtgazetteer_stn = wkdtgazetteer_stn.append(pd.Series([row["wkid"], newaltname, "processed", row["lat"], row["lon"]], index=wkdtgazetteer_stn.columns), ignore_index=True)
 
