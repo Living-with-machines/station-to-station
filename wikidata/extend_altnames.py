@@ -234,7 +234,6 @@ print("\nCreating an altnames-centric gazetteer of the British Isles stations.")
 
 wkdtgazetteer = pd.read_pickle("../resources/wikidata/altname_british_isles_gazetteer.pkl")
 wkdtgazetteer_stn = wkdtgazetteer[wkdtgazetteer["wkid"].isin(stationdf["wikidata_id"])]
-wkdtgazetteer_stn.to_pickle("../resources/wikidata/altname_british_isles_stations_gazetteer.pkl")
 
 # Most railway stations end with "station" or "railway station", but Quick's guide
 # takes it for granted that they are railway stations, so it just has "Currie" for "Currie
@@ -254,6 +253,8 @@ for i, row in wkdtgazetteer_stn.iterrows():
 
 wkdtgazetteer_stn = wkdtgazetteer_stn.drop_duplicates(subset = ['wkid', 'altname'])
 wkdtgazetteer_stn = wkdtgazetteer_stn[wkdtgazetteer_stn['altname'].notna()]
-print(wkdtgazetteer_stn)
+wkdtgazetteer_stn = wkdtgazetteer_stn.reset_index(drop=True)
+
+wkdtgazetteer_stn.to_pickle("../resources/wikidata/altname_british_isles_stations_gazetteer.pkl")
 
 print("\nDone!")
