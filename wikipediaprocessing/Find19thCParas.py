@@ -63,7 +63,7 @@ def keep_only_19_century(content,testing):
                         # with a lenght different from four digits into hours, minutes, and seconds, while defaulting
                         # the year to 1900. E.g. "A666" to "1900-01-01 06:06:06", or
                         # "886" to "1900-01-01 08:08:06", or "200000" to "1900-01-01 20:00:00".
-                        if not (x.isnumeric() and len(x) != 4 and dtime.year == 1900 and dtime.month == 1 and dtime.day == 1):
+                        if (x.isnumeric() or len(x) != 4) and not (dtime.year == 1900 and dtime.month == 1 and dtime.day == 1):
                             years.append(dtime.year)
                     
                     ### --------------------------------
