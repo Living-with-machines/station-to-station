@@ -6,10 +6,10 @@ from bs4 import BeautifulSoup
 from collections import Counter
 from urllib.parse import quote
 import multiprocessing as mp
-from wikimapper import WikiMapper
-import wptools
+#from wikimapper import WikiMapper
+#import wptools
 
-mapper = WikiMapper("/resources/wikidata2wikipedia/index_enwiki-20190420.db")
+#mapper = WikiMapper("/resources/wikidata2wikipedia/index_enwiki-20190420.db")
 
 def get_all_ngrams(text,ngram_up_to):
     
@@ -75,15 +75,18 @@ def process_doc(doc):
     pages = []
     for page in content:
         title = page["title"]
-        wikidata_id = mapper.title_to_id(title.replace(" ","_"))
-        if wikidata_id is None:
-            try:
-                wikidata_id = wptools.page(title,silent=True).get_wikidata().data["wikibase"]
-            except LookupError:
-                wikidata_id = None
-        sections = {"wikidata_id":wikidata_id,"title":title,"sections": get_sections(page)}
-        r = [title]+ clean_page(page) + [sections]
-        pages.append([r])
+        if "/" not in title:
+        #wikidata_id = mapper.title_to_id(title.replace(" ","_"))
+        #if wikidata_id is None:
+        #    try:
+        #        wikidata_id = wptools.page(title,silent=True).get_wikidata().data["wikibase"]
+        #    except LookupError:
+        #        wikidata_id = None
+#        sections = {"wikidata_id":wikidata_id,"title":title,"sections": get_sections(page)}
+
+            sections = {"title":title,"sections": get_sections(page)}
+            r = [title]+ clean_page(page) + [sections]
+            pages.append([r])
     return pages
 
 
@@ -121,18 +124,18 @@ if __name__ == '__main__':
             
             # saving sections independently
             for sect in sections:
-                title = sect["title"]
-                wikidata_id = sect["wikidata_id"]
-                if wikidata_id is not None:
+                    title = sect["title"]
+#                wikidata_id = sect["wikidata_id"]
+#                if wikidata_id is not None:
                     s = sect["sections"]
                     try:
-                        with open('/resources/wikipedia/extractedResources/Pages/'+wikidata_id+".json", 'w') as fp:
+                        with open('/resources/wikipedia/extractedResources/Pages/'+title+".json", 'w') as fp:
                             json.dump(s, fp)
                     except OSError as e:
                         print (e)
                         continue
-                else:
-                    print ("Missing:",title)
+               # else:
+                #    print ("Missing:",title)
             # storing counts, still divided in folders       
             with open('/resources/wikipedia/extractedResources/Store-Counts/'+str(step)+".json", 'w') as fp:
                 json.dump(freq_res, fp)
