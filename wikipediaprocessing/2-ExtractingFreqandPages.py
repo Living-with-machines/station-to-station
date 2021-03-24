@@ -6,10 +6,7 @@ from bs4 import BeautifulSoup
 from collections import Counter
 from urllib.parse import quote
 import multiprocessing as mp
-#from wikimapper import WikiMapper
-#import wptools
 
-#mapper = WikiMapper("/resources/wikidata2wikipedia/index_enwiki-20190420.db")
 
 def get_all_ngrams(text,ngram_up_to):
     
@@ -93,14 +90,14 @@ def process_doc(doc):
 # %%
 # load the set of all possible mentions 
 
-with open("/resources/wikipedia/extractedResources/all_mentions.pickle", "rb") as f:
+with open("../resources/wikipedia/extractedResources/all_mentions.pickle", "rb") as f:
     all_mentions = pickle.load(f)
 
 
 # %%
 # the output already used before, coming from WikiExtractor
 
-proessed_docs = "/resources/wikipedia/processedWiki/"
+proessed_docs = "../resources/wikipedia/processedWiki/"
 
 ngram_up_to = 3
 
@@ -129,7 +126,7 @@ if __name__ == '__main__':
 #                if wikidata_id is not None:
                     s = sect["sections"]
                     try:
-                        with open('/resources/wikipedia/extractedResources/Pages/'+title+".json", 'w') as fp:
+                        with open('../resources/wikipedia/extractedResources/Pages/'+title+".json", 'w') as fp:
                             json.dump(s, fp)
                     except OSError as e:
                         print (e)
@@ -137,7 +134,7 @@ if __name__ == '__main__':
                # else:
                 #    print ("Missing:",title)
             # storing counts, still divided in folders       
-            with open('/resources/wikipedia/extractedResources/Store-Counts/'+str(step)+".json", 'w') as fp:
+            with open('../resources/wikipedia/extractedResources/Store-Counts/'+str(step)+".json", 'w') as fp:
                 json.dump(freq_res, fp)
             
             print("Done %s folders over %s" % (step, len(os.listdir(proessed_docs))))
