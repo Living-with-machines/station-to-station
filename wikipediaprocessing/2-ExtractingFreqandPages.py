@@ -1,7 +1,7 @@
 # To add a new cell, type '# %%'
 # To add a new markdown cell, type '# %% [markdown]'
 # %%
-import nltk,re, pickle, os, json
+import nltk,re, pickle, os, json,pathlib
 from bs4 import BeautifulSoup
 from collections import Counter
 from urllib.parse import quote
@@ -97,7 +97,10 @@ with open("../resources/wikipedia/extractedResources/all_mentions.pickle", "rb")
 # %%
 # the output already used before, coming from WikiExtractor
 
-proessed_docs = "../resources/wikipedia/processedWiki/"
+processed_docs = "../resources/wikipedia/processedWiki/"
+
+pathlib.Path('../resources/wikipedia/extractedResources/Pages/').mkdir(parents=True, exist_ok=True)
+pathlib.Path('../resources/wikipedia/extractedResources/Store-Counts/').mkdir(parents=True, exist_ok=True)
 
 ngram_up_to = 3
 
@@ -108,10 +111,10 @@ if __name__ == '__main__':
     
     step = 1
 
-    for folder in os.listdir(proessed_docs):
-        
+    for folder in os.listdir(processed_docs):
+        if folder != ".gitkeep":
             with mp.Pool(processes = N) as p:
-                res = p.map(process_doc, os.listdir(proessed_docs+folder))
+                res = p.map(process_doc, os.listdir(processed_docs+folder))
 
             res = [y for x in res for y in x]
             
@@ -139,9 +142,3 @@ if __name__ == '__main__':
             
             print("Done %s folders over %s" % (step, len(os.listdir(proessed_docs))))
             step+=1
-
-
-# %%
-
-
-
