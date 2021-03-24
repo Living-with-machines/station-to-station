@@ -1,7 +1,7 @@
 # To add a new cell, type '# %%'
 # To add a new markdown cell, type '# %% [markdown]'
 # %%
-import os, json,pickle
+import os, json,pickle, pathlib
 import multiprocessing as mp
 from urllib.parse import quote
 from bs4 import BeautifulSoup
@@ -32,7 +32,7 @@ if __name__ == '__main__':
 
 
     for folder in os.listdir(processed_docs):
-        
+        if folder != ".gitkeep":
             with mp.Pool(processes = N) as p:
                 res = p.map(process_doc, os.listdir(processed_docs+folder))
                 
@@ -45,12 +45,11 @@ all_mentions_dict = {x for x in all_mentions}
 
 
 # %%
-out = '../resources/wikipedia/extractedResources/all_mentions.pickle'
+out = '../resources/wikipedia/extractedResources/'
 
-if not os.path.exists(out):
-    os.makedirs(out)
+pathlib.Path(out).mkdir(parents=True, exist_ok=True)
 
-with open(out, "wb") as fp:
+with open(out+'all_mentions.pickle', "wb") as fp:
     pickle.dump(all_mentions_dict, fp)
 
 
