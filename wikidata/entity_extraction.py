@@ -9,6 +9,8 @@ import pathlib
 import re
 from pathlib import Path
 
+pathlib.Path('../processed/wikidata/').mkdir(parents=True, exist_ok=True)
+
 # Disable chained assignments
 pd.options.mode.chained_assignment = None
 
@@ -404,7 +406,7 @@ def parse_record(record):
 
 print("\nCreating the British Isles gazetteer.")
 
-if not Path("../resources/wikidata/british_isles_gazetteer.csv").exists():
+if not Path("../processed/wikidata/british_isles_gazetteer.csv").exists():
     path = r"../resources/wikidata/extracted/"
     pathlib.Path(path).mkdir(parents=True, exist_ok=True)
 
@@ -437,7 +439,7 @@ if not Path("../resources/wikidata/british_isles_gazetteer.csv").exists():
     britdf['longitude'] = britdf['longitude'].astype(float)
     britdf = britdf[britdf['latitude'].notna()]
     britdf = britdf[britdf['longitude'].notna()]
-    britdf.to_csv("../resources/wikidata/british_isles_gazetteer.csv", index=False)
+    britdf.to_csv("../processed/wikidata/british_isles_gazetteer.csv", index=False)
 
 
 # ====================================================
@@ -446,7 +448,7 @@ if not Path("../resources/wikidata/british_isles_gazetteer.csv").exists():
 
 print("Done.\n\nCreating the British Isles stations gazetteer.")
 
-britdf = pd.read_csv("../resources/wikidata/british_isles_gazetteer.csv", header=0, index_col=None, low_memory=False)
+britdf = pd.read_csv("../processed/wikidata/british_isles_gazetteer.csv", header=0, index_col=None, low_memory=False)
 
 # From: https://docs.google.com/spreadsheets/d/1sREU_TKBU0HXoSSm7nyOw-4kId_bfu6OTEXxtdZeLl0/edit#gid=0
 stn_wkdt_classes = ["Q55488", "Q4663385", "Q55491", "Q18516630", "Q1335652", "Q28109487",
@@ -469,4 +471,4 @@ for i, row in tqdm(britdf.iterrows()):
         if any(x in wkdtcl for x in stn_wkdt_classes) or (re.match(re_station, row["english_label"]) and not re.match(re_nostation, row["english_label"])):
             stationgaz = stationgaz.append(row, ignore_index=True)
 
-stationgaz.to_csv("../resources/wikidata/british_isles_stations_gazetteer.csv", index=False)
+stationgaz.to_csv("../processed/wikidata/british_isles_stations_gazetteer.csv", index=False)

@@ -20,7 +20,7 @@ from tqdm.notebook import trange, tqdm
 
 # The british_isles_gazetteer.csv file is an output from entity_extraction.py, which is stored in ../resources/wikidata/.
 print("Loading the British Isles gazetteer.")
-britdf = pd.read_csv("../resources/wikidata/british_isles_gazetteer.csv", header=0, index_col=None, low_memory=False)
+britdf = pd.read_csv("../processed/wikidata/british_isles_gazetteer.csv", header=0, index_col=None, low_memory=False)
 
 
 ### --------------------------------------------
@@ -29,7 +29,7 @@ britdf = pd.read_csv("../resources/wikidata/british_isles_gazetteer.csv", header
 
 # The british_isles_gazetteer.csv file is an output from entity_extraction.py, which is stored in ../resources/wikidata/.
 print("\nLoading the British Isles stations gazetteer.")
-stationdf = pd.read_csv("../resources/wikidata/british_isles_stations_gazetteer.csv", header=0, index_col=None, low_memory=False)
+stationdf = pd.read_csv("../processed/wikidata/british_isles_stations_gazetteer.csv", header=0, index_col=None, low_memory=False)
 
 
 ### --------------------------------------------
@@ -156,7 +156,7 @@ geonames_altnames = pd.read_pickle("../resources/geonames/geonames_altnames.pkl"
 
 print("\nCreating an altnames-centric gazetteer of the British Isles.")
 
-if not Path("../resources/wikidata/altname_british_isles_gazetteer.pkl").exists():
+if not Path("../processed/wikidata/altname_british_isles_gazetteer.pkl").exists():
     def obtain_altnames(elabel, aliases, nativelabel, wikipedia_title, geonamesIDs, wikigaz_altnames, geoaltnames):
 
         altnames = dict()
@@ -221,9 +221,9 @@ if not Path("../resources/wikidata/altname_british_isles_gazetteer.pkl").exists(
 
     wkdtgazetteer = wkdtgazetteer.drop_duplicates(subset = ['wkid', 'altname'])
     wkdtgazetteer = wkdtgazetteer[wkdtgazetteer['altname'].notna()]
-    wkdtgazetteer.to_pickle("../resources/wikidata/altname_british_isles_gazetteer.pkl")
+    wkdtgazetteer.to_pickle("../processed/wikidata/altname_british_isles_gazetteer.pkl")
     
-wkdtgazetteer = pd.read_pickle("../resources/wikidata/altname_british_isles_gazetteer.pkl")
+wkdtgazetteer = pd.read_pickle("../processed/wikidata/altname_british_isles_gazetteer.pkl")
 
 
 ### --------------------------------------------
@@ -232,7 +232,7 @@ wkdtgazetteer = pd.read_pickle("../resources/wikidata/altname_british_isles_gaze
 
 print("\nCreating an altnames-centric gazetteer of the British Isles stations.")
 
-wkdtgazetteer = pd.read_pickle("../resources/wikidata/altname_british_isles_gazetteer.pkl")
+wkdtgazetteer = pd.read_pickle("../processed/wikidata/altname_british_isles_gazetteer.pkl")
 wkdtgazetteer_stn = wkdtgazetteer[wkdtgazetteer["wkid"].isin(stationdf["wikidata_id"])]
 
 # Most railway stations end with "station" or "railway station", but Quick's guide
@@ -254,6 +254,6 @@ wkdtgazetteer_stn = wkdtgazetteer_stn.drop_duplicates(subset = ['wkid', 'altname
 wkdtgazetteer_stn = wkdtgazetteer_stn[wkdtgazetteer_stn['altname'].notna()]
 wkdtgazetteer_stn = wkdtgazetteer_stn.reset_index(drop=True)
 
-wkdtgazetteer_stn.to_pickle("../resources/wikidata/altname_british_isles_stations_gazetteer.pkl")
+wkdtgazetteer_stn.to_pickle("../processed/wikidata/altname_british_isles_stations_gazetteer.pkl")
 
 print("\nDone!")
