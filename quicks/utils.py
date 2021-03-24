@@ -8,11 +8,11 @@ from pathlib import Path
 from difflib import SequenceMatcher
 
 # Load dictionary of companies from Quicks intro:
-cmpdf = pd.read_csv("resources/companies.tsv", sep="\t")
+cmpdf = pd.read_csv("../resources/quicks/companies.tsv", sep="\t")
 dCompanies = pd.Series(cmpdf["Wikidata ID"].values,index=cmpdf["Company"]).to_dict()
 
 # Load index2map dictionary from Quicks appendix:
-i2mdf = pd.read_csv("resources/index2map.tsv", sep="\t")
+i2mdf = pd.read_csv("../resources/quicks/index2map.tsv", sep="\t")
 dIndex2map = dict()
 for i, row in i2mdf.iterrows():
     place = row["Place"]
