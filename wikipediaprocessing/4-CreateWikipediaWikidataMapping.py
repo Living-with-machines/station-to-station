@@ -4,16 +4,16 @@ import os, pickle, json
 from wikimapper import WikiMapper
 
 
-with open("/resources/wikipedia/extractedResources/overall_entity_freq.pickle", "rb") as f:
+with open("../resources/wikipedia/extractedResources/overall_entity_freq.pickle", "rb") as f:
     overall_entity_freq = pickle.load(f)
 
-mapper = WikiMapper("/resources/wikidata2wikipedia/index_enwiki-20190420.db")
+mapper = WikiMapper("../resources/wikidata2wikipedia/index_enwiki-20190420.db")
 
 wikidata2wikipedia = {}
 
 wikipedia2wikidata = {}
 
-folder = os.listdir("/resources/wikipedia/extractedResources/Pages/")
+folder = os.listdir("../resources/wikipedia/extractedResources/Pages/")
 
 for i in tqdm(range(len(folder))):
     page = folder[i]
@@ -33,9 +33,9 @@ for i in tqdm(range(len(folder))):
 
         wikipedia2wikidata[page] = wikidata_id
 
-with open('/resources/wikipedia/extractedResources/wikidata2wikipedia.json', 'w') as fp:
+with open('../resources/wikipedia/extractedResources/wikidata2wikipedia.json', 'w') as fp:
     json.dump(wikidata2wikipedia, fp)
 
-with open('/resources/wikipedia/extractedResources/wikipedia2wikidata.json', 'w') as fp:
+with open('../resources/wikipedia/extractedResources/wikipedia2wikidata.json', 'w') as fp:
     json.dump(wikipedia2wikidata, fp)
 
