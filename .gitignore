@@ -148,6 +148,6 @@ wikipediaprocessing/outputs/*
 wikipediaprocessing/testing/*
 annotations/
 *.docx
-quick/*/
+quicks/outputs/
 *.xlsx
 resources/
