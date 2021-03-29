@@ -151,3 +151,4 @@ annotations/
 quicks/outputs/
 *.xlsx
 resources/
+processed/
