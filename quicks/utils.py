@@ -3,15 +3,16 @@ import json
 import string
 import pandas as pd
 import numpy as np
+import dateparser
 from pathlib import Path
 from difflib import SequenceMatcher
 
 # Load dictionary of companies from Quicks intro:
-cmpdf = pd.read_csv("resources/companies.tsv", sep="\t")
+cmpdf = pd.read_csv("../resources/quicks/companies.tsv", sep="\t")
 dCompanies = pd.Series(cmpdf["Wikidata ID"].values,index=cmpdf["Company"]).to_dict()
 
 # Load index2map dictionary from Quicks appendix:
-i2mdf = pd.read_csv("resources/index2map.tsv", sep="\t")
+i2mdf = pd.read_csv("../resources/quicks/index2map.tsv", sep="\t")
 dIndex2map = dict()
 for i, row in i2mdf.iterrows():
     place = row["Place"]
@@ -446,7 +447,7 @@ def detect_altnames(description, mainst, subst):
     
     # -----------------------------------
     # Capture alternate names...
-    re_altname = r"(\b[A-Z]+(?:[A-Z \&\'\-(St|for|at|on|upon)])*[A-Z])+\b"
+    re_altname = r"(\b[A-Z]+(?:[A-Z \&\'\-(St|at|on|upon)])*[A-Z])+\b"
     
     # ... in their context:
     re_replacedby = r"\b(?:[Bb]ecame|[Rr]enamed|[Ll]ater|[Aa]ltered to|[Rr]eplaced by)\b " + re_altname
@@ -561,9 +562,9 @@ def capture_dates(description):
     cllast = re.findall(re_cl_date_last, description)
     
     capturedClo = list(set(clst+clrv+clfl+clflrv))
-    # If "still open" in description, add as closing date:
-    if "still open" in description.lower():
-        capturedClo.append("still open")
+    # If "still open" or "still in use" in description, add date of first edition (2001) as closing date:
+    if "still open" in description.lower() or "still in use" in description.lower():
+        capturedClo.append("31 December 2001")
         
     # If no closing date has been found, add last-in-brad date if exists:
     if not capturedClo:
@@ -571,51 +572,72 @@ def capture_dates(description):
         
     closing_dates = capturedClo
     
-    return opening_dates, closing_dates
+    # Parse date string and convert to datetime
+    opening_dtime = [dateparser.parse(d) for d in opening_dates]
+    closing_dtime = [dateparser.parse(d) for d in closing_dates]
+    
+    # Do not keep None dates
+    opening_dtime = [d for d in opening_dates if d]
+    closing_dtime = [d for d in closing_dates if d]
+    
+    # Keep first opening date and last closing date
+    # Has there been an interruption in the use of this railway station?
+    # We consider there has been if there are two or more opening and/or closing dates.
+    hiatus = False
+    first_opening_date = None
+    last_closing_date = None
+    if opening_dtime:
+        first_opening_date = min(opening_dtime)
+        hiatus = True if len(opening_dates) > 1 else False
+    if closing_dtime:
+        last_closing_date = max(closing_dtime)
+        hiatus = True if len(closing_dates) > 1 else False
+    
+    return first_opening_date, last_closing_date, hiatus
     
     
-# -----------------------------------------------
-def format_for_candranker(output_dir, output_filename,  unique_placenames_array):
-    """
-    This function returns the unique alternate names in a given gazetteer
-    in the format required by DeezyMatch candidate ranker.
+# # -----------------------------------------------
+# def format_for_candranker(output_dir, output_filename,  unique_placenames_array):
+#     """
+#     This function returns the unique alternate names in a given gazetteer
+#     in the format required by DeezyMatch candidate ranker.
     
-    Arguments:
-        output_dir (str): directory where DeezyMatch query files are stored.
-        outpuf_filename (str): filename of the query file.
-        unique_placenames_array (list): unique names that will be Deezy
-                                        Match queries.
-    """
-    gazname = output_dir + output_filename
+#     Arguments:
+#         output_dir (str): directory where DeezyMatch query files are stored.
+#         outpuf_filename (str): filename of the query file.
+#         unique_placenames_array (list): unique names that will be Deezy
+#                                         Match queries.
+#     """
+#     gazname = output_dir + output_filename
 
-    with open(gazname + ".txt", "w") as fw:
-        for pl in unique_placenames_array:
-            pl = pl.strip()
-            if pl:
-                pl = pl.replace('"', "")
-                fw.write(pl.strip() + "\t0\tfalse\n")
+#     with open(gazname + ".txt", "w") as fw:
+#         for pl in unique_placenames_array:
+#             pl = pl.strip()
+#             if pl:
+#                 pl = pl.replace('"', "")
+#                 fw.write(pl.strip() + "\t0\tfalse\n")
                 
                 
-# -----------------------------------------------
-def prepare_alt_queries(parsedf, scen):
-    mainId = []
-    substId = []
-    names = []
-    for i, row in parsedf.iterrows():
-        t = row[scen]
-        for x in t:
-            mainId.append(row["MainId"])
-            substId.append(row["SubId"])
-            names.append(x)
-    # Dataframe of alternate names:
-    df_tmp = pd.DataFrame()
-    df_tmp[scen] = names
-    df_tmp["MainId"] = mainId
-    df_tmp["SubId"] = substId
-    df_tmp.to_pickle("outputs/quicks_" + scen.lower() + "_df.pkl")
+# # -----------------------------------------------
+# def prepare_alt_queries(parsedf, scen):
+#     mainId = []
+#     substId = []
+#     names = []
+#     for i, row in parsedf.iterrows():
+#         t = row[scen]
+#         for x in t:
+#             mainId.append(row["MainId"])
+#             substId.append(row["SubId"])
+#             names.append(x)
+#     # Dataframe of alternate names:
+#     df_tmp = pd.DataFrame()
+#     df_tmp[scen] = names
+#     df_tmp["MainId"] = mainId
+#     df_tmp["SubId"] = substId
+#     df_tmp.to_pickle("../outputs/quicks/quicks_" + scen.lower() + "_df.pkl")
     
-    unique_placenames_array = list(set(list(np.array(df_tmp[scen]))))
+#     unique_placenames_array = list(set(list(np.array(df_tmp[scen]))))
     
-    output_dir = "../toponym_matching/toponyms/"
-    output_filename = "quicks_" + scen.lower() + "_queries.txt"
-    format_for_candranker(output_dir, output_filename, unique_placenames_array)
+#     output_dir = "../toponym_matching/toponyms/"
+#     output_filename = "quicks_" + scen.lower() + "_queries.txt"
+#     format_for_candranker(output_dir, output_filename, unique_placenames_array)
