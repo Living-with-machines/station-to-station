@@ -7,6 +7,7 @@ import pandas as pd
 from pathlib import Path
 from random import shuffle
 import multiprocessing as mp
+from joblib import Parallel, delayed
 from geopy.distance import great_circle
 from Levenshtein import distance as levDist
 from IPython.display import display, clear_output
@@ -14,7 +15,7 @@ import random
 import tqdm
 
 """
-This script is from https://github.com/Living-with-machines/LwM_SIGSPATIAL2020_ToponymMatching/blob/master/processing/toponym_matching_datasets/wikigaz/generate_wikigaz_comb.py
+This script creates positive and negative matching pairs of toponyms given a gazetteer of alternate names. The code is based on https://github.com/Living-with-machines/LwM_SIGSPATIAL2020_ToponymMatching/blob/master/processing/toponym_matching_datasets/wikigaz/generate_wikigaz_comb.py
 """
 
 def get_placename_and_unique_alt_names(place_dict):
@@ -40,7 +41,7 @@ def get_ngrams(placename, maxngrams,minngrams):
     return ngrams
 
 
-def get_final_wrong_cands_challenging(cand_ngrams,unique_alt_names,placename,placeloc,n_neg_cand_to_generate,place_id):
+def get_final_wrong_cands_challenging(cand_ngrams,unique_alt_names,placename,placeloc,n_neg_cand_to_generate,place_id,wiki_ids,altnames):
 
     selected_wrong_cands = set()
     
@@ -93,7 +94,7 @@ def get_final_wrong_cands_challenging(cand_ngrams,unique_alt_names,placename,pla
     
     return final_wrong_cands
 
-def get_final_wrong_cands_trivial(unique_alt_names,placename,placeloc,n_neg_cand_to_generate,place_id):
+def get_final_wrong_cands_trivial(unique_alt_names,placename,placeloc,n_neg_cand_to_generate,place_id,wiki_ids,altnames):
 
     selected_wrong_cands = set()
     
@@ -133,6 +134,7 @@ def generate_cands(place_id):
 
     challenging_alt_names = [u for u in unique_alt_names if u != placename]
     challenging_alt_names = [u for u in challenging_alt_names if normalized_lev(u, placename) > 0.25]
+    challenging_alt_names = list(set(challenging_alt_names))
 
     final_cands_chall = []
     final_cands_trivial = []
@@ -186,7 +188,7 @@ def generate_cands(place_id):
         
         # now, having a set of ngams, we try to retrieve negative candidates
         # so candidates that are similar based on ngrams overlap, like Marcelona for Barcelona
-        final_cands_chall = get_final_wrong_cands_challenging(cand_ngrams,challenging_alt_names,placename,placeloc,n_neg_cand_to_generate,place_id)
+        final_cands_chall = get_final_wrong_cands_challenging(cand_ngrams,challenging_alt_names,placename,placeloc,n_neg_cand_to_generate,place_id,wiki_ids,altnames)
 
         if final_cands_chall != None:
             # we keep only placename and wrongcand and add the label False
@@ -222,7 +224,7 @@ def generate_cands(place_id):
     n_neg_cand_to_generate = len(trivial_alt_names)
 
     # we try to retrieve negative trivial pairs for as many positive pairs
-    final_cands_trivial = get_final_wrong_cands_trivial(trivial_alt_names,placename,placeloc,n_neg_cand_to_generate,place_id)
+    final_cands_trivial = get_final_wrong_cands_trivial(trivial_alt_names,placename,placeloc,n_neg_cand_to_generate,place_id,wiki_ids,altnames)
 
     if final_cands_trivial != None:
         # we keep only placename and wrongcand and add the label False
@@ -254,11 +256,9 @@ def generate_cands(place_id):
         return None
 
 
-def main():
-    
+def main(kilometre_distance, N, titles_per_chunk, out_file):
+                
     p = mp.Pool(processes = N)
-
-    tot = 0
     start = datetime.datetime.now()
     
     # i have divided the list of wiki titles in small chunks 
@@ -274,64 +274,25 @@ def main():
         
         #write out the results
         for el in res:
-            out.write('\t'.join(el)+"\n")
-            tot += 1
-
-
-
-if __name__ == '__main__':
+            out_file.write('\t'.join(el)+"\n")
+            
+def process_args(number_cpus, input_gazetteer):
+    gazdf = pd.read_pickle(input_gazetteer)
+    gazdf = gazdf[gazdf['altname'].str.len() < 50]
     
-    parser = argparse.ArgumentParser()
-    parser.add_argument("-n", "--number_cpus", default=-1, 
-                    help="Number of CPUs to be used for processing. Default: -1 (use all)")
-    parser.add_argument("-tc", "--titles_per_chunk", default=20, 
-                    help="Number of titles per chunk")
-    parser.add_argument("-km", "--kilometre_distance", default=50, 
-                    help="Minimum distance of negative toponym pair")
-    args = parser.parse_args()
-
-    kilometre_distance = args.kilometre_distance
-
-    if args.number_cpus < 0:
-        # how many cpu to be used
-        N = mp.cpu_count()
-    else:
-        N = int(args.number_cpus)
+    wiki_ids = {row["wkid"]:{"placename":row["altname"], "altnames":set(),"lat":"","lon":""} for i, row in gazdf.iterrows()}
+    altnames = {row["altname"]:set() for i, row in gazdf.iterrows()}
     
-    titles_per_chunk = int(args.titles_per_chunk)
+    for i,row in gazdf.iterrows():
+        if len(wiki_ids[row["wkid"]]["altnames"])==0:
+            wiki_ids[row["wkid"]]["lat"] = row["lat"]
+            wiki_ids[row["wkid"]]["lon"] = row["lon"]
 
-    path2wikigaz_filtered = Path("/resources/wikigazetteer")
-    path2wikigaz_filtered = path2wikigaz_filtered / f"brit_wikigazetteer.pkl"
-    wikigaz_df = pd.read_pickle(path2wikigaz_filtered)
-    
-    if not os.path.exists('gazetteers/'):
-        os.makedirs("gazetteers/")
+        if row["altname"] not in wiki_ids[row["wkid"]]["altnames"]:
+            wiki_ids[row["wkid"]]["altnames"].add(row["altname"])
 
-    wikigaz_df["name"] = wikigaz_df['name'].str.replace('(','')
-    wikigaz_df["name"] = wikigaz_df['name'].str.replace(')','')
-    wikigaz_df.to_csv("gazetteers/wikigaz.tsv", sep = "\t", 
-                      columns = ["wikititle", "name", "latitude", "longitude", "source"], 
-                      header=False, index=False)
-    
-    # we retrieve wiki_ids and altnames and we structure them in two dictionaries (wiki_title -> altnames and altname -> wiki_titles)
-    wiki_variations = open("gazetteers/wikigaz.tsv", "r").read().strip().split("\n")
-    wiki_variations = [x.split("\t") for x in wiki_variations]
-    wiki_variations = [[x[0]]+[x[0].replace("_"," ").replace('"','')]+x[1:] for x in wiki_variations]
-
-    wiki_ids = {x[0]:{"placename":x[1], "altnames":set(),"lat":"","lon":""} for x in wiki_variations}
-    altnames = {x[2]:set() for x in wiki_variations}
-
-    for x in wiki_variations:
-        if len(wiki_ids[x[0]]["altnames"])==0:
-           wiki_ids[x[0]]["lat"] = x[3]
-           wiki_ids[x[0]]["lon"] = x[4]
-
-        if x[2] not in wiki_ids[x[0]]["altnames"]:
-           wiki_ids[x[0]]["altnames"].add(x[2])
-
-        if x[0] not in altnames[x[2]]:
-            altnames[x[2]].add(x[0])
-    
+        if row["wkid"] not in altnames[row["altname"]]:
+            altnames[row["altname"]].add(row["wkid"])
 
     wiki_titles = [x for x in wiki_ids.keys()]
 
@@ -339,10 +300,40 @@ if __name__ == '__main__':
     
     # we organize it in chunks, each chink has titles_per_chunk titles
     wiki_titles_splits = list(chunks(wiki_titles, titles_per_chunk))
-    n_splits = len(wiki_titles_splits)
 
-    out = open("gazetteers/britwikigaz_dataset.txt","w")    
+    if number_cpus < 0:
+        # how many cpu to be used
+        N = mp.cpu_count()
+    else:
+        N = int(number_cpus)
+    
+    return N, wiki_titles, wiki_titles_splits, wiki_ids, altnames
 
-    main()
+if __name__ == '__main__':
+    
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-g", "--gazetteer",
+                    help="Gazetter from which to create the toponym matching dataset. Options:\n*british_isles\n*british_isles_stations", required=True)
+    parser.add_argument("-n", "--number_cpus", default=-1, 
+                    help="Number of CPUs to be used for processing. Default: -1 (use all)")
+    parser.add_argument("-tc", "--titles_per_chunk", default=100, 
+                    help="Number of titles per chunk")
+    parser.add_argument("-km", "--kilometre_distance", default=50, 
+                    help="Minimum distance of negative toponym pair")
+    args = parser.parse_args()
 
-    out.close()
+    # Parameters you can tune tune:
+    kilometre_distance = int(args.kilometre_distance)
+    number_cpus = int(args.number_cpus) # Use all
+    titles_per_chunk = int(args.titles_per_chunk)
+    
+    gazetteer = args.gazetteer # british_isles or british_isles_stations
+    
+    input_gazetteer = "../processed/wikidata/altname_" + gazetteer + "_gazetteer.pkl"
+    output_dataset = "../processed/deezymatch/" + gazetteer + "_toponym_pairs.txt"
+    
+    if not Path(output_dataset).is_file():
+        output_file = open(output_dataset, "w")
+        N, wiki_titles, wiki_titles_splits, wiki_ids, altnames = process_args(number_cpus, input_gazetteer)
+        main(kilometre_distance, N, titles_per_chunk, output_file)
+        output_file.close()
