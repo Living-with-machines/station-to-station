@@ -3,20 +3,18 @@
 Follow the installation instructions from [here](
 https://github.com/Living-with-machines/LwM_SIGSPATIAL2020_ToponymMatching#installation), and activate the `py37deezy` conda environment.
 
+**Note:** The code in this folder depends on having processed Wikidata. Make sure you have followed [these steps](https://github.com/Living-with-machines/PlaceLinking/blob/dev/wikidata/README.md) before attempting to run the following scripts.
+
 ## Create a toponym matching dataset
 
-Run [prepare_britwikigaz.ipynb] to create an altname-focused version of the British Isles English Wikigazetteer.
-
-Run [create_britTM_dataset.py](https://github.com/Living-with-machines/PlaceLinking/blob/fuzzy_matching/toponym_matching/create_britTM_dataset.py) to create the toponym pairs dataset, which will be the training data to train a DeezyMatch model.:
+Run [deezy_dataset_creation.py] to create the toponym pairs dataset, which will be the training data to train a DeezyMatch model. This will need the gazetteer to be specified. Run the script both with `british_isles` and `british_isles_stations`:
 ```
-python create_britTM_dataset.py
+python deezy_dataset_creation.py -g british_isles
 ```
-
-This script is adapted from https://github.com/Living-with-machines/LwM_SIGSPATIAL2020_ToponymMatching/blob/master/processing/toponym_matching_datasets/wikigaz/generate_wikigaz_comb.py
 
 ## Train DeezyMatch models
 
-Run [train_DMmodels.ipynb](https://github.com/Living-with-machines/PlaceLinking/blob/fuzzy_matching/toponym_matching/train_DMmodels.ipynb) to train the models.
+Run [deezy_model_training.ipynb](https://github.com/Living-with-machines/PlaceLinking/blob/fuzzy_matching/toponym_matching/train_DMmodels.ipynb) to train and fine-tune the models.
 
 ## Find candidates with DeezyMatch: Quicks to Wikidata
 
