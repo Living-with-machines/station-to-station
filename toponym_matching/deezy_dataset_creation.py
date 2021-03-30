@@ -7,7 +7,6 @@ import pandas as pd
 from pathlib import Path
 from random import shuffle
 import multiprocessing as mp
-from joblib import Parallel, delayed
 from geopy.distance import great_circle
 from Levenshtein import distance as levDist
 from IPython.display import display, clear_output
