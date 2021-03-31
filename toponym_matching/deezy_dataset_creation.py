@@ -132,7 +132,7 @@ def generate_cands(place_id):
             get_placename_and_unique_alt_names(place_dict)
 
     challenging_alt_names = [u for u in unique_alt_names if u != placename]
-    challenging_alt_names = [u for u in challenging_alt_names if normalized_lev(u, placename) > 0.25]
+    challenging_alt_names = [u for u in challenging_alt_names if normalized_lev(u, placename) > 0.5]
     challenging_alt_names = list(set(challenging_alt_names))
 
     final_cands_chall = []
@@ -205,41 +205,42 @@ def generate_cands(place_id):
                 alt_name_cand = [placename,challenging_alt_names[i],"True"]
                 final_cands_chall.append(alt_name_cand)
 
-    """
-    ### TRIVIAL PAIRS: (if we indented twice: if there are challenging pairs, we also get trivial pairs,
-    as it is now: for each toponym, get trivial pairs)
-    """
+        """
+        ### TRIVIAL PAIRS:
+        # * indented twice: if there are challenging pairs, we also get trivial pairs.
+        # * indented once: for each toponym, get trivial pairs.
+        """
 
-    trivial_alt_names = [u for u in unique_alt_names if u.lower() == placename.lower()]
+        trivial_alt_names = [u for u in unique_alt_names if u.lower() == placename.lower()]
 
-    # Randomly with probabily 1/20 we add a lower-cased toponym or upper-cased toponym as alternate name:
-    random_add = random.choice(range(0,20))
-    if random_add == 2:
-        trivial_alt_names.append(placename.lower())
-    if random_add == 3:
-        trivial_alt_names.append(placename.upper())
+        # Randomly with probabily 1/20 we add a lower-cased toponym or upper-cased toponym as alternate name:
+        random_add = random.choice(range(0,20))
+        if random_add == 2:
+            trivial_alt_names.append(placename.lower())
+        if random_add == 3:
+            trivial_alt_names.append(placename.upper())
 
-    # the number of neg candidates depend on the number of positive candidates
-    n_neg_cand_to_generate = len(trivial_alt_names)
+        # the number of neg candidates depend on the number of positive candidates
+        n_neg_cand_to_generate = len(trivial_alt_names)
 
-    # we try to retrieve negative trivial pairs for as many positive pairs
-    final_cands_trivial = get_final_wrong_cands_trivial(trivial_alt_names,placename,placeloc,n_neg_cand_to_generate,place_id,wiki_ids,altnames)
+        # we try to retrieve negative trivial pairs for as many positive pairs
+        final_cands_trivial = get_final_wrong_cands_trivial(trivial_alt_names,placename,placeloc,n_neg_cand_to_generate,place_id,wiki_ids,altnames)
 
-    if final_cands_trivial != None:
-        # we keep only placename and wrongcand and add the label False
-        final_cands_trivial = [x[:2]+["False"] for x in final_cands_trivial]
+        if final_cands_trivial != None:
+            # we keep only placename and wrongcand and add the label False
+            final_cands_trivial = [x[:2]+["False"] for x in final_cands_trivial]
 
-        # we double check and in case the number of neg is less than the pos
-        # we take only a random selection of the positive
+            # we double check and in case the number of neg is less than the pos
+            # we take only a random selection of the positive
 
-        n_final_wrong = len(final_cands_trivial)
+            n_final_wrong = len(final_cands_trivial)
 
-        shuffle(trivial_alt_names)
+            shuffle(trivial_alt_names)
 
-        # we add the positive as well with the label
-        for i in range(n_final_wrong):
-            alt_name_cand = [placename,trivial_alt_names[i],"True"]
-            final_cands_trivial.append(alt_name_cand)
+            # we add the positive as well with the label
+            for i in range(n_final_wrong):
+                alt_name_cand = [placename,trivial_alt_names[i],"True"]
+                final_cands_trivial.append(alt_name_cand)
     
     # We join trivial and challenging pairs   
     if final_cands_trivial:
@@ -331,8 +332,8 @@ if __name__ == '__main__':
     input_gazetteer = "../processed/wikidata/altname_" + gazetteer + "_gazetteer.pkl"
     output_dataset = "../processed/deezymatch/" + gazetteer + "_toponym_pairs.txt"
     
-    if not Path(output_dataset).is_file():
-        output_file = open(output_dataset, "w")
-        N, wiki_titles, wiki_titles_splits, wiki_ids, altnames = process_args(number_cpus, input_gazetteer)
-        main(kilometre_distance, N, titles_per_chunk, output_file)
-        output_file.close()
+#     if not Path(output_dataset).is_file():
+    output_file = open(output_dataset, "w")
+    N, wiki_titles, wiki_titles_splits, wiki_ids, altnames = process_args(number_cpus, input_gazetteer)
+    main(kilometre_distance, N, titles_per_chunk, output_file)
+    output_file.close()
