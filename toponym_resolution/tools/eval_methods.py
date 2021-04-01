@@ -1,7 +1,7 @@
 import pandas as pd
 
 def get_true_and_ranking(row,approach):
-    true = row["Wikidata ID"]
+    true = row["Final Wikidata ID"]
     ranking = [[k,v] for k, v in sorted(row[approach].items(), key=lambda item: item[1], reverse = True)]
     return true, ranking
 

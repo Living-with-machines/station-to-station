@@ -1,4 +1,9 @@
 import pandas as pd
+import time
+
+# --------------------------------------
+# Perfect match
+# --------------------------------------
 
 def perfect_match(name,wikidata_df):
     res = wikidata_df[["wkid"]]
@@ -12,6 +17,10 @@ def check_if_identical(name,row):
         return 1.0
 
 
+# --------------------------------------
+# Partial overlap match
+# --------------------------------------
+
 def partial_match(name,wikidata_df):
     res = wikidata_df[["wkid"]]
     res["method"] = wikidata_df.apply(lambda row: check_if_contained(name,row), axis=1)
@@ -21,4 +30,3 @@ def partial_match(name,wikidata_df):
 def check_if_contained(name,row):
     if name.lower() in row["altname"].lower():
         return len(name)/len(row["altname"])
-
