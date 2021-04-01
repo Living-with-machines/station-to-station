@@ -20,7 +20,7 @@ import time
 if not Path('../processed/deezymatch/models/wikidata_british_isles/wikidata_british_isles.model').is_file():
     # train a new model
     dm_train(input_file_path="../processed/deezymatch/input_dfm.yaml",
-         dataset_path="../processed/deezymatch/british_isles_toponym_pairs.txt",
+         dataset_path="../processed/deezymatch/datasets/british_isles_toponym_pairs.txt",
          model_name="wikidata_british_isles")
     
 
@@ -31,7 +31,7 @@ if not Path('../processed/deezymatch/models/wikidata_british_isles/wikidata_brit
 if not Path('../processed/deezymatch/models/wikidata_british_isles_stations/wikidata_british_isles_stations.model').is_file():
 # fine-tune a pretrained model stored at pretrained_model_path and pretrained_vocab_path 
     dm_finetune(input_file_path="../processed/deezymatch/input_dfm.yaml", 
-            dataset_path="../processed/deezymatch/british_isles_stations_toponym_pairs.txt", 
+            dataset_path="../processed/deezymatch/datasets/british_isles_stations_toponym_pairs.txt", 
             model_name="wikidata_british_isles_stations",
             pretrained_model_path="../processed/deezymatch/models/wikidata_british_isles/wikidata_british_isles.model", 
             pretrained_vocab_path="../processed/deezymatch/models/wikidata_british_isles/wikidata_british_isles.vocab")

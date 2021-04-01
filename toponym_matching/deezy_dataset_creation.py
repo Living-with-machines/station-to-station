@@ -330,9 +330,9 @@ if __name__ == '__main__':
     gazetteer = args.gazetteer # british_isles or british_isles_stations
     
     input_gazetteer = "../processed/wikidata/altname_" + gazetteer + "_gazetteer.pkl"
-    output_dataset = "../processed/deezymatch/" + gazetteer + "_toponym_pairs.txt"
+    output_dataset = "../processed/deezymatch/datasets/" + gazetteer + "_toponym_pairs.txt"
+    Path(output_dataset).mkdir(parents=True, exist_ok=True)
     
-#     if not Path(output_dataset).is_file():
     output_file = open(output_dataset, "w")
     N, wiki_titles, wiki_titles_splits, wiki_ids, altnames = process_args(number_cpus, input_gazetteer)
     main(kilometre_distance, N, titles_per_chunk, output_file)
