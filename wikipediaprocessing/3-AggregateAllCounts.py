@@ -36,16 +36,16 @@ mention_overall_dict = {}
 entity_overall_dict = {}
 
 
-with open("/resources/wikipedia/extractedResources/overall_mentions_freq.pickle", "wb") as fp:
+with open("../resources/wikipedia/extractedResources/overall_mentions_freq.pickle", "wb") as fp:
     pickle.dump(overall_mentions_freq, fp)
 
-with open("/resources/wikipedia/extractedResources/overall_entity_freq.pickle", "wb") as fp:
+with open("../resources/wikipedia/extractedResources/overall_entity_freq.pickle", "wb") as fp:
     pickle.dump(overall_entity_freq, fp)
     
-with open("/resources/wikipedia/extractedResources/overall_ngrams_freq.pickle", "wb") as fp:
+with open("../resources/wikipedia/extractedResources/overall_ngrams_freq.pickle", "wb") as fp:
     pickle.dump(overall_ngrams_freq, fp)
     
-json_folder = "/resources/wikipedia/extractedResources/Store-Counts/"
+json_folder = "../resources/wikipedia/extractedResources/Store-Counts/"
 
 start_time = time.time()
 previous = start_time
@@ -63,36 +63,36 @@ for filename in jsons:
         for res in data:
             fill_dicts(res)
          
-    with open("/resources/wikipedia/extractedResources/overall_mentions_freq.pickle", "rb") as f:
+    with open("../resources/wikipedia/extractedResources/overall_mentions_freq.pickle", "rb") as f:
         overall_mentions_freq = pickle.load(f)
         
     overall_mentions_freq += mentions_freq
     
-    with open("/resources/wikipedia/extractedResources/overall_mentions_freq.pickle", "wb") as fp:
+    with open("../resources/wikipedia/extractedResources/overall_mentions_freq.pickle", "wb") as fp:
         pickle.dump(overall_mentions_freq, fp)
         
         
-    with open("/resources/wikipedia/extractedResources/overall_entity_freq.pickle", "rb") as f:
+    with open("../resources/wikipedia/extractedResources/overall_entity_freq.pickle", "rb") as f:
         overall_entity_freq = pickle.load(f)
         
     overall_entity_freq += entity_freq
     
-    with open("/resources/wikipedia/extractedResources/overall_entity_freq.pickle", "wb") as fp:
+    with open("../resources/wikipedia/extractedResources/overall_entity_freq.pickle", "wb") as fp:
         pickle.dump(overall_entity_freq, fp)
 
         
-    with open("/resources/wikipedia/extractedResources/overall_ngrams_freq.pickle", "rb") as f:
+    with open("../resources/wikipedia/extractedResources/overall_ngrams_freq.pickle", "rb") as f:
         overall_ngrams_freq = pickle.load(f)
         
     overall_ngrams_freq += ngrams_freq
     
-    with open("/resources/wikipedia/extractedResources/overall_ngrams_freq.pickle", "wb") as fp:
+    with open("../resources/wikipedia/extractedResources/overall_ngrams_freq.pickle", "wb") as fp:
         pickle.dump(overall_ngrams_freq, fp)
     
-    with open("/resources/wikipedia/extractedResources/mention_overall_dict.pickle", "wb") as fp:
+    with open("../resources/wikipedia/extractedResources/mention_overall_dict.pickle", "wb") as fp:
         pickle.dump(mention_overall_dict, fp)
     
-    with open("/resources/wikipedia/extractedResources/entity_overall_dict.pickle", "wb") as fp:
+    with open("../resources/wikipedia/extractedResources/entity_overall_dict.pickle", "wb") as fp:
         pickle.dump(entity_overall_dict, fp)
     
     print ("done:", filename)

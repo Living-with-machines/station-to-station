@@ -5,6 +5,14 @@ import pandas as pd
 import pydash
 import ast
 from tqdm import tqdm
+import pathlib
+import re
+from pathlib import Path
+
+pathlib.Path('../processed/wikidata/').mkdir(parents=True, exist_ok=True)
+
+# Disable chained assignments
+pd.options.mode.chained_assignment = None
 
 languages = ['en', 'cy', 'sco', 'gd', 'ga', 'kw']
 
@@ -146,6 +154,9 @@ def parse_record(record):
         for r in replaces_dict:
             replaces.append(pydash.get(r, 'mainsnak.datavalue.value.id'))
 
+    # Heritage designation
+    heritage_designation = pydash.get(record, 'claims.P1435[0].mainsnak.datavalue.value.id')
+
     # ==========================================
     # Neighbouring or part-of locations
     # ==========================================
@@ -195,6 +206,13 @@ def parse_record(record):
     near_water = None
     if near_water_dict:
         near_water = [pydash.get(r, 'mainsnak.datavalue.value.id') for r in near_water_dict]
+
+    # Nearby waterbodies (Wikidata ID)
+    part_of_dict = pydash.get(record, 'claims.P361')
+    part_of = None
+    if part_of_dict:
+        part_of = [pydash.get(r, 'mainsnak.datavalue.value.id') for r in part_of_dict] 
+    
 
     # ==========================================
     # Coordinates
@@ -254,6 +272,12 @@ def parse_record(record):
     if epns_dict:
         epns = [pydash.get(p, 'mainsnak.datavalue.value') for p in epns_dict]
 
+    # Identifier in the Getty Thesaurus of Geographic Names
+    getty_dict = pydash.get(record, 'claims.P1667')
+    getty = None
+    if getty_dict:
+        getty = [pydash.get(p, 'mainsnak.datavalue.value') for p in getty_dict]
+
     # OS grid reference (Wikidata ID)
     os_grid_ref = pydash.get(record, 'claims.P613[0].mainsnak.datavalue.value')
 
@@ -269,6 +293,15 @@ def parse_record(record):
 
     # Street address
     street_address = pydash.get(record, 'claims.P6375[0].mainsnak.datavalue.value.text')
+
+    # Located on street
+    street_located = pydash.get(record, 'claims.P669[0].mainsnak.datavalue.value.id')
+
+    # Postal code
+    postal_code_dict = pydash.get(record, 'claims.P281')
+    postal_code = None
+    if postal_code_dict:
+        postal_code = [pydash.get(c, 'mainsnak.datavalue.value') for c in postal_code_dict]
 
     # ==========================================
     # Rail-related properties
@@ -292,10 +325,41 @@ def parse_record(record):
     if connectline_dict:
         connectline = [pydash.get(conline, 'mainsnak.datavalue.value.id') for conline in connectline_dict]
 
+    # Owned by
+    ownedby_dict = pydash.get(record, 'claims.P127')
+    ownedby = None
+    if ownedby_dict:
+        ownedby = [pydash.get(conline, 'mainsnak.datavalue.value.id') for conline in ownedby_dict]
+
+    # Connecting service
+    connectservice_dict = pydash.get(record, 'claims.P1192')
+    connectservice = None
+    if connectservice_dict:
+        connectservice = [pydash.get(conline, 'mainsnak.datavalue.value.id') for conline in connectservice_dict]
+
     # ==========================================
     # Store records in a dictionary
     # ==========================================
-    df_record = {'wikidata_id': wikidata_id, 'english_label': english_label, 'instance_of': instance_of, 'description_set': description_set, 'alias_dict': alias_dict, 'nativelabel': nativelabel, 'population_dict': population_dict, 'area': area, 'hcounties': hcounties, 'date_opening': date_opening, 'date_closing': date_closing, 'inception_date': inception_date, 'dissolved_date': dissolved_date, 'follows': follows, 'replaces': replaces, 'adm_regions': adm_regions, 'countries': countries, 'continents': continents, 'capital_of': capital_of, 'borders': borders, 'near_water': near_water, 'latitude': latitude, 'longitude': longitude, 'wikititle': wikititle, 'geonamesIDs': geonamesIDs, 'toIDs': toIDs, 'vchIDs': vchIDs, 'vob_placeIDs': vob_placeIDs, 'vob_unitIDs': vob_unitIDs, 'epns': epns, 'os_grid_ref': os_grid_ref, 'connectswith': connectswith, 'street_address': street_address, 'adjacent_stations': adjacent_stations, 'ukrailcode': ukrailcode, 'connectline': connectline}
+    df_record = {'wikidata_id': wikidata_id, 'english_label': english_label,
+                 'instance_of': instance_of, 'description_set': description_set,
+                 'alias_dict': alias_dict, 'nativelabel': nativelabel,
+                 'population_dict': population_dict, 'area': area,
+                 'hcounties': hcounties, 'date_opening': date_opening,
+                 'date_closing': date_closing, 'inception_date': inception_date,
+                 'dissolved_date': dissolved_date, 'follows': follows,
+                 'replaces': replaces, 'adm_regions': adm_regions,
+                 'countries': countries, 'continents': continents,
+                 'capital_of': capital_of, 'borders': borders, 'near_water': near_water,
+                 'latitude': latitude, 'longitude': longitude, 'wikititle': wikititle,
+                 'geonamesIDs': geonamesIDs, 'toIDs': toIDs, 'vchIDs': vchIDs,
+                 'vob_placeIDs': vob_placeIDs, 'vob_unitIDs': vob_unitIDs,
+                 'epns': epns, 'os_grid_ref': os_grid_ref, 'connectswith': connectswith,
+                 'street_address': street_address, 'adjacent_stations': adjacent_stations,
+                 'ukrailcode': ukrailcode, 'connectline': connectline,
+                 'heritage_designation': heritage_designation, 'getty': getty,
+                 'street_located': street_located, 'postal_code': postal_code,
+                 'ownedby': ownedby, 'connectservice': connectservice
+                }
     return df_record
 
 
@@ -303,9 +367,12 @@ def parse_record(record):
 # Parse all WikiData
 # ==========================================
 
-### Uncomment the following to run this script (WARNING: This will take days to run):
+### Uncomment the following to run this script (WARNING: This will take days to run, 40 hours on a machine with 64GiB of RAM):
 
-# df_record_all = pd.DataFrame(columns=['wikidata_id', 'english_label', 'instance_of', 'description_set', 'alias_dict', 'nativelabel', 'population_dict', 'area', 'hcounties', 'date_opening', 'date_closing', 'inception_date', 'dissolved_date', 'follows', 'replaces', 'adm_regions', 'countries', 'continents', 'capital_of', 'borders', 'near_water', 'latitude', 'longitude', 'wikititle', 'geonamesIDs', 'toIDs', 'vchIDs', 'vob_placeIDs', 'vob_unitIDs', 'epns', 'os_grid_ref', 'connectswith', 'street_address', 'adjacent_stations', 'ukrailcode', 'connectline'])
+# path = r"../resources/wikidata/extracted/"
+# pathlib.Path(path).mkdir(parents=True, exist_ok=True)
+
+# df_record_all = pd.DataFrame(columns=['wikidata_id', 'english_label', 'instance_of', 'description_set', 'alias_dict', 'nativelabel', 'population_dict', 'area', 'hcounties', 'date_opening', 'date_closing', 'inception_date', 'dissolved_date', 'follows', 'replaces', 'adm_regions', 'countries', 'continents', 'capital_of', 'borders', 'near_water', 'latitude', 'longitude', 'wikititle', 'geonamesIDs', 'toIDs', 'vchIDs', 'vob_placeIDs', 'vob_unitIDs', 'epns', 'os_grid_ref', 'connectswith', 'street_address', 'adjacent_stations', 'ukrailcode', 'connectline', 'heritage_designation', 'getty', 'street_located', 'postal_code', 'ownedby', 'connectservice'])
 
 # header=True
 # i = 0
@@ -321,45 +388,87 @@ def parse_record(record):
 #         df_record_all = df_record_all.append(df_record, ignore_index=True)
 #         i += 1
 #         if (i % 5000 == 0):
-#             pd.DataFrame.to_csv(df_record_all, path_or_buf='extracted/till_'+record['id']+'_item.csv')
+#             pd.DataFrame.to_csv(df_record_all, path_or_buf=path + '/till_'+record['id']+'_item.csv')
 #             print('i = '+str(i)+' item '+record['id']+'  Done!')
 #             print('CSV exported')
 #             df_record_all = pd.DataFrame(columns=['wikidata_id', 'english_label', 'instance_of', 'description_set', 'alias_dict', 'nativelabel', 'population_dict', 'area', 'hcounties', 'date_opening', 'date_closing', 'inception_date', 'dissolved_date', 'follows', 'replaces', 'adm_regions', 'countries', 'continents', 'capital_of', 'borders', 'near_water', 'latitude', 'longitude', 'wikititle', 'geonamesIDs', 'toIDs', 'vchIDs', 'vob_placeIDs', 'vob_unitIDs', 'epns', 'os_grid_ref', 'connectswith', 'street_address', 'adjacent_stations', 'ukrailcode', 'connectline'])
 #         else:
 #             continue
             
-# pd.DataFrame.to_csv(df_record_all, path_or_buf='extracted/final_csv_till_'+record['id']+'_item.csv')
+# pd.DataFrame.to_csv(df_record_all, path_or_buf=path + 'final_csv_till_'+record['id']+'_item.csv')
 # print('i = '+str(i)+' item '+record['id']+'  Done!')
 # print('All items finished, final CSV exported!')
 
 
 # ====================================================
-# Create a subset with entities from the British Isles
+# Create an approximate subset with entities from the British Isles
 # ====================================================
 
-path = r"extracted/"
-all_files = glob.glob(path + "/*.csv")
+print("\nCreating the British Isles gazetteer.")
 
-li = []
-for filename in all_files:
-    df_temp = pd.read_csv(filename, index_col=None, header=0)
-    li.append(df_temp)
+if not Path("../processed/wikidata/british_isles_gazetteer.csv").exists():
+    path = r"../resources/wikidata/extracted/"
+    pathlib.Path(path).mkdir(parents=True, exist_ok=True)
 
-df = pd.concat(li, axis=0, ignore_index=True)
-df = df.drop(columns=['Unnamed: 0'])
+    all_files = glob.glob(path + "/*.csv")
 
-def filter_britisles(lat, lon, countries):
-    bbox = (-11.31,48.78,2.41,61.28)
-    countries = ast.literal_eval(countries)
-    for c in countries:
-        if c == "Q145" or c == "Q27": # United Kingdom and Ireland
+    li = []
+    for filename in all_files:
+        df_temp = pd.read_csv(filename, index_col=None, header=0)
+        li.append(df_temp)
+
+    df = pd.concat(li, axis=0, ignore_index=True)
+    df = df.drop(columns=['Unnamed: 0'])
+
+    def filter_britisles(lat, lon, countries):
+        bbox = (-11.31,48.78,2.41,61.28)
+        countries = ast.literal_eval(countries)
+        for c in countries:
+            if c == "Q145" or c == "Q27": # United Kingdom and Ireland
+                return True
+            if c == "Q142" or c == "Q31": # France and Belgium
+                return False
+        if float(lat) >= bbox[1] and float(lat) <= bbox[3] and float(lon) >= bbox[0] and float(lon) <= bbox[2]:
             return True
-        if c == "Q142" or c == "Q31": # France and Belgium
+        else:
             return False
-    if float(lat) >= bbox[1] and float(lat) <= bbox[3] and float(lon) >= bbox[0] and float(lon) <= bbox[2]:
-        return True
-    else:
-        return False
-    
-mask = df.apply(lambda x: filter_britisles(x['latitude'], x['longitude'], x['countries']), axis=1)
-df[mask].to_csv("british_isles.csv")
+
+    mask = df.apply(lambda x: filter_britisles(x['latitude'], x['longitude'], x['countries']), axis=1)
+    britdf = df[mask]
+    britdf['latitude'] = britdf['latitude'].astype(float)
+    britdf['longitude'] = britdf['longitude'].astype(float)
+    britdf = britdf[britdf['latitude'].notna()]
+    britdf = britdf[britdf['longitude'].notna()]
+    britdf.to_csv("../processed/wikidata/british_isles_gazetteer.csv", index=False)
+
+
+# ====================================================
+# Create an approximate subset with railway station entities from the British Isles
+# ====================================================
+
+print("Done.\n\nCreating the British Isles stations gazetteer.")
+
+britdf = pd.read_csv("../processed/wikidata/british_isles_gazetteer.csv", header=0, index_col=None, low_memory=False)
+
+# From: https://docs.google.com/spreadsheets/d/1sREU_TKBU0HXoSSm7nyOw-4kId_bfu6OTEXxtdZeLl0/edit#gid=0
+stn_wkdt_classes = ["Q55488", "Q4663385", "Q55491", "Q18516630", "Q1335652", "Q28109487",
+                    "Q55678", "Q1567913", "Q39917125", "Q11424045", "Q14562709", "Q27020748",
+                    "Q22808403", "Q85641138", "Q928830", "Q1339195", "Q27030992", "Q55485",
+                    "Q17158079", "Q55493", "Q325358", "Q168565", "Q18543139", "Q11606300",
+                    "Q2175765", "Q2298537", "Q19563580"]
+
+# Most railway stations end with "railway station" in Wikidata.
+re_station = r"(.*)\b(([Hh]alt)|([Ss]top)|([Ss]tation))((\, .*)|( \(.*))?$"
+
+# Most common non-railway stations in Wikidata:
+re_nostation = r".*\b(([Pp]olice [Ss]tation)|([Rr]elay [Ss]tation)|([Ff]ire [Ss]tation)|([Gg]enerating [Ss]tation)|([Ss]ignal [Ss]tation)|([Pp]ower [Ss]tation)|([Ll]ifeboat [Ss]tation)|([Pp]umping [Ss]tation)|([Tt]ransmitting [Ss]tation)|([Bb]us [Ss]tation)|([Cc]oach [Ss]tation)|([Ff]ishing [Ss]tation)).*$"
+
+stationgaz = pd.DataFrame(columns=['wikidata_id', 'english_label', 'instance_of', 'description_set', 'alias_dict', 'nativelabel', 'population_dict', 'area', 'hcounties', 'date_opening', 'date_closing', 'inception_date', 'dissolved_date', 'follows', 'replaces', 'adm_regions', 'countries', 'continents', 'capital_of', 'borders', 'near_water', 'latitude', 'longitude', 'wikititle', 'geonamesIDs', 'toIDs', 'vchIDs', 'vob_placeIDs', 'vob_unitIDs', 'epns', 'os_grid_ref', 'connectswith', 'street_address', 'adjacent_stations', 'ukrailcode', 'connectline', 'heritage_designation', 'getty', 'street_located', 'postal_code', 'ownedby', 'connectservice'])
+
+for i, row in tqdm(britdf.iterrows()):
+    if type(row["instance_of"]) == str and type(row["english_label"]) == str:
+        wkdtcl = ast.literal_eval(row["instance_of"])
+        if any(x in wkdtcl for x in stn_wkdt_classes) or (re.match(re_station, row["english_label"]) and not re.match(re_nostation, row["english_label"])):
+            stationgaz = stationgaz.append(row, ignore_index=True)
+
+stationgaz.to_csv("../processed/wikidata/british_isles_stations_gazetteer.csv", index=False)
