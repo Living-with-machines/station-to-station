@@ -11,6 +11,10 @@ Run [deezy_dataset_creation.py] to create the toponym pairs dataset, which will 
 ```
 python deezy_dataset_creation.py -g british_isles
 ```
+and:
+```
+python deezy_dataset_creation.py -g british_isles_stations
+```
 
 ## Train DeezyMatch models
 
