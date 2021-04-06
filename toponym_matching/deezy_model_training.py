@@ -84,13 +84,14 @@ def findcandidates(candidates, dm_model, inputfile):
 
         
 ##### IN USE
-# Generate candidate vectors for the British Isles gazetteer
-wkgazetteer = pd.read_pickle("../processed/wikidata/altname_british_isles_gazetteer.pkl")
+        
+# Generate candidate vectors for the British Isles stations gazetteer
+wkgazetteer = pd.read_pickle("../processed/wikidata/altname_british_isles_stations_gazetteer.pkl")
 unique_placenames_array = list(set(list(np.array(wkgazetteer["altname"]))))
-format_for_candranker("../processed/deezymatch/candidate_toponyms/british_isles", unique_placenames_array)
+format_for_candranker("../processed/deezymatch/candidate_toponyms/british_isles_stations", unique_placenames_array)
 
-candidates = "british_isles"
-dm_model = "wikidata_british_isles"
+candidates = "british_isles_stations"
+dm_model = "wikidata_british_isles_stations"
 inputfile = "input_dfm"
 
 findcandidates(candidates, dm_model, inputfile)
@@ -101,7 +102,18 @@ unique_placenames_array = list(set(list(np.array(wkgazetteer["altname"]))))
 format_for_candranker("../processed/deezymatch/candidate_toponyms/british_isles_stations", unique_placenames_array)
 
 candidates = "british_isles_stations"
-dm_model = "wikidata_british_isles_stations"
+dm_model = "wikidata_british_isles"
+inputfile = "input_dfm"
+
+findcandidates(candidates, dm_model, inputfile)
+
+# Generate candidate vectors for the British Isles gazetteer
+wkgazetteer = pd.read_pickle("../processed/wikidata/altname_british_isles_gazetteer.pkl")
+unique_placenames_array = list(set(list(np.array(wkgazetteer["altname"]))))
+format_for_candranker("../processed/deezymatch/candidate_toponyms/british_isles", unique_placenames_array)
+
+candidates = "british_isles"
+dm_model = "wikidata_british_isles"
 inputfile = "input_dfm"
 
 findcandidates(candidates, dm_model, inputfile)
