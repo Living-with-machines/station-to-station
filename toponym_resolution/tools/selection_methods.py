@@ -80,9 +80,9 @@ def format_for_candranker(gazname, unique_placenames_array):
                 pl = pl.replace('"', "")
                 fw.write(pl.strip() + "\t0\tfalse\n")
 
-def find_deezymatch_candidates(gazetteer, quicks_df, dm_model, inputfile, candidates, queries, candrank_metric, candrank_thr, num_candidates):
+def find_deezymatch_candidates(gazetteer, quicks_df, quicks_query_column, dm_model, inputfile, candidates, queries, candrank_metric, candrank_thr, num_candidates):
     # Generate candidate vectors for the British Isles gazetteer
-    unique_placenames_array = list(set(list(np.array(quicks_df["SubStFormatted"]))))
+    unique_placenames_array = list(set(list(np.array(quicks_df[quicks_query_column]))))
     format_for_candranker("../processed/deezymatch/query_toponyms/" + queries, unique_placenames_array)
     
     # generate vectors for queries (specified in dataset_path) 
@@ -125,4 +125,4 @@ def find_deezymatch_candidates(gazetteer, quicks_df, dm_model, inputfile, candid
     
     ranked_candidates = pd.read_pickle("../processed/deezymatch/ranker_results/" + queries + "_" + candidates + "_" + dm_model + "_" + candrank_metric + str(num_candidates) + ".pkl")
     ranked_candidates["wkcands"] = ranked_candidates.progress_apply(lambda row : match_cands_wikidata_stn(row,gazetteer,"faiss_distance"), axis=1)
-    return pd.merge(left=quicks_df, right=ranked_candidates, how='left', left_on='SubStFormatted', right_on='query')[["wkcands"]]
+    return pd.merge(left=quicks_df, right=ranked_candidates, how='left', left_on=quicks_query_column, right_on='query')[["wkcands"]]
