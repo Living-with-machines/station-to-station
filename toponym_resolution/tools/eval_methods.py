@@ -59,30 +59,29 @@ def topres_exactmetrics(df, approach):
     print("Jaccard Score:", jaccard_score(true, prediction, average="macro"))
 
 def distance_in_km(gazdf, gs, pred):
-    gs_tmp = gazdf[gazdf["wikidata_id"] == gs]
     gs_coords = None
-    if not gs_tmp.empty:
-        gs_coords = (gs_tmp.iloc[0].latitude, gs_tmp.iloc[0].longitude)
-    pred_tmp = gazdf[gazdf["wikidata_id"] == pred]
+    if gs in gazdf.index:
+        gs_coords = tuple(gazdf.loc[gs][["latitude", "longitude"]].to_list())
     pred_coords = None
-    if not pred_tmp.empty:
-        pred_coords = (pred_tmp.iloc[0].latitude, pred_tmp.iloc[0].longitude)
+    if pred in gazdf.index:
+        pred_coords = tuple(gazdf.loc[pred][["latitude", "longitude"]].to_list())
     if not gs_coords and not pred_coords: # If both gold standard and prediction are None, distance is 0:
         return 0.0
     if not gs_coords or not pred_coords: # If only one is None, return a large number:
-        return 1000000
-    return haversine(gs_coords, pred_coords)
+        return 10000
+    return round(haversine(gs_coords, pred_coords), 2)
 
 def accuracy_at_km(km_dist, min_km):
     km_dist = km_dist.to_list()
-    dist_list = [1 if dist < min_km else 0 for dist in km_dist]
+    dist_list = [1 if dist <= min_km else 0 for dist in km_dist]
     return dist_list.count(1) / len(dist_list)
 
 def topres_distancemetrics(gazdf, df, approach):
-    df["Final Wikidata ID"] = df["Final Wikidata ID"].str.replace("opl:.*", "", regex=True)
-    df["Final Wikidata ID"] = df["Final Wikidata ID"].str.replace("ppl:.*", "", regex=True)
-    df["km_dist"] = df.apply(lambda row: distance_in_km(gazdf,row["Final Wikidata ID"],row[approach]), axis=1)
-    print("Accuracy at 1:", accuracy_at_km(df["km_dist"], 1))
-    print("Accuracy at 5:", accuracy_at_km(df["km_dist"], 5))
-    print("Accuracy at 10:", accuracy_at_km(df["km_dist"], 10))
+    tmp_df = df.copy()
+    tmp_df["Final Wikidata ID"] = tmp_df["Final Wikidata ID"].str.replace("opl:.*", "", regex=True)
+    tmp_df["Final Wikidata ID"] = tmp_df["Final Wikidata ID"].str.replace("ppl:.*", "", regex=True)
+    tmp_df["km_dist"] = tmp_df.apply(lambda row: distance_in_km(gazdf,row["Final Wikidata ID"],row[approach]), axis=1)
+    print("Accuracy at 1:", accuracy_at_km(tmp_df["km_dist"], 1))
+    print("Accuracy at 5:", accuracy_at_km(tmp_df["km_dist"], 5))
+    print("Accuracy at 10:", accuracy_at_km(tmp_df["km_dist"], 10))
     
