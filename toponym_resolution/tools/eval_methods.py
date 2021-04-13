@@ -9,13 +9,36 @@ from sklearn.metrics import zero_one_loss
 # CANDIDATE SELECTION
 # ----------------------------------
 
-def get_true_and_ranking(row,approach, reverse):
+def get_true_and_ranking(row,approach, relv_cols, reverse):
+    
+    # Combine candidates from different columns:
+    dCandidates = dict()
+    for rc in relv_cols:
+        for cand in row[rc]:
+            if not cand in dCandidates:
+                dCandidates[cand] = row[rc][cand]
+            else:
+                dCandidates[cand] = row[rc][cand]
+    
+    # Return true and sorted ranked candidates
+    # Watch out! The reverse parameter changes depending on the candidate ranking metric:
     true = row["Final Wikidata ID"]
-    ranking = [[k,v] for k, v in sorted(row[approach].items(), key=lambda item: item[1], reverse = reverse)]
+    true = true.replace("ppl:", "")
+    true = true.replace("opl:", "")
+    ranking = [[k,v] for k, v in sorted(dCandidates.items(), key=lambda item: item[1], reverse = reverse)]
     return true, ranking
 
-def p1(row,approach, reverse):
-    true, ranking = get_true_and_ranking(row, approach, reverse)
+def isRetrieved(row, approach, relv_cols, ncands, reverse):
+    true, ranking = get_true_and_ranking(row, approach, relv_cols, reverse)
+    ranking = ranking[:ncands]
+    retrieved = [x[0] for x in ranking]
+    if true in retrieved:
+        return 1.0
+    else:
+        return 0.0
+
+def p1(row,approach, relv_cols, reverse):
+    true, ranking = get_true_and_ranking(row, approach, relv_cols, reverse)
     if len(ranking)>0:
         first = ranking[0][0]
         if first == true:
@@ -25,8 +48,8 @@ def p1(row,approach, reverse):
     else:
         return 0.0 # note that if the correct one is not retrieved at all, we give 0
 
-def pAt(row,approach, ncands, reverse):
-    true, ranking = get_true_and_ranking(row, approach, reverse)
+def pAt(row, approach, relv_cols, ncands, reverse):
+    true, ranking = get_true_and_ranking(row, approach, relv_cols, reverse)
     if len(ranking)>0:
         ranking = ranking[:ncands]
         for pred in ranking:
@@ -35,8 +58,8 @@ def pAt(row,approach, ncands, reverse):
     
     return 0.0 # note that if the correct one is not retrieved at all, we give 0
 
-def avgP (row,approach, ncands, reverse):
-    true, ranking = get_true_and_ranking(row, approach, reverse)
+def avgP (row, approach, relv_cols, ncands, reverse):
+    true, ranking = get_true_and_ranking(row, approach, relv_cols, reverse)
     if len(ranking)>0:
         ranking = ranking[:ncands]
     for r in range(len(ranking)):
@@ -50,15 +73,15 @@ def avgP (row,approach, ncands, reverse):
 # ----------------------------------
 
 def topres_exactmetrics(df, approach):
-    df["Final Wikidata ID"] = df["Final Wikidata ID"].str.replace("opl:.*", "", regex=True)
-    df["Final Wikidata ID"] = df["Final Wikidata ID"].str.replace("ppl:.*", "", regex=True)
     true = df["Final Wikidata ID"].to_list()
+    true = [t.replace("opl:", "").replace("ppl:", "") for t in true]
     prediction = df[approach].to_list()
     print("Hamming Loss:", hamming_loss(true, prediction))
     print("Accuracy Score:", accuracy_score(true, prediction))
     print("Jaccard Score:", jaccard_score(true, prediction, average="macro"))
 
 def distance_in_km(gazdf, gs, pred):
+    gs = gs.replace("opl:", "").replace("ppl:", "")
     gs_coords = None
     if gs in gazdf.index:
         gs_coords = tuple(gazdf.loc[gs][["latitude", "longitude"]].to_list())
@@ -77,11 +100,8 @@ def accuracy_at_km(km_dist, min_km):
     return dist_list.count(1) / len(dist_list)
 
 def topres_distancemetrics(gazdf, df, approach):
-    tmp_df = df.copy()
-    tmp_df["Final Wikidata ID"] = tmp_df["Final Wikidata ID"].str.replace("opl:.*", "", regex=True)
-    tmp_df["Final Wikidata ID"] = tmp_df["Final Wikidata ID"].str.replace("ppl:.*", "", regex=True)
-    tmp_df["km_dist"] = tmp_df.apply(lambda row: distance_in_km(gazdf,row["Final Wikidata ID"],row[approach]), axis=1)
-    print("Accuracy at 1:", accuracy_at_km(tmp_df["km_dist"], 1))
-    print("Accuracy at 5:", accuracy_at_km(tmp_df["km_dist"], 5))
-    print("Accuracy at 10:", accuracy_at_km(tmp_df["km_dist"], 10))
+    df["km_dist"] = df.apply(lambda row: distance_in_km(gazdf,row["Final Wikidata ID"],row[approach]), axis=1)
+    print("Accuracy at 1:", accuracy_at_km(df["km_dist"], 1))
+    print("Accuracy at 5:", accuracy_at_km(df["km_dist"], 5))
+    print("Accuracy at 10:", accuracy_at_km(df["km_dist"], 10))
     
