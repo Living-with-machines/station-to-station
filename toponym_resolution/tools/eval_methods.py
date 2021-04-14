@@ -59,9 +59,8 @@ def avgP (row, approach, relv_cols, reverse):
                 positive += 1
                 overall.append(positive/(r+1.0))
                 
-        if len(overall) == 0:
-            return 0.0
-        return sum(overall)/len(overall)
+        if len(overall) > 0:
+            return sum(overall)/len(overall)
     return 0.0 # note that if the correct one is not retrieved at all, we give 0
 
 
