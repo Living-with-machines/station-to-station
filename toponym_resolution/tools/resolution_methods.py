@@ -27,9 +27,22 @@ ppl_wkdt_classes = ["Q532", "Q1115575", "Q486972", "Q5084", "Q3957", "Q5124673",
 # Feature selection
 # ----------------------------------
 
-def feature_selection(candrank, df, gazetteer_df, wikipedia_entity_overall_dict):
-    
+def closest_geo(gazetteer_df, c, place_cands, closest):
+    closest = 100000
     bbox_gb = [-7.84,49.11,1.97,61.2]
+    st_lat = gazetteer_df.loc[c]["latitude"]
+    st_lon = gazetteer_df.loc[c]["longitude"]
+    if st_lat > bbox_gb[1] and st_lat < bbox_gb[3] and st_lon > bbox_gb[0] and st_lon < bbox_gb[2]:
+        for mc in place_cands:
+            if place_cands[mc] < 1.0: # High DeezyMatch confidence
+                pl_lat = gazetteer_df.loc[mc]["latitude"]
+                pl_lon = gazetteer_df.loc[mc]["longitude"]
+                dcands = haversine((st_lat, st_lon), (pl_lat, pl_lon))
+                if dcands < closest:
+                    closest = dcands
+    return closest
+
+def feature_selection(candrank, df, gazetteer_df, wikipedia_entity_overall_dict):
 
     mainid_column = []
     subid_column = []
@@ -73,15 +86,15 @@ def feature_selection(candrank, df, gazetteer_df, wikipedia_entity_overall_dict)
             if c == label:
                 binary_label = 1
 
-            local_compatibility = [0]*9
+            feature_vector = [0.0]*9
 
             # 1. Candidate source and selection confidence:
             if c in subst_cands:
-                local_compatibility[0] = round((5 - subst_cands[c])/5, 2)
+                feature_vector[0] = round((5 - subst_cands[c])/5, 4)
             if c in place_cands:
-                local_compatibility[1] = round((5 - place_cands[c])/5, 2)
+                feature_vector[1] = round((5 - place_cands[c])/5, 4)
             if c in altnm_cands:
-                local_compatibility[2] = round((5 - altnm_cands[c])/5, 2)
+                feature_vector[2] = round((5 - altnm_cands[c])/5, 4)
 
             # 2. Text compatibility between Quicks and Wikidata entry:
             try:
@@ -96,65 +109,42 @@ def feature_selection(candrank, df, gazetteer_df, wikipedia_entity_overall_dict)
                         wikidata_text += ", " + gazetteer_df.loc[ar]["english_label"]
 
                 embeddings = model.encode([disambiguator_text, wikidata_text])
-                local_compatibility[3] = round(util.pytorch_cos_sim(embeddings[0], embeddings[1]).item(), 2)
+                feature_vector[3] = round(util.pytorch_cos_sim(embeddings[0], embeddings[1]).item(), 4)
 
                 # 3. Wikidata class
                 if not (type(wikidata_data["instance_of"]) == float and np.isnan(wikidata_data["instance_of"])):
                     for inst in literal_eval(wikidata_data["instance_of"]):
                         if inst in stn_wkdt_classes:
-                            local_compatibility[4] = 1
+                            feature_vector[4] = 1.0
                             continue
                 if not (type(wikidata_data["instance_of"]) == float and np.isnan(wikidata_data["instance_of"])):
                     for inst in literal_eval(wikidata_data["instance_of"]):
                         if inst in ppl_wkdt_classes:
-                            local_compatibility[5] = 1
+                            feature_vector[5] = 1.0
                             continue
 
                 # 4. Substation place compatibility
                 closest = 100000
                 if c in subst_cands or c in altnm_cands:
-                    st_lat = gazetteer_df.loc[c]["latitude"]
-                    st_lon = gazetteer_df.loc[c]["longitude"]
-                    if st_lat > bbox_gb[1] and st_lat < bbox_gb[3] and st_lon > bbox_gb[0] and st_lon < bbox_gb[2]:
-                        for mc in place_cands:
-                            if place_cands[mc] < 1.0: # High DeezyMatch confidence
-                                pl_lat = gazetteer_df.loc[mc]["latitude"]
-                                pl_lon = gazetteer_df.loc[mc]["longitude"]
-                                dcands = haversine((st_lat, st_lon), (pl_lat, pl_lon))
-                                if dcands < closest:
-                                    closest = dcands
+                    closest = closest_geo(gazetteer_df, c, place_cands, closest)
                 closest = 10.0 if closest > 10.0 else closest
-                local_compatibility[6] = round((10 - closest)/10, 2)
+                feature_vector[6] = round((10 - closest)/10, 4)
 
                 # 4. Substation place compatibility
                 closest = 100000
                 if c in place_cands:
-                    st_lat = gazetteer_df.loc[c]["latitude"]
-                    st_lon = gazetteer_df.loc[c]["longitude"]
-                    if st_lat > bbox_gb[1] and st_lat < bbox_gb[3] and st_lon > bbox_gb[0] and st_lon < bbox_gb[2]:
-                        for mc in subst_cands:
-                            if subst_cands[mc] < 1.0: # High DeezyMatch confidence
-                                pl_lat = gazetteer_df.loc[mc]["latitude"]
-                                pl_lon = gazetteer_df.loc[mc]["longitude"]
-                                dcands = haversine((st_lat, st_lon), (pl_lat, pl_lon))
-                                if dcands < closest:
-                                    closest = dcands
-                    for mc in altnm_cands:
-                        if altnm_cands[mc] < 1.0:
-                            pl_lat = gazetteer_df.loc[mc]["latitude"]
-                            pl_lon = gazetteer_df.loc[mc]["longitude"]
-                            dcands = haversine((st_lat, st_lon), (pl_lat, pl_lon))
-                            if dcands < closest:
-                                closest = dcands
+                    closest = closest_geo(gazetteer_df, c, subst_cands, closest)
+                if c in place_cands:
+                    closest = closest_geo(gazetteer_df, c, altnm_cands, closest)
 
                 closest = 10.0 if closest > 10.0 else closest
-                local_compatibility[7] = round((10 - closest)/10, 2)
+                feature_vector[7] = round((10 - closest)/10, 4)
                 
                 if not (type(wikidata_data["wikititle"]) == float and np.isnan(wikidata_data["wikititle"])):
                     inlinks = wikipedia_entity_overall_dict.get(quote(wikidata_data["wikititle"], safe=''), 0)
                     if inlinks > max_inlinks:
                         max_inlinks = inlinks
-                    local_compatibility[8] = inlinks
+                    feature_vector[8] = inlinks
                 
             except KeyError:
                 continue
@@ -163,7 +153,7 @@ def feature_selection(candrank, df, gazetteer_df, wikipedia_entity_overall_dict)
             subid_column.append(row["SubId"])
             query_column.append(row["SubStFormatted"])
             candidate_column.append(c)
-            feature_columns.append(local_compatibility)
+            feature_columns.append(feature_vector)
             goldstandard_column.append(binary_label)
             exact_match_column.append(exact_match)
 
