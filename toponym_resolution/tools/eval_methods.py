@@ -28,43 +28,40 @@ def get_true_and_ranking(row,approach, relv_cols, reverse):
     ranking = [[k,v] for k, v in sorted(dCandidates.items(), key=lambda item: item[1], reverse = reverse)]
     return true, ranking
 
-def isRetrieved(row, approach, relv_cols, ncands, reverse):
+def isRetrieved(row, approach, relv_cols, reverse):
     true, ranking = get_true_and_ranking(row, approach, relv_cols, reverse)
-    ranking = ranking[:ncands]
     retrieved = [x[0] for x in ranking]
     if true in retrieved:
         return 1.0
     else:
         return 0.0
 
-def p1(row,approach, relv_cols, reverse):
+def pAt(row, approach, relv_cols, reverse):
     true, ranking = get_true_and_ranking(row, approach, relv_cols, reverse)
+    positive = 0
+    overall = 0
     if len(ranking)>0:
-        first = ranking[0][0]
-        if first == true:
-            return 1.0
-        else:
-            return 0.0
-    else:
-        return 0.0 # note that if the correct one is not retrieved at all, we give 0
-
-def pAt(row, approach, relv_cols, ncands, reverse):
-    true, ranking = get_true_and_ranking(row, approach, relv_cols, reverse)
-    if len(ranking)>0:
-        ranking = ranking[:ncands]
         for pred in ranking:
             if pred[0] == true:
-                return 1.0
+                positive += 1
+            overall += 1
+        return positive/overall
     
     return 0.0 # note that if the correct one is not retrieved at all, we give 0
 
-def avgP (row, approach, relv_cols, ncands, reverse):
+def avgP (row, approach, relv_cols, reverse):
     true, ranking = get_true_and_ranking(row, approach, relv_cols, reverse)
+    positive = 0
+    overall = []
     if len(ranking)>0:
-        ranking = ranking[:ncands]
-    for r in range(len(ranking)):
-        if ranking[r][0] == true:
-            return 1.0/(r+1.0) # checking at which position we find the correct one
+        for r in range(len(ranking)):
+            if ranking[r][0] == true:
+                positive += 1
+                overall.append(positive/(r+1.0))
+                
+        if len(overall) == 0:
+            return 0.0
+        return sum(overall)/len(overall)
     return 0.0 # note that if the correct one is not retrieved at all, we give 0
 
 
@@ -76,9 +73,9 @@ def topres_exactmetrics(df, approach):
     true = df["Final Wikidata ID"].to_list()
     true = [t.replace("opl:", "").replace("ppl:", "") for t in true]
     prediction = df[approach].to_list()
-    print("Hamming Loss:", hamming_loss(true, prediction))
-    print("Accuracy Score:", accuracy_score(true, prediction))
-    print("Jaccard Score:", jaccard_score(true, prediction, average="macro"))
+    print("Hamming Loss:", round(hamming_loss(true, prediction), 3))
+    print("Accuracy Score:", round(accuracy_score(true, prediction), 3))
+    print("Jaccard Score:", round(jaccard_score(true, prediction, average="macro"), 3))
 
 def distance_in_km(gazdf, gs, pred):
     gs = gs.replace("opl:", "").replace("ppl:", "")
@@ -101,7 +98,7 @@ def accuracy_at_km(km_dist, min_km):
 
 def topres_distancemetrics(gazdf, df, approach):
     df["km_dist"] = df.apply(lambda row: distance_in_km(gazdf,row["Final Wikidata ID"],row[approach]), axis=1)
-    print("Accuracy at 1:", accuracy_at_km(df["km_dist"], 1))
-    print("Accuracy at 5:", accuracy_at_km(df["km_dist"], 5))
-    print("Accuracy at 10:", accuracy_at_km(df["km_dist"], 10))
+    print("Accuracy at 1:", round(accuracy_at_km(df["km_dist"], 1), 3))
+    print("Accuracy at 5:", round(accuracy_at_km(df["km_dist"], 5), 3))
+    print("Accuracy at 10:", round(accuracy_at_km(df["km_dist"], 10), 3))
     
