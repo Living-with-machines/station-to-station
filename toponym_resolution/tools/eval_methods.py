@@ -10,7 +10,6 @@ from sklearn.metrics import zero_one_loss
 # ----------------------------------
 
 def get_true_and_ranking(row,approach, relv_cols, reverse):
-    
     # Combine candidates from different columns:
     dCandidates = dict()
     for rc in relv_cols:
@@ -72,9 +71,7 @@ def topres_exactmetrics(df, approach):
     true = df["Final Wikidata ID"].to_list()
     true = [t.replace("opl:", "").replace("ppl:", "") for t in true]
     prediction = df[approach].to_list()
-    print("Hamming Loss:", round(hamming_loss(true, prediction), 3))
-    print("Accuracy Score:", round(accuracy_score(true, prediction), 3))
-    print("Jaccard Score:", round(jaccard_score(true, prediction, average="macro"), 3))
+    return accuracy_score(true, prediction)
 
 def distance_in_km(gazdf, gs, pred):
     gs = gs.replace("opl:", "").replace("ppl:", "")
@@ -88,7 +85,7 @@ def distance_in_km(gazdf, gs, pred):
         return 0.0
     if not gs_coords or not pred_coords: # If only one is None, return a large number:
         return 10000
-    return round(haversine(gs_coords, pred_coords), 2)
+    return haversine(gs_coords, pred_coords)
 
 def accuracy_at_km(km_dist, min_km):
     km_dist = km_dist.to_list()
@@ -97,7 +94,4 @@ def accuracy_at_km(km_dist, min_km):
 
 def topres_distancemetrics(gazdf, df, approach):
     df["km_dist"] = df.apply(lambda row: distance_in_km(gazdf,row["Final Wikidata ID"],row[approach]), axis=1)
-    print("Accuracy at 1:", round(accuracy_at_km(df["km_dist"], 1), 3))
-    print("Accuracy at 5:", round(accuracy_at_km(df["km_dist"], 5), 3))
-    print("Accuracy at 10:", round(accuracy_at_km(df["km_dist"], 10), 3))
-    
+    return accuracy_at_km(df["km_dist"], 1), accuracy_at_km(df["km_dist"], 5), accuracy_at_km(df["km_dist"], 10)

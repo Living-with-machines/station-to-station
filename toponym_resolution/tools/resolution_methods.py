@@ -51,8 +51,16 @@ def feature_selection(candrank, df, gazetteer_df, wikipedia_entity_overall_dict)
         disambiguator_text = re.sub(" +", " ", disambiguator_text).strip()
         disambiguator_text = disambiguator_text.title()
         disambiguator_text = "" if len(disambiguator_text) <= 5 else disambiguator_text
+        
+        if type(subst_cands) == float:
+            subst_cands = dict()
+        if type(place_cands) == float:
+            place_cands = dict()
+        if type(altnm_cands) == float:
+            altnm_cands = dict()
 
         all_cands = list(set(list(subst_cands.keys()) + list(place_cands.keys()) + list(altnm_cands.keys())))
+        
         for c in all_cands:
             
             exact_match = 0
@@ -179,7 +187,9 @@ def feature_selection(candrank, df, gazetteer_df, wikipedia_entity_overall_dict)
 # Classification
 # ----------------------------------
 
-def train_classifier(df, use_cols, run):
+def train_classifier(inpdf, use_cols):
+    
+    df = inpdf.copy()
     df.drop_duplicates(subset=['Query','Candidate'], inplace=True)
     
     # Split dev set into train and test:
@@ -198,8 +208,7 @@ def train_classifier(df, use_cols, run):
     print("Instances in train and test:", len(y_train),len(y_test))
     
     # Find optimal parameters:
-    tuned_parameters = [{'kernel': ['rbf'], 'gamma': [1e-3, 1e-4], 'C': [0.01, 0.1, 1, 10, 100, 1000]},
-                    {'kernel': ['linear'], 'C': [0.01, 0.1, 1, 10, 100, 1000]}]
+    tuned_parameters = [{'kernel': ['linear'], 'C': [0.01, 0.1, 1, 10, 100, 1000]}]
 
     clf_gs = GridSearchCV(SVC(), tuned_parameters, scoring = 'f1_macro')
     clf_gs.fit(X_train, y_train)
@@ -208,60 +217,13 @@ def train_classifier(df, use_cols, run):
     
     clf = SVC(**clf_gs.best_params_,probability=True)
     clf.fit(X_train, y_train)
-    
+
     y_pred = clf.predict(X_test)
-    print("Classification report on dev test set:")
+    print("Classification report on the test split of the dev set:")
     print(classification_report(y_pred,y_test))
-    
-    # Train classifier with all data using the best parameters:
-    if run == "test":
-        X_all = df[use_cols].values
-        y_all = df.Label.values
-        clf = SVC(**clf_gs.best_params_)
-        clf.fit(X_all,y_all)
+    print(clf.coef_)
     
     return clf
-
-
-def find_thresholds(df, clf_stations, use_cols_stations, gazetteer_df, minthr, maxthr, stepthr, mindist):
-    for th in np.arange(minthr, maxthr, stepthr):
-        tp = 0
-        fn = 0
-        fp = 0
-
-        for subid in list(set(list(df.SubId.unique()))):
-
-            query = df[df["SubId"] == subid].iloc[0].Query
-            cands = df[df.SubId==subid].Candidate.values
-            gs_labels = list(df[(df.SubId==subid) & (df.Label==1)].Candidate.values)
-            y = df[df.SubId==subid].Label.values
-
-            # Stations classifier:
-            X_stations = df.loc[df.SubId==subid,use_cols_stations].values
-            probs_stations = [round(x[1], 4) for x in clf_stations.predict_proba(X_stations)]
-            predicted_station_prob = max(probs_stations)
-            predicted_station = cands[probs_stations.index(predicted_station_prob)]
-            predicted_station_coords = gazetteer_df.loc[predicted_station][["latitude", "longitude"]].to_list()
-
-            gs_coords = []
-            if gs_labels:
-                gs_label = gs_labels[0]
-                gs_coords = gazetteer_df.loc[gs_label][["latitude", "longitude"]].to_list()
-
-                if haversine(gs_coords, predicted_station_coords) <= mindist and th > predicted_station_prob:
-                    tp += 1
-                elif haversine(gs_coords, predicted_station_coords) <= mindist  and th <= predicted_station_prob:
-                    fn += 1
-                elif haversine(gs_coords, predicted_station_coords) > mindist  and th > predicted_station_prob:
-                    fp += 1
-
-        fscore = 0.0
-        if tp > 0:
-            precision = tp/(tp+fn)
-            recall = tp/(tp+fp)
-            fscore = (2 * precision * recall) / (precision + recall)
-            
-        print("Stations threshold:", round(th, 2), round(fscore, 4))
         
 
 # ----------------------------------
@@ -280,21 +242,18 @@ def our_method(df, clf_stations, use_cols_stations, clf_places, use_cols_places,
 
         # Stations classifier:
         X_stations = df.loc[df.SubId==subid,use_cols_stations].values
-        probs_stations = [round(x[1], 4) for x in clf_stations.predict_proba(X_stations)]
-        predicted_station_prob = max(probs_stations)
-        predicted_station = cands[probs_stations.index(predicted_station_prob)]
+        probs_stations = [x[1] for x in clf_stations.predict_proba(X_stations)]
+        predicted_probs = max(probs_stations)
+        predicted_final = cands[probs_stations.index(predicted_probs)]
+        
+        # If the probability is lower than the threshold we've previously identified:
+        if predicted_probs < threshold:
 
-        # Places classifier:
-        X_places = df.loc[df.SubId==subid,use_cols_places].values
-        probs_places = [round(x[1], 4) for x in clf_places.predict_proba(X_places)]
-        predicted_place_prob = max(probs_places)
-        predicted_place = cands[probs_places.index(predicted_place_prob)]
-            
-        predicted_final = predicted_place
-        predicted_probs = predicted_place_prob
-        if predicted_station_prob > threshold:
-            predicted_final = predicted_station
-            predicted_probs = predicted_station_prob
+            # Places classifier:
+            X_places = df.loc[df.SubId==subid,use_cols_places].values
+            probs_places = [x[1] for x in clf_places.predict_proba(X_places)]
+            predicted_probs = max(probs_places)
+            predicted_final = cands[probs_places.index(predicted_probs)]
         
         dResolved[subid] = predicted_final
         
