@@ -61,8 +61,7 @@ def run_ranklib(dev_feat_file,test_feat_file,filter):
         scores = [[x.split(" ")[2],x.split(" ")[5]] for x in rank if x.split(" ")[3]==q_id]
         scores.sort(key=lambda x: x[1],reverse=True)
         results[q_id] = scores[0][0]
-    print (results)
-    return "done."
+    return results
 
 
 
