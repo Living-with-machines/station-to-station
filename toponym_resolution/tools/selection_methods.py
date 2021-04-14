@@ -25,7 +25,7 @@ def check_if_identical(name,row):
 # Skyline
 # --------------------------------------
 
-def skyline(gs_wkid,wikidata_df):
+def skyline_match(gs_wkid,wikidata_df):
     res = dict()
     if gs_wkid.startswith("Q"):
         res[gs_wkid] = 1.0
@@ -38,10 +38,13 @@ def skyline(gs_wkid,wikidata_df):
 # Partial overlap match
 # --------------------------------------
 
-def partial_match(name,wikidata_df):
+def partial_match(name,wikidata_df,num_candidates):
     res = wikidata_df[["wkid"]]
     res["method"] = wikidata_df.apply(lambda row: check_if_contained(name,row), axis=1)
-    res = res.dropna().set_index('wkid').to_dict()["method"]
+    res = res.dropna()
+    top_scores = sorted(list(set(list(res["method"].unique()))), reverse=True)[:num_candidates]
+    res = res[res["method"].isin(top_scores)]
+    res = res.set_index('wkid').to_dict()["method"]
     return res 
 
 def check_if_contained(name,row):
