@@ -10,8 +10,12 @@ def convert_feature_file_format(filepath, filter):
         outfile = p.stem+"_notexact-ranklib.tsv"
     else:
         outfile = p.stem+"_all-ranklib.tsv"
-    out_file = "toponym_resolution/supervised_ranking/feature_files/" + outfile
-    out = open(out_file,"w")
+
+    out_feat_folder = "toponym_resolution/supervised_ranking/feature_files/"
+    out_model_folder = "toponym_resolution/supervised_ranking/models/"
+    pathlib.Path(out_feat_folder).mkdir(parents=True, exist_ok=True)
+    pathlib.Path(out_model_folder).mkdir(parents=True, exist_ok=True)
+    out = open(out_feat_folder+ outfile,"w")
 
     features = open(filepath).read().strip().split("\n")[1:]
     current_qid = 0
@@ -41,7 +45,7 @@ def convert_feature_file_format(filepath, filter):
         out.write(" ".join(feat_vect))
         out.write("\n")
     out.close()
-    return out_file
+    return out_feat_folder+ outfile
 
 def run_ranklib(dev_feat_file,test_feat_file,filter):
     dev = convert_feature_file_format(dev_feat_file,filter=filter)
@@ -52,20 +56,22 @@ def run_ranklib(dev_feat_file,test_feat_file,filter):
     test_performance = out.decode("utf-8").split("\n")[-4]
     print (train_performance,test_performance)
     subprocess.check_output(["java", "-jar","/home/fnanni/Projects/PlaceLinking/toponym_resolution/tools/RankLib-2.13.jar","-load","toponym_resolution/supervised_ranking/models/model.run","-rank",test,"-indri","toponym_resolution/supervised_ranking/models/rank.txt"])
+    
     rank = open("toponym_resolution/supervised_ranking/models/rank.txt","r").read().strip().split("\n")
     q_ids = set([x.split(" ")[3] for x in rank])
 
     results = {}
 
     for q_id in q_ids:
-        scores = [[x.split(" ")[2],x.split(" ")[5]] for x in rank if x.split(" ")[3]==q_id]
+        scores = [[x.split(" ")[2],float(x.split(" ")[5])] for x in rank if x.split(" ")[3]==q_id]
         scores.sort(key=lambda x: x[1],reverse=True)
         results[q_id] = scores[0][0]
     return results
 
 
 
-filter="exact"
+filter="all"
 dev_feat_file = "toponym_resolution/features_dev_deezy_match.tsv"
 test_feat_file = "toponym_resolution/features_test_deezy_match.tsv"
-run_ranklib(dev_feat_file,test_feat_file,filter)
+res_dict = run_ranklib(dev_feat_file,test_feat_file,filter)
+print (res_dict)
