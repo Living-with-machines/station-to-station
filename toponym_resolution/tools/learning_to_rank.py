@@ -47,31 +47,40 @@ def convert_feature_file_format(filepath, filter):
     out.close()
     return out_feat_folder+ outfile
 
-def run_ranklib(dev_feat_file,test_feat_file,filter):
+def run_ranklib(dev_feat_file,test_feat_file,filter,code_folder,cross_val):
+
     dev = convert_feature_file_format(dev_feat_file,filter=filter)
-    test = convert_feature_file_format(test_feat_file,filter="all")
+    feature_used = open("toponym_resolution/supervised_ranking/models/features.txt","r").read().replace('\n'," ")
 
-    out = subprocess.check_output(["java", "-jar","/home/fnanni/Projects/PlaceLinking/toponym_resolution/tools/RankLib-2.13.jar","-train",dev,"-test",test,"-ranker","4","-metric2t","P@1", "-metric2T", "P@1","-save","/home/fnanni/Projects/PlaceLinking/toponym_resolution/supervised_ranking/models/model.run"])
-    train_performance = out.decode("utf-8").split("\n")[-6]
-    test_performance = out.decode("utf-8").split("\n")[-4]
-    print (train_performance,test_performance)
-    subprocess.check_output(["java", "-jar","/home/fnanni/Projects/PlaceLinking/toponym_resolution/tools/RankLib-2.13.jar","-load","toponym_resolution/supervised_ranking/models/model.run","-rank",test,"-indri","toponym_resolution/supervised_ranking/models/rank.txt"])
-    
-    rank = open("toponym_resolution/supervised_ranking/models/rank.txt","r").read().strip().split("\n")
-    q_ids = set([x.split(" ")[3] for x in rank])
+    if cross_val == True:
+        subprocess.call(["java", "-jar",code_folder+"PlaceLinking/toponym_resolution/tools/RankLib-2.13.jar","-train",dev,"-ranker","4","-kcv", "5", "-metric2t","P@1", "-metric2T", "P@1","-feature","toponym_resolution/supervised_ranking/models/features.txt"])
+        print ("feature used:",feature_used)
+    else:
+        test = convert_feature_file_format(test_feat_file,filter="all")
+        out = subprocess.check_output(["java", "-jar",code_folder+"PlaceLinking/toponym_resolution/tools/RankLib-2.13.jar","-train",dev,"-test",test,"-ranker","4","-metric2t","P@1", "-metric2T", "P@1","-save",code_folder+"PlaceLinking/toponym_resolution/supervised_ranking/models/model.run","-feature","toponym_resolution/supervised_ranking/models/features.txt"])
+        train_performance = out.decode("utf-8").split("\n")[-6]
+        test_performance = out.decode("utf-8").split("\n")[-4]
+        print (train_performance,test_performance)
+        subprocess.check_output(["java", "-jar",code_folder+"PlaceLinking/toponym_resolution/tools/RankLib-2.13.jar","-load","toponym_resolution/supervised_ranking/models/model.run","-rank",test,"-indri","toponym_resolution/supervised_ranking/models/rank.txt","-feature","toponym_resolution/supervised_ranking/models/features.txt"])
+        
+        rank = open("toponym_resolution/supervised_ranking/models/rank.txt","r").read().strip().split("\n")
+        q_ids = set([x.split(" ")[3] for x in rank])
 
-    results = {}
+        results = {}
 
-    for q_id in q_ids:
-        scores = [[x.split(" ")[2],float(x.split(" ")[5])] for x in rank if x.split(" ")[3]==q_id]
-        scores.sort(key=lambda x: x[1],reverse=True)
-        results[q_id] = scores[0][0]
-    return results
+        for q_id in q_ids:
+            scores = [[x.split(" ")[2],float(x.split(" ")[5])] for x in rank if x.split(" ")[3]==q_id]
+            scores.sort(key=lambda x: x[1],reverse=True)
+            results[q_id] = scores[0][0]
+        print ("feature used:",feature_used)
+
+        return results
 
 
-
-filter="all"
+code_folder = "/home/fnanni/Projects/"
+filter="exact"
 dev_feat_file = "toponym_resolution/features_dev_deezy_match.tsv"
 test_feat_file = "toponym_resolution/features_test_deezy_match.tsv"
-res_dict = run_ranklib(dev_feat_file,test_feat_file,filter)
+cross_val = False
+res_dict = run_ranklib(dev_feat_file,test_feat_file,filter,code_folder,cross_val)
 print (res_dict)
