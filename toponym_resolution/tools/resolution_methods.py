@@ -314,3 +314,23 @@ def semantically_most_similar(features_df, test_df):
     test_df["semantically_most_similar"] = test_df['SubId'].map(dResolved)
     
     return test_df
+
+
+def skyline(features_df, test_df):
+    
+    dResolved = dict()
+    for subid in list(set(list(features_df.SubId.unique()))):
+        
+        predicted_final = ""
+
+        cands = features_df[features_df.SubId==subid].Candidate.values
+        predicted_final = cands[features_df[features_df.SubId==subid]["Label"].argmax()]
+        
+        dResolved[subid] = predicted_final
+        
+    test_df["skyline"] = test_df['SubId'].map(dResolved)
+    
+    return test_df
+
+        
+
