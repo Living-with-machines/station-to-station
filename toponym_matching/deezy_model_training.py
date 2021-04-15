@@ -19,7 +19,7 @@ import time
 # If model does not exist already, train a new model:
 if not Path('../processed/deezymatch/models/wikidata_british_isles/wikidata_british_isles.model').is_file():
     # train a new model
-    dm_train(input_file_path="../processed/deezymatch/input_dfm.yaml",
+    dm_train(input_file_path="../resources/deezymatch/input_dfm.yaml",
          dataset_path="../processed/deezymatch/datasets/british_isles_toponym_pairs.txt",
          model_name="wikidata_british_isles")
     
@@ -30,7 +30,7 @@ if not Path('../processed/deezymatch/models/wikidata_british_isles/wikidata_brit
 
 if not Path('../processed/deezymatch/models/wikidata_british_isles_stations/wikidata_british_isles_stations.model').is_file():
 # fine-tune a pretrained model stored at pretrained_model_path and pretrained_vocab_path 
-    dm_finetune(input_file_path="../processed/deezymatch/input_dfm.yaml", 
+    dm_finetune(input_file_path="../resources/deezymatch/input_dfm.yaml", 
             dataset_path="../processed/deezymatch/datasets/british_isles_stations_toponym_pairs.txt", 
             model_name="wikidata_british_isles_stations",
             pretrained_model_path="../processed/deezymatch/models/wikidata_british_isles/wikidata_british_isles.model", 
@@ -84,13 +84,14 @@ def findcandidates(candidates, dm_model, inputfile):
 
         
 ##### IN USE
-# Generate candidate vectors for the British Isles gazetteer
-wkgazetteer = pd.read_pickle("../processed/wikidata/altname_british_isles_gazetteer.pkl")
+        
+# Generate candidate vectors for the British Isles stations gazetteer
+wkgazetteer = pd.read_pickle("../processed/wikidata/altname_british_isles_stations_gazetteer.pkl")
 unique_placenames_array = list(set(list(np.array(wkgazetteer["altname"]))))
-format_for_candranker("../processed/deezymatch/candidate_toponyms/british_isles", unique_placenames_array)
+format_for_candranker("../processed/deezymatch/candidate_toponyms/british_isles_stations", unique_placenames_array)
 
-candidates = "british_isles"
-dm_model = "wikidata_british_isles"
+candidates = "british_isles_stations"
+dm_model = "wikidata_british_isles_stations"
 inputfile = "input_dfm"
 
 findcandidates(candidates, dm_model, inputfile)
@@ -101,7 +102,18 @@ unique_placenames_array = list(set(list(np.array(wkgazetteer["altname"]))))
 format_for_candranker("../processed/deezymatch/candidate_toponyms/british_isles_stations", unique_placenames_array)
 
 candidates = "british_isles_stations"
-dm_model = "wikidata_british_isles_stations"
+dm_model = "wikidata_british_isles"
+inputfile = "input_dfm"
+
+findcandidates(candidates, dm_model, inputfile)
+
+# Generate candidate vectors for the British Isles gazetteer
+wkgazetteer = pd.read_pickle("../processed/wikidata/altname_british_isles_gazetteer.pkl")
+unique_placenames_array = list(set(list(np.array(wkgazetteer["altname"]))))
+format_for_candranker("../processed/deezymatch/candidate_toponyms/british_isles", unique_placenames_array)
+
+candidates = "british_isles"
+dm_model = "wikidata_british_isles"
 inputfile = "input_dfm"
 
 findcandidates(candidates, dm_model, inputfile)

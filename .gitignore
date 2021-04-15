@@ -153,3 +153,4 @@ quicks/resources/
 *.xlsx
 resources/
 processed/
+toponym_resolution/*.tsv
