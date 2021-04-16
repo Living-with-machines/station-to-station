@@ -11,6 +11,8 @@ from urllib.parse import quote
 import random
 import pathlib
 import subprocess
+import itertools
+from tqdm import tqdm
 
 from sentence_transformers import SentenceTransformer, util
 model = SentenceTransformer('paraphrase-distilroberta-base-v1')
@@ -222,7 +224,29 @@ def train_classifier(inpdf, use_cols):
 # Our methods
 # ----------------------------------
 
-def our_method(df, clf_stations, use_cols_stations, clf_places, use_cols_places, gazetteer_df, threshold, results_test_df):
+def our_method_simple(df, clf_stations, use_cols_stations, gazetteer_df, results_test_df):
+    
+    dResolved = dict()
+    for subid in list(set(list(df.SubId.unique()))):
+        
+        predicted_final = ""
+        predicted_probs = 0.0
+        
+        cands = df[df.SubId==subid].Candidate.values
+
+        # Stations classifier:
+        X_stations = df.loc[df.SubId==subid,use_cols_stations].values
+        probs_stations = [x[1] for x in clf_stations.predict_proba(X_stations)]
+        predicted_probs = max(probs_stations)
+        predicted_final = cands[probs_stations.index(predicted_probs)]
+        
+        dResolved[subid] = predicted_final
+        
+    results_test_df["our_method_all"] = results_test_df['SubId'].map(dResolved)
+    
+    return results_test_df
+
+def our_method_comb(df, clf_stations, use_cols_stations, clf_places, use_cols_places, gazetteer_df, threshold, results_test_df):
     
     dResolved = dict()
     for subid in list(set(list(df.SubId.unique()))):
@@ -249,7 +273,7 @@ def our_method(df, clf_stations, use_cols_stations, clf_places, use_cols_places,
         
         dResolved[subid] = predicted_final
         
-    results_test_df["our_method"] = results_test_df['SubId'].map(dResolved)
+    results_test_df["our_method_comb"] = results_test_df['SubId'].map(dResolved)
     
     return results_test_df
 
@@ -353,7 +377,7 @@ def convert_feature_file_format(partition,features, filter):
     pathlib.Path(out_feat_folder).mkdir(parents=True, exist_ok=True)
     pathlib.Path(out_model_folder).mkdir(parents=True, exist_ok=True)
     out = open(out_feat_folder+ outfile,"w")
-# MainId	SubId	Query	Candidate	f_0	f_1	f_2	f_3	f_4	f_5	f_6	f_7	f_8	Label	Exact
+    # MainId	SubId	Query	Candidate	f_0	f_1	f_2	f_3	f_4	f_5	f_6	f_7	f_8	Label	Exact
     current_qid = 0
     current_sub_id = 0
     for _id,line in features.iterrows():
@@ -373,7 +397,7 @@ def convert_feature_file_format(partition,features, filter):
             current_qid+=1
         feat_vect.append("qid:"+str(current_qid))
         feat_counter = 1
-        for f in range(5,14):
+        for f in range(4,13):
             feat_vect.append(str(feat_counter)+":"+str(line.iloc[f]))
             feat_counter+=1
         feat_vect.append("# "+ str(cand)+ " "+ str(current_sub_id))
@@ -382,23 +406,26 @@ def convert_feature_file_format(partition,features, filter):
     out.close()
     return out_feat_folder+ outfile
 
-def ranklib(dev_feat_file,test_feat_file,filter,code_folder,cross_val,test_df):
+def ranklib(dev_feat_file,test_feat_file,filter,code_folder,cross_val,test_df,feat_comb, num_candidates):
 
     dev = convert_feature_file_format("dev",dev_feat_file,filter=filter)
-    feature_used = open("supervised_ranking/models/features.txt","r").read().replace('\n'," ")
+    feature_file = "supervised_ranking/features/" + filter + str(num_candidates) + "_" + str(feat_comb) + ".txt"
+    if feat_comb == "allfeatures":
+        feature_file = "supervised_ranking/features/allfeatures.txt"
+    feature_used = open(feature_file,"r").read().replace('\n'," ")
 
     if cross_val == True:
-        print ("feature used:",feature_used)
-        out =  subprocess.check_output(["java", "-jar",code_folder+"PlaceLinking/toponym_resolution/tools/RankLib-2.13.jar","-train",dev,"-ranker","4","-kcv", "5", "-metric2t","P@1", "-metric2T", "P@1","-feature","supervised_ranking/models/features.txt"])
+#         print ("feature used:",feature_used)
+        out =  subprocess.check_output(["java", "-jar",code_folder+"PlaceLinking/toponym_resolution/tools/RankLib-2.13.jar","-train",dev,"-ranker","4","-kcv", "5", "-metric2t","P@1", "-metric2T", "P@1","-feature",feature_file])
         out = out.decode("utf-8").split("\n")[-15:]
         return out
     else:
         test = convert_feature_file_format("test",test_feat_file,filter="all")
-        out = subprocess.check_output(["java", "-jar",code_folder+"PlaceLinking/toponym_resolution/tools/RankLib-2.13.jar","-train",dev,"-test",test,"-ranker","4","-metric2t","P@1", "-metric2T", "P@1","-save",code_folder+"PlaceLinking/toponym_resolution/supervised_ranking/models/model.run","-feature","supervised_ranking/models/features.txt"])
+        out = subprocess.check_output(["java", "-jar",code_folder+"PlaceLinking/toponym_resolution/tools/RankLib-2.13.jar","-train",dev,"-test",test,"-ranker","4","-metric2t","P@1", "-metric2T", "P@1","-save",code_folder+"PlaceLinking/toponym_resolution/supervised_ranking/models/model.run","-feature",feature_file])
         train_performance = out.decode("utf-8").split("\n")[-6]
         test_performance = out.decode("utf-8").split("\n")[-4]
         print (train_performance,test_performance)
-        subprocess.check_output(["java", "-jar",code_folder+"PlaceLinking/toponym_resolution/tools/RankLib-2.13.jar","-load","supervised_ranking/models/model.run","-rank",test,"-indri","supervised_ranking/models/rank.txt","-feature","supervised_ranking/models/features.txt"])
+        subprocess.check_output(["java", "-jar",code_folder+"PlaceLinking/toponym_resolution/tools/RankLib-2.13.jar","-load","supervised_ranking/models/model.run","-rank",test,"-indri","supervised_ranking/models/rank.txt","-feature",feature_file])
         
         rank = open("supervised_ranking/models/rank.txt","r").read().strip().split("\n")
         q_ids = set([int(x.split(" ")[3]) for x in rank])
@@ -414,3 +441,47 @@ def ranklib(dev_feat_file,test_feat_file,filter,code_folder,cross_val,test_df):
     test_df["ranklib"] = test_df['SubId'].map(results)
     
     return test_df
+
+def parse_cross_val_output(crossval_output):
+    lastline = crossval_output.split("\n")[-2].split("|")[-1].strip()
+    return float(lastline)
+
+def find_combinations(features_folder, filter, fix_list, feature_list, num_candidates):
+    dCombinations = dict()
+    combination = 0
+    for fl in range(1, len(feature_list)+1):
+        for subset in itertools.combinations(feature_list, fl):
+            combination += 1
+            dCombinations[combination] = fix_list + list(subset)
+            with open(features_folder + filter + str(num_candidates) + "_" + str(combination) +".txt", "w") as fw:
+                for s in dCombinations[combination]:
+                    fw.write(s + "\n")
+    return dCombinations
+
+def find_feature_comb(features_folder, filter, cross_val, code_folder, features_dev, features_test_df, results_test_df, num_candidates):
+    
+    fix_features = ["1", "2", "3"]
+    if filter == "exact":
+        fix_features = ["1", "3"]
+    if filter == "notexact":
+        fix_features = ["2"]
+    other_features = ["4", "5", "6", "7", "8", "9"]
+
+    dCombinations = find_combinations(features_folder, filter, fix_features, other_features, num_candidates)
+    
+    keep_best_score = 0.0
+    keep_best_combo = []
+    keep_best_combo_scenario = ""
+    with open("supervised_ranking/feature_combs/" + filter + str(num_candidates) + ".txt", "w") as fw:
+        for feature_combination in tqdm(dCombinations):
+            out = ranklib(features_dev,features_test_df,filter,code_folder,cross_val,results_test_df,feature_combination,num_candidates)
+            output = parse_cross_val_output("\n".join(out))
+            if output >= keep_best_score:
+                keep_best_score = output
+                keep_best_combo = dCombinations[feature_combination]
+                keep_best_combo_scenario = feature_combination
+                fw.write(" ".join(dCombinations[feature_combination]) + "\t" + str(output) + "\n")
+        fw.write("\n")
+        fw.write(str(keep_best_combo_scenario) + ":::" + " ".join(keep_best_combo) + "\t" + str(keep_best_score) + "\n")
+
+    return keep_best_combo_scenario

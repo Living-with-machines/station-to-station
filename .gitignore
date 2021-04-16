@@ -154,3 +154,4 @@ quicks/resources/
 resources/
 processed/
 toponym_resolution/*.tsv
+toponym_resolution/supervised_ranking/

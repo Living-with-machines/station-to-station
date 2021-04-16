@@ -97,4 +97,4 @@ def accuracy_at_km(km_dist, min_km):
 
 def topres_distancemetrics(gazdf, df, approach, exact_station):
     df["km_dist"] = df.apply(lambda row: distance_in_km(gazdf,row["Final Wikidata ID"],row[approach], exact_station), axis=1)
-    return accuracy_at_km(df["km_dist"], 1), accuracy_at_km(df["km_dist"], 5), accuracy_at_km(df["km_dist"], 10)
+    return round(accuracy_at_km(df["km_dist"], 1),2), round(accuracy_at_km(df["km_dist"], 5),2), round(accuracy_at_km(df["km_dist"], 10),2)
