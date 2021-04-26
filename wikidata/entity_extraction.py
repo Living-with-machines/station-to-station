@@ -401,12 +401,12 @@ def parse_record(record):
 
 
 # ====================================================
-# Create an approximate subset with entities from the British Isles
+# Create an approximate subset with entities in the UK
 # ====================================================
 
-print("\nCreating the British Isles gazetteer.")
+print("\nCreating the UK gazetteer.")
 
-if not Path("../processed/wikidata/british_isles_gazetteer.csv").exists():
+if not Path("../processed/wikidata/uk_gazetteer.csv").exists():
     path = r"../resources/wikidata/extracted/"
     pathlib.Path(path).mkdir(parents=True, exist_ok=True)
 
@@ -420,35 +420,35 @@ if not Path("../processed/wikidata/british_isles_gazetteer.csv").exists():
     df = pd.concat(li, axis=0, ignore_index=True)
     df = df.drop(columns=['Unnamed: 0'])
 
-    def filter_britisles(lat, lon, countries):
-        bbox = (-11.31,48.78,2.41,61.28)
+    def filter_uk(lat, lon, countries):
+        bbox = (-9.05,48.78,2.41,61.28)
         countries = ast.literal_eval(countries)
         for c in countries:
-            if c == "Q145" or c == "Q27": # United Kingdom and Ireland
+            if c == "Q145": # United Kingdom
                 return True
-            if c == "Q142" or c == "Q31": # France and Belgium
+            if c == "Q142" or c == "Q31" or c == "Q27": # France and Belgium and Ireland
                 return False
         if float(lat) >= bbox[1] and float(lat) <= bbox[3] and float(lon) >= bbox[0] and float(lon) <= bbox[2]:
             return True
         else:
             return False
 
-    mask = df.apply(lambda x: filter_britisles(x['latitude'], x['longitude'], x['countries']), axis=1)
+    mask = df.apply(lambda x: filter_uk(x['latitude'], x['longitude'], x['countries']), axis=1)
     britdf = df[mask]
     britdf['latitude'] = britdf['latitude'].astype(float)
     britdf['longitude'] = britdf['longitude'].astype(float)
     britdf = britdf[britdf['latitude'].notna()]
     britdf = britdf[britdf['longitude'].notna()]
-    britdf.to_csv("../processed/wikidata/british_isles_gazetteer.csv", index=False)
+    britdf.to_csv("../processed/wikidata/uk_gazetteer.csv", index=False)
 
 
-# ====================================================
-# Create an approximate subset with railway station entities from the British Isles
-# ====================================================
+# ====================================================================
+# Create an approximate subset with railway station entities in the UK
+# ====================================================================
 
-print("Done.\n\nCreating the British Isles stations gazetteer.")
+print("Done.\n\nCreating the UK stations gazetteer.")
 
-britdf = pd.read_csv("../processed/wikidata/british_isles_gazetteer.csv", header=0, index_col=None, low_memory=False)
+britdf = pd.read_csv("../processed/wikidata/uk_gazetteer.csv", header=0, index_col=None, low_memory=False)
 
 # From: https://docs.google.com/spreadsheets/d/1sREU_TKBU0HXoSSm7nyOw-4kId_bfu6OTEXxtdZeLl0/edit#gid=0
 stn_wkdt_classes = ["Q55488", "Q4663385", "Q55491", "Q18516630", "Q1335652", "Q28109487",
@@ -471,4 +471,4 @@ for i, row in tqdm(britdf.iterrows()):
         if any(x in wkdtcl for x in stn_wkdt_classes) or (re.match(re_station, row["english_label"]) and not re.match(re_nostation, row["english_label"])):
             stationgaz = stationgaz.append(row, ignore_index=True)
 
-stationgaz.to_csv("../processed/wikidata/british_isles_stations_gazetteer.csv", index=False)
+stationgaz.to_csv("../processed/wikidata/uk_stations_gazetteer.csv", index=False)
