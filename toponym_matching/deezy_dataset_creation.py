@@ -316,7 +316,7 @@ if __name__ == '__main__':
                     help="Gazetter from which to create the toponym matching dataset. Options:\n*british_isles\n*british_isles_stations", required=True)
     parser.add_argument("-n", "--number_cpus", default=-1, 
                     help="Number of CPUs to be used for processing. Default: -1 (use all)")
-    parser.add_argument("-tc", "--titles_per_chunk", default=100, 
+    parser.add_argument("-tc", "--titles_per_chunk", default=5000, 
                     help="Number of titles per chunk")
     parser.add_argument("-km", "--kilometre_distance", default=50, 
                     help="Minimum distance of negative toponym pair")
@@ -327,11 +327,11 @@ if __name__ == '__main__':
     number_cpus = int(args.number_cpus) # Use all
     titles_per_chunk = int(args.titles_per_chunk)
     
-    gazetteer = args.gazetteer # british_isles or british_isles_stations
+    gazetteer = args.gazetteer # gb or gb_stations
     
     input_gazetteer = "../processed/wikidata/altname_" + gazetteer + "_gazetteer.pkl"
     output_dataset = "../processed/deezymatch/datasets/" + gazetteer + "_toponym_pairs.txt"
-    Path(output_dataset).mkdir(parents=True, exist_ok=True)
+    Path("../processed/deezymatch/datasets/").mkdir(parents=True, exist_ok=True)
     
     output_file = open(output_dataset, "w")
     N, wiki_titles, wiki_titles_splits, wiki_ids, altnames = process_args(number_cpus, input_gazetteer)
