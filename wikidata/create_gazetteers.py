@@ -4,6 +4,7 @@ import shapefile
 from shapely.geometry import shape, Point
 import pyproj
 from pathlib import Path
+import glob
 import ast
 import re
 
@@ -16,7 +17,7 @@ print("\nCreating the approximate UK gazetteer.")
 
 if not Path("../processed/wikidata/uk_approx_gazetteer.csv").exists():
     path = r"../resources/wikidata/extracted/"
-    pathlib.Path(path).mkdir(parents=True, exist_ok=True)
+    Path(path).mkdir(parents=True, exist_ok=True)
 
     all_files = glob.glob(path + "/*.csv")
 
