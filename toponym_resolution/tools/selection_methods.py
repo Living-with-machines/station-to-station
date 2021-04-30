@@ -56,10 +56,18 @@ def check_if_contained(name,row):
 # Deezy match
 # --------------------------------------
 
+# Normalize ranking scores:
+def normalize_ranking(score, measure, thr):
+    normalized_score = score
+    if measure == "faiss_distance" or measure == "cosine_dist" or measure == "1-pred_score":
+        normalized_score = (thr - score) / thr
+    return normalized_score
+
 # Returning wikidata IDs for retrieved toponyms:
-def match_cands_wikidata_stn(row,gazetteer,ranking):
+def match_cands_wikidata_stn(row,gazetteer,ranking,candrank_thr):
     wikidata_cands = {}
-    cands = [(k, row[ranking][k]) for k in row[ranking]]
+    
+    cands = [(k, normalize_ranking(row[ranking][k], ranking, candrank_thr)) for k in row[ranking]]
     
     # Find wikidata IDs:
     for cand,score in cands:
@@ -127,5 +135,5 @@ def find_deezymatch_candidates(gazetteer, quicks_df, quicks_query_column, dm_mod
     print("Rank candidates: %s" % elapsed)
     
     ranked_candidates = pd.read_pickle("../processed/deezymatch/ranker_results/" + queries + "_" + quicks_query_column + "_" + candidates + "_" + dm_model + "_" + candrank_metric + str(num_candidates) + ".pkl")
-    ranked_candidates["wkcands"] = ranked_candidates.progress_apply(lambda row : match_cands_wikidata_stn(row,gazetteer,"faiss_distance"), axis=1)
+    ranked_candidates["wkcands"] = ranked_candidates.progress_apply(lambda row : match_cands_wikidata_stn(row,gazetteer,"faiss_distance",candrank_thr), axis=1)
     return pd.merge(left=quicks_df, right=ranked_candidates, how='left', left_on=quicks_query_column, right_on='query')[["wkcands"]]
