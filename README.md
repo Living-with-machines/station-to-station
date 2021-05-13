@@ -1,4 +1,10 @@
-# PlaceLinking
+<div align="center">
+    <h1>Station to Station:\\Linking and enriching historical British railway data</h1>
+</div>
+
+This repository provides underlying code and materials for the paper `Station to Station: Linking and enriching historical British railway data`.
+
+# Table of contents
 
 This is the main directory for Place Linking experiments, which contains:
 * `bho/`: parsing and processing of BHO Lewis' Topographical Dictionaries.
