@@ -54,7 +54,7 @@ def perform_candrank(setting, approach, num_candidates):
             inputfile = "input_dfm"
             queries = "quicks_stations"
             candrank_metric = "faiss" # 'faiss', 'cosine', 'conf'
-            candrank_thr = 5
+            candrank_thr = 3
             quicks_query_column = "SubStFormatted"
             df["cr_deezy_match_stations"] = selection_methods.find_deezymatch_candidates(wkdt_df_stations, df, quicks_query_column, dm_model, inputfile, candidates, queries, candrank_metric, candrank_thr, num_candidates)
 
@@ -63,7 +63,7 @@ def perform_candrank(setting, approach, num_candidates):
             inputfile = "input_dfm"
             queries = "quicks_places"
             candrank_metric = "faiss" # 'faiss', 'cosine', 'conf'
-            candrank_thr = 5
+            candrank_thr = 3
             quicks_query_column = "MainStation"
             df["cr_deezy_match_places"] = selection_methods.find_deezymatch_candidates(wkdt_df_places, df, quicks_query_column, dm_model, inputfile, candidates, queries, candrank_metric, candrank_thr, num_candidates)
 
@@ -72,7 +72,7 @@ def perform_candrank(setting, approach, num_candidates):
             inputfile = "input_dfm"
             queries = "quicks_altns"
             candrank_metric = "faiss" # 'faiss', 'cosine', 'conf'
-            candrank_thr = 5
+            candrank_thr = 3
             quicks_query_column = "Altname"
             alts_df["cr_deezy_match_alts"] = selection_methods.find_deezymatch_candidates(wkdt_df_stations, alts_df, quicks_query_column, dm_model, inputfile, candidates, queries, candrank_metric, candrank_thr, num_candidates)
             print("Deezy match done!")

@@ -33,20 +33,18 @@ ppl_wkdt_classes = ["Q532", "Q1115575", "Q486972", "Q5084", "Q3957", "Q5124673",
 
 def closest_geo(gazetteer_df, c, place_cands, closest):
     closest = 100000
-    bbox_gb = [-7.84,49.11,1.97,61.2]
     st_lat = gazetteer_df.loc[c]["latitude"]
     st_lon = gazetteer_df.loc[c]["longitude"]
-    if st_lat > bbox_gb[1] and st_lat < bbox_gb[3] and st_lon > bbox_gb[0] and st_lon < bbox_gb[2]:
-        for mc in place_cands:
-            if place_cands[mc] < 1.0: # High DeezyMatch confidence
-                pl_lat = gazetteer_df.loc[mc]["latitude"]
-                pl_lon = gazetteer_df.loc[mc]["longitude"]
-                dcands = haversine((st_lat, st_lon), (pl_lat, pl_lon))
-                if dcands < closest:
-                    closest = dcands
+    for mc in place_cands:
+        if gazetteer_df.loc[c]["english_label"] != gazetteer_df.loc[mc]["english_label"]:
+            pl_lat = gazetteer_df.loc[mc]["latitude"]
+            pl_lon = gazetteer_df.loc[mc]["longitude"]
+            dcands = haversine((st_lat, st_lon), (pl_lat, pl_lon))
+            if dcands < closest:
+                closest = dcands
     return closest
 
-def feature_selection(candrank, df, gazetteer_df, wikipedia_entity_overall_dict):
+def feature_selection(candrank, df, gazetteer_df, wikipedia_entity_overall_dict,sub_id_there, experiment=True):
 
     mainid_column = []
     subid_column = []
@@ -81,7 +79,9 @@ def feature_selection(candrank, df, gazetteer_df, wikipedia_entity_overall_dict)
         for c in all_cands:
             
             exact_match = 0
-            label = row["Final Wikidata ID"]
+            label = ""
+            if experiment == True:
+                label = row["Final Wikidata ID"]
             if label.startswith("Q"):
                 exact_match = 1
             label = label.replace("opl:", "")
@@ -94,11 +94,11 @@ def feature_selection(candrank, df, gazetteer_df, wikipedia_entity_overall_dict)
 
             # 1. Candidate source and selection confidence:
             if c in subst_cands:
-                feature_vector[0] = round((5 - subst_cands[c])/5, 4)
+                feature_vector[0] = round(subst_cands[c], 4)
             if c in place_cands:
-                feature_vector[1] = round((5 - place_cands[c])/5, 4)
+                feature_vector[1] = round(place_cands[c], 4)
             if c in altnm_cands:
-                feature_vector[2] = round((5 - altnm_cands[c])/5, 4)
+                feature_vector[2] = round(altnm_cands[c], 4)
 
             # 2. Text compatibility between Quicks and Wikidata entry:
             try:
@@ -278,6 +278,58 @@ def our_method_comb(df, clf_stations, use_cols_stations, clf_places, use_cols_pl
     return results_test_df
 
 
+# This one keeps the info we'll like to have when applying to the whole Quicks dataset (type of prediction and confs):
+def our_method_comb_keepconf(df, clf_stations, use_cols_stations, clf_places, use_cols_places, gazetteer_df, threshold, results_test_df):
+    
+    dResolved = dict()
+    dStationsConf = dict()
+    dPlacesConf = dict()
+    dTypePrediction = dict()
+    dLatitude = dict()
+    dLongitude = dict()
+    for subid in list(set(list(df.SubId.unique()))):
+        
+        predicted_final_station = ""
+        predicted_final_place = ""
+        predicted_probs = 0.0
+        
+        cands = df[df.SubId==subid].Candidate.values
+
+        # Stations classifier:
+        X_stations = df.loc[df.SubId==subid,use_cols_stations].values
+        probs_stations = [x[1] for x in clf_stations.predict_proba(X_stations)]
+        predicted_probs_station = max(probs_stations)
+        predicted_final_station = cands[probs_stations.index(predicted_probs_station)]
+        
+        # Places classifier:
+        X_places = df.loc[df.SubId==subid,use_cols_places].values
+        probs_places = [x[1] for x in clf_places.predict_proba(X_places)]
+        predicted_probs_place = max(probs_places)
+        predicted_final_place = cands[probs_places.index(predicted_probs_place)]
+        
+        dStationsConf[subid] = round(predicted_probs_station, 2)
+        dPlacesConf[subid] = round(predicted_probs_place, 2)
+        
+        # If the probability is lower than the threshold we've previously identified:
+        dResolved[subid] = predicted_final_station
+        dTypePrediction[subid] = "station"
+        if predicted_probs_station < threshold:
+            dResolved[subid] = predicted_final_place
+            dTypePrediction[subid] = "place"
+            
+        dLatitude[subid] = gazetteer_df.loc[dResolved[subid]]["latitude"]
+        dLongitude[subid] = gazetteer_df.loc[dResolved[subid]]["longitude"]
+        
+    results_test_df["prediction"] = results_test_df['SubId'].map(dResolved)
+    results_test_df["typePrediction"] = results_test_df['SubId'].map(dTypePrediction)
+    results_test_df["station_conf"] = results_test_df['SubId'].map(dStationsConf)
+    results_test_df["place_conf"] = results_test_df['SubId'].map(dPlacesConf)
+    results_test_df["latitude"] = results_test_df['SubId'].map(dLatitude)
+    results_test_df["longitude"] = results_test_df['SubId'].map(dLongitude)
+    
+    return results_test_df
+
+
 # ----------------------------------
 # Baselines
 # ----------------------------------
@@ -411,21 +463,21 @@ def ranklib(dev_feat_file,test_feat_file,filter,code_folder,cross_val,test_df,fe
     dev = convert_feature_file_format("dev",dev_feat_file,filter=filter)
     feature_file = "supervised_ranking/features/" + filter + str(num_candidates) + "_" + str(feat_comb) + ".txt"
     if feat_comb == "allfeatures":
-        feature_file = "supervised_ranking/features/allfeatures.txt"
+        feature_file = "supervised_ranking/feature_files/allfeatures.txt"
     feature_used = open(feature_file,"r").read().replace('\n'," ")
 
     if cross_val == True:
 #         print ("feature used:",feature_used)
-        out =  subprocess.check_output(["java", "-jar",code_folder+"PlaceLinking/toponym_resolution/tools/RankLib-2.13.jar","-train",dev,"-ranker","4","-kcv", "5", "-metric2t","P@1", "-metric2T", "P@1","-feature",feature_file])
+        out =  subprocess.check_output(["java", "-jar",code_folder+"station-to-station/toponym_resolution/tools/RankLib-2.13.jar","-train",dev,"-ranker","4","-kcv", "5", "-metric2t","P@1", "-metric2T", "P@1","-feature",feature_file])
         out = out.decode("utf-8").split("\n")[-15:]
         return out
     else:
         test = convert_feature_file_format("test",test_feat_file,filter="all")
-        out = subprocess.check_output(["java", "-jar",code_folder+"PlaceLinking/toponym_resolution/tools/RankLib-2.13.jar","-train",dev,"-test",test,"-ranker","4","-metric2t","P@1", "-metric2T", "P@1","-save",code_folder+"PlaceLinking/toponym_resolution/supervised_ranking/models/model.run","-feature",feature_file])
+        out = subprocess.check_output(["java", "-jar",code_folder+"station-to-station/toponym_resolution/tools/RankLib-2.13.jar","-train",dev,"-test",test,"-ranker","4","-metric2t","P@1", "-metric2T", "P@1","-save",code_folder+"station-to-station/toponym_resolution/supervised_ranking/models/model.run","-feature",feature_file])
         train_performance = out.decode("utf-8").split("\n")[-6]
         test_performance = out.decode("utf-8").split("\n")[-4]
         print (train_performance,test_performance)
-        subprocess.check_output(["java", "-jar",code_folder+"PlaceLinking/toponym_resolution/tools/RankLib-2.13.jar","-load","supervised_ranking/models/model.run","-rank",test,"-indri","supervised_ranking/models/rank.txt","-feature",feature_file])
+        subprocess.check_output(["java", "-jar",code_folder+"station-to-station/toponym_resolution/tools/RankLib-2.13.jar","-load","supervised_ranking/models/model.run","-rank",test,"-indri","supervised_ranking/models/rank.txt","-feature",feature_file])
         
         rank = open("supervised_ranking/models/rank.txt","r").read().strip().split("\n")
         q_ids = set([int(x.split(" ")[3]) for x in rank])

@@ -30,6 +30,30 @@ britdf = pd.read_csv("../processed/wikidata/gb_gazetteer.csv", header=0, index_c
 # The gb_stations_gazetteer.csv file is an output from create_gazetteers.py.
 print("\nLoading the GB stations gazetteer.")
 stationdf = pd.read_csv("../processed/wikidata/gb_stations_gazetteer.csv", header=0, index_col=None, low_memory=False)
+
+
+### --------------------------------------------
+### Process English WikiGazetteer altnames
+### --------------------------------------------
+
+# The English WikiGazetteer can be downloaded from https://zenodo.org/record/4034819/: download the .zip. The only file we will need is 'wikigaz_en_basic.pkl', which should be stored in ../resources/wikigaz/.
+print("\nCreating the English WikiGazetteer altnames dataframe.")
+
+if not Path("../resources/wikigaz/wikigaz_altnames.pkl").exists():
+    wikigaz_path = "/resources/wikigazetteer/wikigaz_en_basic.pkl"
+    wikigaz_en = pd.read_pickle(wikigaz_path)
+
+    # Filter entries if in British Isles boundary box and altname source is either wikimain or wikiredirect (not accurate,
+    # this step is just for speed in linking wikigaz with wikidata).
+    bbox = (-9.05,48.78,2.41,61.28)
+    wikigaz_en = wikigaz_en[(wikigaz_en["lat"] >= bbox[1]) & (wikigaz_en["lat"] <= bbox[3]) & (wikigaz_en["lon"] >= bbox[0]) & (wikigaz_en["lon"] <= bbox[2])]
+    wikigaz_en = wikigaz_en[wikigaz_en["source"].isin(["wikimain", "wikiredirect"])]
+
+    wikigaz_altnames = wikigaz_en[["pid", "altname"]]
+    wikigaz_altnames = wikigaz_altnames.drop_duplicates(subset=["pid", "altname"], ignore_index = True)
+    wikigaz_altnames.to_pickle("../resources/wikigaz/wikigaz_altnames.pkl")
+    
+wikigaz_altnames = pd.read_pickle("../resources/wikigaz/wikigaz_altnames.pkl")
         
     
 ### --------------------------------------------
@@ -124,7 +148,7 @@ geonames_altnames = pd.read_pickle("../resources/geonames/geonames_altnames.pkl"
 print("\nCreating an altnames-centric gazetteer of GB.")
 
 if not Path("../processed/wikidata/altname_gb_gazetteer.pkl").exists():
-    def obtain_altnames(elabel, aliases, nativelabel, wikipedia_title, geonamesIDs, geoaltnames):
+    def obtain_altnames(elabel, aliases, nativelabel, wikipedia_title, geonamesIDs, wikigaz_altnames, geoaltnames):
 
         altnames = dict()
         if type(geonamesIDs) == str:
@@ -132,6 +156,12 @@ if not Path("../processed/wikidata/altname_gb_gazetteer.pkl").exists():
             geon_altnames = set(geonames_altnames[geonames_altnames["geonameid"].isin(geonamesIDs)].alternateName.unique())
             for ga in geon_altnames:
                 altnames[ga] = "geonames"
+
+        if type(wikipedia_title) == str:
+            wikipedia_title = wikipedia_title.replace(" ", "_")
+            wgaz_altnames = set(wikigaz_altnames[wikigaz_altnames["pid"] == wikipedia_title].altname.unique())
+            for wa in wgaz_altnames:
+                altnames[wa] = "wikigaz"
 
         re_appo = r"(.+)(:?\(.+\)|(\,.+))$"
         if type(nativelabel) == str:
@@ -165,7 +195,7 @@ if not Path("../processed/wikidata/altname_gb_gazetteer.pkl").exists():
     dAltnames = dict()
 
     for i, row in britdf.iterrows():
-        dAltnames = obtain_altnames(row["english_label"], row["alias_dict"], row["nativelabel"], row["wikititle"], row["geonamesIDs"], geonames_altnames)
+        dAltnames = obtain_altnames(row["english_label"], row["alias_dict"], row["nativelabel"], row["wikititle"], row["geonamesIDs"], wikigaz_altnames, geonames_altnames)
         for a in dAltnames:
             wkid.append(row["wikidata_id"])
             altname.append(a)
