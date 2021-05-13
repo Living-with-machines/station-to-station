@@ -1,6 +1,13 @@
 <div align="center">
-    <h1>Station to Station</h1>
-    <h2>Linking and enriching historical British railway data</h2>
+    <h1>Station to Station:<br>
+        Linking and enriching historical British railway data</h1>
+ 
+<p align="center">
+    <a href="https://github.com/Living-with-machines/station-to-station/blob/master/LICENSE">
+        <img alt="License" src="https://img.shields.io/badge/License-MIT-yellow.svg">
+    </a>
+    <br/>
+</p>
 </div>
 
 This repository provides underlying code and materials for the paper `Station to Station: Linking and enriching historical British railway data`.
@@ -8,16 +15,17 @@ This repository provides underlying code and materials for the paper `Station to
 ## Table of contents
 
 This is the main directory for Place Linking experiments, which contains:
-* `bho/`: parsing and processing of BHO Lewis' Topographical Dictionaries.
-* `quick/`: parsing and processing of Quick's Railway Guide.
+* `resources/`: folder where required data and resources are stored.
+* `processed/`: folder where processed data and resources are stored.
+* `quick/`: parsing and processing of Quick's _Chronology_.
 * `wikidata`: processing of Wikidata, to be used in linking experiments.
 * `wikipediaprocessing`: processing of Wikipedia, to be used in linking experiments.
-* `toponym_matching`: DeezyMatch and its inputs and ouptuts.
+* `toponym_matching`: scripts to create the DeezyMatch datasets and models.
 * `toponym_resolution`: where toponym resolution happens.
 
-See how to reproduce a specific experiment in the subsections below.
+## Installation
 
-## Quicks to Wikidata
+## Directory structure
 
 To reproduce this experiment:
 
@@ -41,3 +49,54 @@ To reproduce this experiment:
     * Quick's main entries as queries; Wikidata British full gazetteer entries as candidates.
     
 4. Find Wikidata candidates for Quick's queries ([notebook](https://github.com/Living-with-machines/PlaceLinking/blob/quicks_wiki_alignment/toponym_resolution/quicks_wikidata/quicks_to_wikidata_candrank.ipynb)). This notebook returns a dataframe with the structured Quick's dataset with the best Wikidata candidates for each entry.
+
+## Datasets and resources
+
+## Evaluation results
+
+## Citation
+
+```
+Kaspar Beelen, Mariona Coll Ardanuy, Jon Lawrence, Katherine McDonough, Federico Nanni, Joshua Rhodes, Giorgia Tolfo, and Daniel CS Wilson. "Station to Station: linking and enriching historical British railway data." In XXXXXX (XXXX), pp. XXX--XXX. 2021.
+```
+
+```
+@inproceedings{lwm-station-to-station-2021,
+    title = "Station to Station: linking and enriching historical British railway data",
+    author = "Beelen, Kaspar and
+      Coll Ardanuy, Mariona and
+      Lawrence, Jon and
+      McDonough, Katherine and
+      Nanni, Federico and
+      Rhodes, Joshua and
+      Tolfo, Giorgia and
+      Wilson, Daniel CS",
+    booktitle = "XXXXXXXXXXX",
+    year = "2021",
+    address = "XXXXXXX",
+    publisher = "XXXXXXX",
+    url = "XXXXXXX",
+    pages = "XXX--XXX",
+}
+```
+
+#### Author contributions
+In the paper, authors are listed in alphabetical order. The following are sorted by amount of contribution and, if equal, alphabetically:
+* **Conceptualization:** KM, JL, DW
+* **Methodology:** MCA, FN, KB
+* **Implementation:** MCA, FN, KB, GT
+* **Reprodducibility:** FN, MCA
+* **Historical Analysis:** KB, KM, JL, JR, DW
+* **Data Acquisition and Curation:** MCA, GT, FN, DW
+* **Annotation:** JL KM
+* **Project Management:** MCA
+* **Writing and Editing:** all authors
+ 
+## Acknowledgements
+
+We thank Ted Cheers and the Railway and Canal Historical Society for sharing the OOXML-formatted _Railway Passenger Stations in Great Britain: a Chronology_ byMichael Quick. Work for this paper was produced as part of Living with Machines. This project, funded by the UK Research and Innovation (UKRI) Strategic Priority Fund, is a multidisciplinary collaboration delivered by the Arts and Humanities Research Council (AHRC), with The Alan Turing Institute, the British Library and the Universities of Cambridge, East Anglia, Exeter, and Queen Mary University of London.
+
+## License
+
+- The source code is licensed under MIT License.
+- Copyright (c) 2020 The Alan Turing Institute, British Library Board, Queen Mary University of London, University of Exeter, University of East Anglia and University of Cambridge.
