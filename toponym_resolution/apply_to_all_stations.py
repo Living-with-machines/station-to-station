@@ -85,7 +85,7 @@ if not Path("../processed/resolution/candranking_" + setting + ".pkl").is_file()
 gazetteer_df = pd.read_csv("../processed/wikidata/gb_gazetteer.csv", header=0, index_col=0, low_memory=False)
 
 import pickle
-with open("/resources/wikipedia/extractedResources/overall_entity_freq.pickle", 'rb') as fp:
+with open("../processed/wikipedia/overall_entity_freq.pickle", 'rb') as fp:
     wikipedia_entity_overall_dict = pickle.load(fp)
     
     
