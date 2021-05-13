@@ -38,9 +38,9 @@ All needed files are provided in this GitHub repository, you do not need to do a
 ### Wikigaz
 
 * Download the minimal English WikiGazetteer (`wikigaz_en_basic.pkl`) from our Zenodo repository **[TODO here](Add link to Zenodo)**, and store it in `station-to-station/processed/wikigaz/`.
-    > **Note:** You can generate the complete WikiGazetteer from scratch following the instructions [here](https://github.com/Living-with-machines/lwm_GIR19_resolving_places/tree/master/gazetteer_construction) and obtain its minimal form running the code [here](https://github.com/Living-with-machines/LwM_SIGSPATIAL2020_ToponymMatching/blob/master/processing/gazetteers/generate_wikigazetteers.ipynb).
+    > **Note:** You can generate the complete WikiGazetteer from scratch following the instructions [here](https://github.com/Living-with-machines/lwm_GIR19_resolving_places/tree/dev/gazetteer_construction) and obtain its minimal form running the code [here](https://github.com/Living-with-machines/LwM_SIGSPATIAL2020_ToponymMatching/blob/master/processing/gazetteers/generate_wikigazetteers.ipynb).
 
 ### Wikipedia
 
 * Download the Wikipedia inlinks table (`overall_entity_freq.pickle`) from our Zenodo repository **[TODO here](Add link to Zenodo)**, and store it in `station-to-station/processed/wikipedia/`.
-    > **Note:** You can generate this table by following our code to process a Wikidata dump from scratch, extracting and structuring pages, mention/entity statistics and in- /out-link information, following the instructions [here](https://github.com/Living-with-machines/station-to-station/tree/31-prepare-release/wikipediaprocessing).
+    > **Note:** You can generate this table by following our code to process a Wikidata dump from scratch, extracting and structuring pages, mention/entity statistics and in- /out-link information, following the instructions [here](https://github.com/Living-with-machines/station-to-station/tree/dev/wikipediaprocessing).
