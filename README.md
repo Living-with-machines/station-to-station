@@ -25,7 +25,9 @@ This is the main directory for Place Linking experiments, which contains:
 
 ## Installation
 
-## Directory structure
+**[TO DO]**
+
+## Experiments
 
 **[TO DO: Update]**
 
@@ -56,8 +58,6 @@ To reproduce this experiment:
 
 All produced datasets and resources (including the DeezyMatch models) can be found in Zenodo [here](**TODO add link**).
 
-## Evaluation results
-
 ## Citation
 
 Please acknowledge our work if you use the code or derived data in your work, by citing:
@@ -66,7 +66,7 @@ Please acknowledge our work if you use the code or derived data in your work, by
 Kaspar Beelen, Mariona Coll Ardanuy, Jon Lawrence, Katherine McDonough, Federico Nanni, Joshua Rhodes, Giorgia Tolfo, and Daniel CS Wilson. "Station to Station: linking and enriching historical British railway data." In XXXXXX (XXXX), pp. XXX--XXX. 2021.
 ```
 
-```
+```bibtex
 @inproceedings{lwm-station-to-station-2021,
     title = "Station to Station: linking and enriching historical British railway data",
     author = "Beelen, Kaspar and
