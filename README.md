@@ -27,6 +27,8 @@ This is the main directory for Place Linking experiments, which contains:
 
 ## Directory structure
 
+**[TO DO: Update]**
+
 To reproduce this experiment:
 
 1. Process the Quicks dataset ([readme](https://github.com/Living-with-machines/PlaceLinking/blob/quicks_wiki_alignment/quick/README.md) and [notebook](https://github.com/Living-with-machines/PlaceLinking/blob/quicks_wiki_alignment/quick/process_railway_stations.ipynb)). This step will output:
@@ -52,9 +54,13 @@ To reproduce this experiment:
 
 ## Datasets and resources
 
+All produced datasets and resources (including the DeezyMatch models) can be found in Zenodo [here](**TODO add link**).
+
 ## Evaluation results
 
 ## Citation
+
+Please acknowledge our work if you use the code or derived data in your work, by citing:
 
 ```
 Kaspar Beelen, Mariona Coll Ardanuy, Jon Lawrence, Katherine McDonough, Federico Nanni, Joshua Rhodes, Giorgia Tolfo, and Daniel CS Wilson. "Station to Station: linking and enriching historical British railway data." In XXXXXX (XXXX), pp. XXX--XXX. 2021.
