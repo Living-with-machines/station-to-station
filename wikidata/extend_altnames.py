@@ -212,9 +212,9 @@ if not Path("../processed/wikidata/altname_gb_gazetteer.pkl").exists():
 
     wkdtgazetteer = wkdtgazetteer.drop_duplicates(subset = ['wkid', 'altname'])
     wkdtgazetteer = wkdtgazetteer[wkdtgazetteer['altname'].notna()]
-    wkdtgazetteer.to_pickle("../processed/wikidata/altname_gb_gazetteer.pkl")
+    wkdtgazetteer.to_csv("../processed/wikidata/altname_gb_gazetteer.tsv", sep="\t", index=False)
     
-wkdtgazetteer = pd.read_pickle("../processed/wikidata/altname_gb_gazetteer.pkl")
+wkdtgazetteer = pd.read_csv("../processed/wikidata/altname_gb_gazetteer.tsv", sep="\t")
 
 
 ### --------------------------------------------
@@ -223,7 +223,7 @@ wkdtgazetteer = pd.read_pickle("../processed/wikidata/altname_gb_gazetteer.pkl")
 
 print("\nCreating an altnames-centric gazetteer of GB stations.")
 
-wkdtgazetteer = pd.read_pickle("../processed/wikidata/altname_gb_gazetteer.pkl")
+wkdtgazetteer = pd.read_csv("../processed/wikidata/altname_gb_gazetteer.tsv", sep="\t")
 wkdtgazetteer_stn = wkdtgazetteer[wkdtgazetteer["wkid"].isin(stationdf["wikidata_id"])]
 
 # Most railway stations end with "station" or "railway station", but Quick's guide
@@ -245,6 +245,6 @@ wkdtgazetteer_stn = wkdtgazetteer_stn.drop_duplicates(subset = ['wkid', 'altname
 wkdtgazetteer_stn = wkdtgazetteer_stn[wkdtgazetteer_stn['altname'].notna()]
 wkdtgazetteer_stn = wkdtgazetteer_stn.reset_index(drop=True)
 
-wkdtgazetteer_stn.to_pickle("../processed/wikidata/altname_gb_stations_gazetteer.pkl")
+wkdtgazetteer_stn.to_csv("../processed/wikidata/altname_gb_stations_gazetteer.tsv", sep="\t", index=False)
 
 print("\nDone!")

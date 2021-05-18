@@ -44,7 +44,7 @@ def closest_geo(gazetteer_df, c, place_cands, closest):
                 closest = dcands
     return closest
 
-def feature_selection(candrank, df, gazetteer_df, wikipedia_entity_overall_dict,sub_id_there, experiment=True):
+def feature_selection(candrank, df, gazetteer_df, wikipedia_entity_overall_dict, experiment=True):
 
     mainid_column = []
     subid_column = []
@@ -62,9 +62,24 @@ def feature_selection(candrank, df, gazetteer_df, wikipedia_entity_overall_dict,
         place_cands = row["cr_" + candrank + "_places"]
         altnm_cands = row["cr_" + candrank + "_alts"]
         
-        disambiguator_text = row["MainStation"] + ", ".join(row["Disambiguator"]) + " " + row["LocsMapsDescr"][1:-1] + ", ".join(row["Altnames"]) + ", ".join(row["Referenced"])
+        locstext = []
+        if type(row["LocsMapsDescr"]) == str:
+            locstext += [row["LocsMapsDescr"][1:-1]]
+        disambtext = []
+        if type(row["Disambiguator"]) == str:
+            disambtext += literal_eval(row["Disambiguator"])
+        altnmtext = []
+        if type(row["Altnames"]) == str:
+            altnmtext += literal_eval(row["Altnames"])
+        refstext = []
+        if type(row["Referenced"]) == str:
+            refstext += literal_eval(row["Referenced"])
+        
+        disambiguator_text = list(set([row["MainStation"]] + disambtext + locstext + altnmtext + refstext))
+        disambiguator_text = [x for x in disambiguator_text if x]
+        disambiguator_text = [x.title() if x.isupper() else x for x in disambiguator_text]
+        disambiguator_text = ", ".join(disambiguator_text)
         disambiguator_text = re.sub(" +", " ", disambiguator_text).strip()
-        disambiguator_text = disambiguator_text.title()
         disambiguator_text = "" if len(disambiguator_text) <= 5 else disambiguator_text
         
         if type(subst_cands) == float:

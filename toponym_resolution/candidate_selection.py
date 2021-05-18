@@ -20,10 +20,10 @@ def perform_candrank(setting, approach, num_candidates):
     
     if not Path("../processed/resolution/candranking_" + approach + "_" + setting + str(num_candidates) + ".pkl").is_file():
 
-        df = pd.read_pickle("../processed/quicks/quicks_" + setting + ".pkl")
-        alts_df = pd.read_pickle("../processed/quicks/quicks_altname_" + setting + ".pkl")
-        wkdt_df_places = pd.read_pickle("../processed/wikidata/altname_gb_gazetteer.pkl")
-        wkdt_df_stations = pd.read_pickle("../processed/wikidata/altname_gb_stations_gazetteer.pkl")
+        df = pd.read_csv("../processed/quicks/quicks_" + setting + ".tsv", sep="\t")
+        alts_df = pd.read_csv("../processed/quicks/quicks_altname_" + setting + ".tsv", sep="\t")
+        wkdt_df_places = pd.read_csv("../processed/wikidata/altname_gb_gazetteer.tsv", sep="\t")
+        wkdt_df_stations = pd.read_csv("../processed/wikidata/altname_gb_stations_gazetteer.tsv", sep="\t")
 
         # ---------------
         # Skyline

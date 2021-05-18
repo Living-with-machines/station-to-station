@@ -6,6 +6,7 @@ import pyproj
 from pathlib import Path
 import glob
 import ast
+import sys
 import re
 
 
@@ -25,30 +26,36 @@ if not Path("../processed/wikidata/uk_approx_gazetteer.csv").exists():
     for filename in all_files:
         df_temp = pd.read_csv(filename, index_col=None, header=0)
         li.append(df_temp)
+        
+    if not li:
+        print("\n***WARNING:***\n\nYou either don't have the processed version of Wikidata (see readme) or its path is not correct.\nThis script will be skipped. Make sure you follow the instructions in\nhttps://github.com/Living-with-machines/station-to-station/blob/master/resources/README.md\nto make sure you have the files required to be able to run the linking experiments.")
+        print()
+        sys.exit()
 
-    df = pd.concat(li, axis=0, ignore_index=True)
-    df = df.drop(columns=['Unnamed: 0'])
+    else:
+        df = pd.concat(li, axis=0, ignore_index=True)
+        df = df.drop(columns=['Unnamed: 0'])
 
-    def filter_uk(lat, lon, countries):
-        bbox = (-9.05,48.78,2.41,61.28)
-        countries = ast.literal_eval(countries)
-        for c in countries:
-            if c == "Q145": # United Kingdom
+        def filter_uk(lat, lon, countries):
+            bbox = (-9.05,48.78,2.41,61.28)
+            countries = ast.literal_eval(countries)
+            for c in countries:
+                if c == "Q145": # United Kingdom
+                    return True
+                if c == "Q142" or c == "Q31" or c == "Q27": # France and Belgium and Ireland
+                    return False
+            if float(lat) >= bbox[1] and float(lat) <= bbox[3] and float(lon) >= bbox[0] and float(lon) <= bbox[2]:
                 return True
-            if c == "Q142" or c == "Q31" or c == "Q27": # France and Belgium and Ireland
+            else:
                 return False
-        if float(lat) >= bbox[1] and float(lat) <= bbox[3] and float(lon) >= bbox[0] and float(lon) <= bbox[2]:
-            return True
-        else:
-            return False
 
-    mask = df.apply(lambda x: filter_uk(x['latitude'], x['longitude'], x['countries']), axis=1)
-    ukdf = df[mask]
-    ukdf['latitude'] = ukdf['latitude'].astype(float)
-    ukdf['longitude'] = ukdf['longitude'].astype(float)
-    ukdf = ukdf[ukdf['latitude'].notna()]
-    ukdf = ukdf[ukdf['longitude'].notna()]
-    ukdf.to_csv("../processed/wikidata/uk_approx_gazetteer.csv", index=False)
+        mask = df.apply(lambda x: filter_uk(x['latitude'], x['longitude'], x['countries']), axis=1)
+        ukdf = df[mask]
+        ukdf['latitude'] = ukdf['latitude'].astype(float)
+        ukdf['longitude'] = ukdf['longitude'].astype(float)
+        ukdf = ukdf[ukdf['latitude'].notna()]
+        ukdf = ukdf[ukdf['longitude'].notna()]
+        ukdf.to_csv("../processed/wikidata/uk_approx_gazetteer.csv", index=False)
 
 
 # =======================================
