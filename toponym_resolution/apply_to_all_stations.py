@@ -15,6 +15,7 @@ tqdm.pandas()
 import pickle
 
 setting = "allquicks" # dev or test
+num_candidates = 1
 
 
 # -------------------------------
@@ -25,11 +26,9 @@ setting = "allquicks" # dev or test
 if not Path("../processed/resolution/candranking_" + setting + ".pkl").is_file():
 
     df = pd.read_pickle("../processed/quicks/quicks_parsed.pkl")
-    alts_df = pd.read_pickle("../processed/quicks/quicks_altname_" + setting + ".pkl")
-    wkdt_df_places = pd.read_pickle("../processed/wikidata/altname_gb_gazetteer.pkl")
-    wkdt_df_stations = pd.read_pickle("../processed/wikidata/altname_gb_stations_gazetteer.pkl")
-
-    num_candidates = 1
+    alts_df = pd.read_csv("../processed/quicks/quicks_altname_" + setting + ".tsv", sep="\t")
+    wkdt_df_places = pd.read_csv("../processed/wikidata/altname_gb_gazetteer.tsv", sep="\t")
+    wkdt_df_stations = pd.read_csv("../processed/wikidata/altname_gb_stations_gazetteer.tsv", sep="\t")
     
     # ---------------
     # DeezyMatch
@@ -136,7 +135,7 @@ optimal_threshold = 0.0
 keep_acc = 0.0
 for th in np.arange(0, 1, 0.05):
     th = round(th, 2)
-    results_dev_df = pd.read_pickle("../processed/quicks/quicks_dev.pkl")
+    results_dev_df = pd.read_csv("../processed/quicks/quicks_dev.tsv", sep="\t")
     results_dev_df = resolution_methods.our_method_comb(features_dev_df, clf_stations, use_cols_stations, clf_places, use_cols_places, gazetteer_df, th, results_dev_df)
     acc = eval_methods.topres_exactmetrics(results_dev_df, "our_method_comb", False)
     if acc >= keep_acc:
@@ -151,14 +150,14 @@ results_test_df = pd.read_pickle("../processed/quicks/quicks_parsed.pkl")
 # Apply our classification methods:
 results_test_df = resolution_methods.our_method_comb_keepconf(features_test_df, clf_stations, use_cols_stations, clf_places, use_cols_places, gazetteer_df, optimal_threshold, results_test_df)
 
-results_test_df.to_csv("all_quicks_resolved.tsv", sep="\t", index=False)
+results_test_df.to_csv("../processed/resolution/resolved_deezy_match_allquicks_nv1.tsv", sep="\t", index=False)
 
 
 # -------------------------------
 # Filter out ghost entries and cross-references
 # -------------------------------
 
-df = pd.read_csv("all_quicks_resolved.tsv", sep="\t")
+df = pd.read_csv("../processed/resolution/resolved_deezy_match_allquicks_nv1.tsv", sep="\t")
 
 re_altname = r"(\b[A-Z]+(?:[A-Z \&\'\-(St|at|on|upon)])*[A-Z])+\b"
 re_referenced = r"\b(?:[Ss]ee|[Ss]ee under)\b " + re_altname
@@ -224,4 +223,6 @@ df.loc[df.LastClosing == "31 December 2001", "LastClosing"] = "still open"
 df["LastClosing"].fillna("unknown", inplace=True)
 df["FirstOpening"].fillna("unknown", inplace=True)
 
-df.to_csv("all_quicks_resolved_filtered.tsv", sep="\t", index=False)
+df = df.drop(["SubStation", "Description", "Disambiguator", "Companies", "LocsMaps", "LocsMapsDescr"], axis=1)
+df = df.rename({"MainId":"PlaceId", "SubId":"StationId", "MainStation":"Place", "SubStFormatted":"Station", "SubStatin":"AbbrStation", "FirstCompanyWkdt":"Company", "AltCompaniesWkdt":"AltCompanies", "FirstOpening":"Opening", "LastClosing":"Closing"}, axis=1)
+df.to_csv("../processed/resolution/resolved_deezy_match_allquicks_nv1_filtered.tsv", sep="\t", index=False)
