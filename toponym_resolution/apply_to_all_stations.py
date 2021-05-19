@@ -223,6 +223,6 @@ df.loc[df.LastClosing == "31 December 2001", "LastClosing"] = "still open"
 df["LastClosing"].fillna("unknown", inplace=True)
 df["FirstOpening"].fillna("unknown", inplace=True)
 
-df = df.drop(["SubStation", "Description", "Disambiguator", "Companies", "LocsMaps", "LocsMapsDescr"], axis=1)
-df = df.rename({"MainId":"PlaceId", "SubId":"StationId", "MainStation":"Place", "SubStFormatted":"Station", "SubStatin":"AbbrStation", "FirstCompanyWkdt":"Company", "AltCompaniesWkdt":"AltCompanies", "FirstOpening":"Opening", "LastClosing":"Closing"}, axis=1)
+df = df.drop(["Description", "Disambiguator", "Companies", "LocsMaps", "LocsMapsDescr"], axis=1)
+df = df.rename({"MainId":"PlaceId", "SubId":"StationId", "MainStation":"Place", "SubStFormatted":"Station", "SubStation":"AbbrStation", "FirstCompanyWkdt":"Company", "AltCompaniesWkdt":"AltCompanies", "FirstOpening":"Opening", "LastClosing":"Closing"}, axis=1)
 df.to_csv("../processed/resolution/resolved_deezy_match_allquicks_nv1_filtered.tsv", sep="\t", index=False)
