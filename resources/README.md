@@ -43,4 +43,4 @@ All needed files are provided in this GitHub repository, you do not need to do a
 ### Wikipedia
 
 * Download the Wikipedia inlinks table (`overall_entity_freq.pickle`) from our Zenodo repository **[TODO here](Add link to Zenodo)**, and store it in `station-to-station/processed/wikipedia/`.
-    > **Note:** You can generate this table by following our code to process a Wikidata dump from scratch, extracting and structuring pages, mention/entity statistics and in- /out-link information, following the instructions [here](https://github.com/Living-with-machines/station-to-station/tree/dev/wikipediaprocessing).
+    > **Note:** You can generate this table by following our code to process a Wikipedia dump from scratch, extracting and structuring pages, mention/entity statistics and in- /out-link information, following the instructions [here](https://github.com/fedenanni/Reimplementing-TagMe).
