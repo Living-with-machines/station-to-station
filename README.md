@@ -19,7 +19,6 @@ This is the main directory for Place Linking experiments, which contains:
 * `processed/`: folder where processed data and resources are stored.
 * `quick/`: parsing and processing of Quick's _Chronology_.
 * `wikidata`: processing of Wikidata, to be used in linking experiments.
-* `wikipediaprocessing`: processing of Wikipedia, to be used in linking experiments.
 * `toponym_matching`: scripts to create the DeezyMatch datasets and models.
 * `toponym_resolution`: where toponym resolution happens.
 
