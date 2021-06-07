@@ -10,7 +10,7 @@ The scripts in this folder create the Wikidata-derived gazetteers that are used 
 
 ### Section 1: Extracting relevant entities
 
-Run [entity_extraction.py](https://github.com/Living-with-machines/PlaceLinking/blob/18-refactor-wiki-pipeline/wikidata/entity_extraction.py) to extract locations from Wikidata and relevant properties. 
+Run `entity_extraction.py` to extract locations from Wikidata and relevant properties. 
 
 This script is partially based on https://akbaritabar.netlify.app/how_to_use_a_wikidata_dump.
 
@@ -22,20 +22,22 @@ The output is in the form of `.csv` files, stored in `../resources/wikidata/extr
 'wikidata_id', 'english_label', 'instance_of', 'description_set', 'alias_dict', 'nativelabel', 'population_dict', 'area', 'hcounties', 'date_opening', 'date_closing', 'inception_date', 'dissolved_date', 'follows', 'replaces', 'adm_regions', 'countries', 'continents', 'capital_of', 'borders', 'near_water', 'latitude', 'longitude', 'wikititle', 'geonamesIDs', 'toIDs', 'vchIDs', 'vob_placeIDs', 'vob_unitIDs', 'epns', 'os_grid_ref', 'connectswith', 'street_address', 'adjacent_stations', 'ukrailcode', 'connectline', 'connectservice', 'getty', 'heritage_designation', 'ownedby', 'postal_code', 'street_located'
 ```
 
-The [feature_exploration.ipynb] notebook allows exploring Wikidata features for different query entities. It is not part of the pipeline.
+The `feature_exploration.ipynb` notebook allows exploring Wikidata features for different query entities. It is not part of the pipeline.
 
 ### Section 2: Create gazetteers
 
-This step creates Wikidata gazetteers at three levels:
+Run `create_gazetteers.py` to create three different Wikidata gazetteers:
 * Approximate UK gazetteer (point i)
 * GB gazetteer (point ii)
 * GB stations gazetteer (point iii)
 
+The following subsections describe how they are created.
+
 #### i. Create an approximate subset with entities in the UK
 
-In this step, we create an approximate subset with those entities that are in the UK today, to have a more manageable dataset. At this stage we favour recall (we want to make sure we have all relevant entities, we will favour precision at a late point). We perform this filtering in the following manner: we keep Wikidata entities for which the country field is Q145 (United Kingdom) or entities that fall within a very-approximated coordinate boundary box enclosing the UK (because some locations do not have country information), as long as the location's country field is not Q142 (France) or Q31 (Belgium) or Q27 (Ireland), because some locations from these countries fall within the approximate boundary box as well.
+In this step, we create an approximate subset with those entities that are in the UK today, to have a more manageable dataset. At this stage we favour recall (we want to make sure we have all relevant entities, we will favour precision at a late point). We perform this filtering in the following manner: we keep Wikidata entities whose coordinates fall within a very-approximated coordinate boundary box enclosing the UK.
 
-The result is stored as `../resources/wikidata/uk_approx_gazetteer.csv`. See some rows:
+The result is stored as `../processed/wikidata/uk_approx_gazetteer.csv`. See some rows:
 
 | id | wikidata_id | english_label            | instance_of | description_set                                   | alias_dict                                        | ... | heritage_designation | postal_code  |
 |---|-------------|--------------------------|-------------|---------------------------------------------------|---------------------------------------------------|-----|----------------------|--------------|
@@ -47,15 +49,15 @@ The result is stored as `../resources/wikidata/uk_approx_gazetteer.csv`. See som
 
 #### ii. Create a the GB subset
 
-This step creates a strict GB gazetteer using a GB shapefile: Boundary-Line™ ESRI Shapefile from https://osdatahub.os.uk/downloads/open/BoundaryLine (licence: http://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/), by filtering out all locations that are not contained within the polygons described in the shapefile.
+This step creates a strict GB gazetteer using a GB shapefile: Boundary-Line™ ESRI Shapefile from https://osdatahub.os.uk/downloads/open/BoundaryLine (licence: http://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/) (we assume it is stored in `../resources/geoshapefiles/`), by filtering out all locations that are not contained within the polygons described in the shapefile.
 
-The result is stored as `../resources/wikidata/gb_gazetteer.csv`.
+The result is stored as `../processed/wikidata/gb_gazetteer.csv`.
 
 #### iii. Create an approximate subset with GB station entities
 
 In this step, we create a further subset of those entries in the UK that are either instances of station-related classes (manually identified) or their English label has the words `station`, `stop`, or `halt`, not preceded by typical non-railway station stations such as 'police', 'signal', 'power', 'lifeboat', 'pumping', or 'transmitting'.
 
-The result is stored as `../resources/wikidata/gb_stations_gazetteer.csv`. See its first rows:
+The result is stored as `../processed/wikidata/gb_stations_gazetteer.csv`. See some sample rows:
 
 | id | wikidata_id | english_label                             | instance_of | description_set                                   | alias_dict                                        | ... | street_located | postal_code |
 |---|-------------|-------------------------------------------|-------------|---------------------------------------------------|---------------------------------------------------|-----|----------------|-------------|
@@ -68,13 +70,13 @@ The result is stored as `../resources/wikidata/gb_stations_gazetteer.csv`. See i
 
 ### Section 3: Expanding the altnames
 
-Run [extend_altnames.py](https://github.com/Living-with-machines/PlaceLinking/blob/18-refactor-wiki-pipeline/wikidata/extend_altnames.py) to extend the altnames of the British Isles gazetteer and the British Isles stations gazetteer, and to create altname-centric gazetteers (i.e. not WikidataID-centric).
+Run `extend_altnames.py` to extend the altnames of the GB gazetteer and the GB stations gazetteer, and to create altname-centric gazetteers (i.e. instead of WikidataID-centric).
 
 The altnames come from the following sources:
 * Wikidata `alias_dict`, `english_label`, and `native_label` fields.
 * Geonames alternate names.
 
-This results in two different dataframes, one for the British Isles gazetteer (stored in `../resources/wikidata/altname_gb_gazetteer.pkl`) and one for the British Isles stations gazetteer (stored in `../resources/wikidata/altname_gb_stations_gazetteer.pkl`).
+This results in two different dataframes, one for the GB gazetteer (stored in `../processed/wikidata/altname_gb_gazetteer.pkl`) and one for the GB stations gazetteer (stored in `../processed/wikidata/altname_gb_stations_gazetteer.pkl`).
 
 See some rows of the GB stations altnames-centric gazetteer:
 

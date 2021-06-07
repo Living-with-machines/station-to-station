@@ -8,40 +8,34 @@ import glob
 import ast
 import sys
 import re
+import time
 
+
+start_time = time.time()
 
 # ====================================================
 # Create an approximate subset with entities in the UK
 # ====================================================
 
+print("\nCreating the approximate UK gazetteer.")
+
 
 # This function performs an approximate filtering of locations in
-# the United Kingdom. First, it filters based on Wikidata country
-# information: if an entry's country is UK, the entry is automatically
-# accepted, if an entry's country is France and Belgium and Ireland,
-# it's automatically discarded. We specify these three countries (instead
-# of having not a generic "else") because the country information of an
-# entry may be missing, for example. The remaining entrries are filtered
-# by their position within the predefined (very) approximate boundary
-# box. The goal in this step is to reduce the knowledge base to a more
-# manageable size, removing obvious non-GB entries, which we will
-# refine later based on a GB shapefile.
+# the United Kingdom, according to their position within the
+# predefined (very) approximate boundary box. The goal in this
+# step is to reduce the knowledge base to a more manageable size,
+# removing obvious non-GB entries, which we will refine later based
+# on a GB shapefile.
 def filter_uk(lat, lon, countries):
     bbox = (-9.05,48.78,2.41,61.28)
-    countries = ast.literal_eval(countries)
-    for c in countries:
-        if c == "Q145": # United Kingdom
-            return True
-        if c == "Q142" or c == "Q31" or c == "Q27": # France and Belgium and Ireland
-            return False
     if float(lat) >= bbox[1] and float(lat) <= bbox[3] and float(lon) >= bbox[0] and float(lon) <= bbox[2]:
         return True
     else:
         return False
-            
+    
 
-print("\nCreating the approximate UK gazetteer.")
-
+# Read the Wikidata extracted processed files, and store
+# an approximated UK gazetteer:
 if not Path("../processed/wikidata/uk_approx_gazetteer.csv").exists():
     path = r"../resources/wikidata/extracted/"
     Path(path).mkdir(parents=True, exist_ok=True)
@@ -54,7 +48,7 @@ if not Path("../processed/wikidata/uk_approx_gazetteer.csv").exists():
         li.append(df_temp)
         
     if not li:
-        print("\n***WARNING:***\n\nYou either don't have the processed version of Wikidata (see readme) or its path is not correct.\nThis script will be skipped. Make sure you follow the instructions in\nhttps://github.com/Living-with-machines/station-to-station/blob/master/resources/README.md\nto make sure you have the files required to be able to run the linking experiments.")
+        print("\n***WARNING:***\n\nYou either don't have the processed version of Wikidata (see readme) or its path\nis not correct. This script will be skipped. Make sure you follow the instructions in\nhttps://github.com/Living-with-machines/station-to-station/blob/master/resources/README.md\nto make sure you have the files required to be able to run the linking experiments.")
         print()
         sys.exit()
 
@@ -63,13 +57,15 @@ if not Path("../processed/wikidata/uk_approx_gazetteer.csv").exists():
         df = df.drop(columns=['Unnamed: 0'])
 
         mask = df.apply(lambda x: filter_uk(x['latitude'], x['longitude'], x['countries']), axis=1)
-        ukdf = df[mask]
+        ukdf = df.copy()
+        ukdf = ukdf[mask]
         ukdf['latitude'] = ukdf['latitude'].astype(float)
         ukdf['longitude'] = ukdf['longitude'].astype(float)
         ukdf = ukdf[ukdf['latitude'].notna()]
         ukdf = ukdf[ukdf['longitude'].notna()]
         ukdf.to_csv("../processed/wikidata/uk_approx_gazetteer.csv", index=False)
 
+print("Time:", time.time() - start_time)
 
 # =======================================
 # Create generic GB gazetteer
@@ -108,6 +104,8 @@ data_merged_inner = data_merged_inner.drop(columns = ["index_right", "index"])
 # Store GB gazetteer:
 data_merged_inner.to_csv("../processed/wikidata/gb_gazetteer.csv", index=False)
 
+print("Time:", time.time() - start_time)
+
 
 # ====================================================================
 # Create a subset with station entities in GB
@@ -139,3 +137,5 @@ for i, row in gbdf.iterrows():
             stationgaz = stationgaz.append(row, ignore_index=True)
 
 stationgaz.to_csv("../processed/wikidata/gb_stations_gazetteer.csv", index=False)
+
+print("Time:", time.time() - start_time)
