@@ -472,28 +472,27 @@ def convert_feature_file_format(partition,features, filter):
     out.close()
     return out_feat_folder+ outfile
 
-def ranklib(dev_feat_file,test_feat_file,filter,code_folder,cross_val,test_df,feat_comb, num_candidates):
+def ranklib(dev_feat_file,test_feat_file,filter,code_folder,cross_val,test_df):
 
+    pathlib.Path(code_folder+"station-to-station/processed/ranklib/").mkdir(parents=True, exist_ok=True)
     dev = convert_feature_file_format("dev",dev_feat_file,filter=filter)
-    feature_file = "supervised_ranking/features/" + filter + str(num_candidates) + "_" + str(feat_comb) + ".txt"
-    if feat_comb == "allfeatures":
-        feature_file = "supervised_ranking/feature_files/allfeatures.txt"
+    feature_file = code_folder+"station-to-station/resources/ranklib/features.txt"
     feature_used = open(feature_file,"r").read().replace('\n'," ")
 
     if cross_val == True:
-#         print ("feature used:",feature_used)
-        out =  subprocess.check_output(["java", "-jar",code_folder+"station-to-station/toponym_resolution/tools/RankLib-2.13.jar","-train",dev,"-ranker","4","-kcv", "5", "-metric2t","P@1", "-metric2T", "P@1","-feature",feature_file])
+        
+        out =  subprocess.check_output(["java", "-jar",code_folder+"station-to-station/resources/ranklib/RankLib-2.13.jar","-train",dev,"-ranker","4","-kcv", "5", "-metric2t","P@1", "-metric2T", "P@1","-feature",feature_file])
         out = out.decode("utf-8").split("\n")[-15:]
         return out
     else:
         test = convert_feature_file_format("test",test_feat_file,filter="all")
-        out = subprocess.check_output(["java", "-jar",code_folder+"station-to-station/toponym_resolution/tools/RankLib-2.13.jar","-train",dev,"-test",test,"-ranker","4","-metric2t","P@1", "-metric2T", "P@1","-save",code_folder+"station-to-station/toponym_resolution/supervised_ranking/models/model.run","-feature",feature_file])
+        out = subprocess.check_output(["java", "-jar",code_folder+"station-to-station/resources/ranklib/RankLib-2.13.jar","-train",dev,"-test",test,"-ranker","4","-metric2t","P@1", "-metric2T", "P@1","-save",code_folder+"station-to-station/processed/ranklib/model.run","-feature",feature_file])
         train_performance = out.decode("utf-8").split("\n")[-6]
         test_performance = out.decode("utf-8").split("\n")[-4]
         print (train_performance,test_performance)
-        subprocess.check_output(["java", "-jar",code_folder+"station-to-station/toponym_resolution/tools/RankLib-2.13.jar","-load","supervised_ranking/models/model.run","-rank",test,"-indri","supervised_ranking/models/rank.txt","-feature",feature_file])
+        subprocess.check_output(["java", "-jar",code_folder+"station-to-station/resources/ranklib/RankLib-2.13.jar","-load",code_folder+"station-to-station/processed/ranklib/model.run","-rank",test,"-indri",code_folder+"station-to-station/processed/ranklib/rank.txt","-feature",feature_file])
         
-        rank = open("supervised_ranking/models/rank.txt","r").read().strip().split("\n")
+        rank = open(code_folder+"station-to-station/processed/ranklib/rank.txt","r").read().strip().split("\n")
         q_ids = set([int(x.split(" ")[3]) for x in rank])
 
         results = {}
@@ -507,47 +506,3 @@ def ranklib(dev_feat_file,test_feat_file,filter,code_folder,cross_val,test_df,fe
     test_df["ranklib"] = test_df['SubId'].map(results)
     
     return test_df
-
-def parse_cross_val_output(crossval_output):
-    lastline = crossval_output.split("\n")[-2].split("|")[-1].strip()
-    return float(lastline)
-
-def find_combinations(features_folder, filter, fix_list, feature_list, num_candidates):
-    dCombinations = dict()
-    combination = 0
-    for fl in range(1, len(feature_list)+1):
-        for subset in itertools.combinations(feature_list, fl):
-            combination += 1
-            dCombinations[combination] = fix_list + list(subset)
-            with open(features_folder + filter + str(num_candidates) + "_" + str(combination) +".txt", "w") as fw:
-                for s in dCombinations[combination]:
-                    fw.write(s + "\n")
-    return dCombinations
-
-def find_feature_comb(features_folder, filter, cross_val, code_folder, features_dev, features_test_df, results_test_df, num_candidates):
-    
-    fix_features = ["1", "2", "3"]
-    if filter == "exact":
-        fix_features = ["1", "3"]
-    if filter == "notexact":
-        fix_features = ["2"]
-    other_features = ["4", "5", "6", "7", "8", "9"]
-
-    dCombinations = find_combinations(features_folder, filter, fix_features, other_features, num_candidates)
-    
-    keep_best_score = 0.0
-    keep_best_combo = []
-    keep_best_combo_scenario = ""
-    with open("supervised_ranking/feature_combs/" + filter + str(num_candidates) + ".txt", "w") as fw:
-        for feature_combination in tqdm(dCombinations):
-            out = ranklib(features_dev,features_test_df,filter,code_folder,cross_val,results_test_df,feature_combination,num_candidates)
-            output = parse_cross_val_output("\n".join(out))
-            if output >= keep_best_score:
-                keep_best_score = output
-                keep_best_combo = dCombinations[feature_combination]
-                keep_best_combo_scenario = feature_combination
-                fw.write(" ".join(dCombinations[feature_combination]) + "\t" + str(output) + "\n")
-        fw.write("\n")
-        fw.write(str(keep_best_combo_scenario) + ":::" + " ".join(keep_best_combo) + "\t" + str(keep_best_score) + "\n")
-
-    return keep_best_combo_scenario

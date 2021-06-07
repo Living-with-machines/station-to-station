@@ -75,11 +75,10 @@ for num_candidates in num_candidates_list:
 
         code_folder = str(Path("../../").resolve()) + "/"
         filter="all"
-        feature_combination = "allfeatures"
         cross_val = False
 
         # Apply all features combination to test set:
-        results_test_df = resolution_methods.ranklib(features_dev_df,features_test_df,filter,code_folder,cross_val,results_test_df,feature_combination,num_candidates)
+        results_test_df = resolution_methods.ranklib(features_dev_df,features_test_df,filter,code_folder,cross_val,results_test_df)
 
         # -------------------------------
         # Our method simple: one classifier for all entries
