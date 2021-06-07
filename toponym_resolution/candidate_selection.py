@@ -8,15 +8,9 @@ from tqdm.auto import tqdm
 tqdm.pandas()
 
 
-# Options (looped over at the end of the script):
-devtest_settings = ["dev", "test"]
-cr_approaches = ["deezy_match", "partial_match", "perfect_match"]
-ncand_options = [1, 3, 5]
-
-
 # ----------------------------------------
 # Function that finds candidates for each scenario:
-def perform_candrank(setting, approach, num_candidates):
+def perform_candrank(setting, approach, num_candidates, dm_model, inputfile, candrank_metric, candrank_thr):
     
     if not Path("../processed/resolution/candranking_" + approach + "_" + setting + str(num_candidates) + ".pkl").is_file():
 
@@ -47,32 +41,21 @@ def perform_candrank(setting, approach, num_candidates):
             print("Partial match done!")
 
         if approach == "deezy_match":
+            
             # ---------------
             # DeezyMatch
             candidates = "gb_stations"
-            dm_model = "wikidata_gb"
-            inputfile = "input_dfm"
             queries = "quicks_stations"
-            candrank_metric = "faiss" # 'faiss', 'cosine', 'conf'
-            candrank_thr = 3
             quicks_query_column = "SubStFormatted"
             df["cr_deezy_match_stations"] = selection_methods.find_deezymatch_candidates(wkdt_df_stations, df, quicks_query_column, dm_model, inputfile, candidates, queries, candrank_metric, candrank_thr, num_candidates)
 
             candidates = "gb"
-            dm_model = "wikidata_gb"
-            inputfile = "input_dfm"
             queries = "quicks_places"
-            candrank_metric = "faiss" # 'faiss', 'cosine', 'conf'
-            candrank_thr = 3
             quicks_query_column = "MainStation"
             df["cr_deezy_match_places"] = selection_methods.find_deezymatch_candidates(wkdt_df_places, df, quicks_query_column, dm_model, inputfile, candidates, queries, candrank_metric, candrank_thr, num_candidates)
 
             candidates = "gb_stations"
-            dm_model = "wikidata_gb"
-            inputfile = "input_dfm"
             queries = "quicks_altns"
-            candrank_metric = "faiss" # 'faiss', 'cosine', 'conf'
-            candrank_thr = 3
             quicks_query_column = "Altname"
             alts_df["cr_deezy_match_alts"] = selection_methods.find_deezymatch_candidates(wkdt_df_stations, alts_df, quicks_query_column, dm_model, inputfile, candidates, queries, candrank_metric, candrank_thr, num_candidates)
             print("Deezy match done!")
@@ -98,10 +81,29 @@ def perform_candrank(setting, approach, num_candidates):
         Path("../processed/resolution/").mkdir(parents=True, exist_ok=True)
         df.to_pickle("../processed/resolution/candranking_" + approach + "_" + setting + str(num_candidates) + ".pkl")
 
-        
+
 # -----------------------------------
 # Run the different candrank experiments
+
+# Options (looped over at the end of the script):
+devtest_settings = ["dev", "test"]
+cr_approaches = ["deezy_match", "partial_match", "perfect_match"]
+ncand_options = [1, 3, 5]
+
+# DeezyMatch parameters:
+dm_model = "wikidata_gb"
+inputfile = "input_dfm"
+candrank_metric = "faiss" # 'faiss', 'cosine', 'conf'
+candrank_thr = 3
+
+# This is a default value. The threshold if we use one of
+# two metrics should not be higher than 1 (all values are
+# between 0 and 1).
+if candrank_metric in ['cosine', 'conf']:
+    candrank_thr = 1
+
+# Loop over all possible scenarios:
 for setting in devtest_settings:
     for approach in cr_approaches:
         for num_candidates in ncand_options:
-            perform_candrank(setting, approach, num_candidates)
+            perform_candrank(setting, approach, num_candidates, dm_model, inputfile, candrank_metric, candrank_thr)
