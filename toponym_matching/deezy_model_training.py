@@ -1,13 +1,7 @@
 from DeezyMatch import train as dm_train
-from DeezyMatch import plot_log
-from DeezyMatch import finetune as dm_finetune
-from DeezyMatch import inference as dm_inference
 from DeezyMatch import inference as dm_inference
 from DeezyMatch import combine_vecs
-
 from pathlib import Path
-from shutil import copyfile
-
 import pandas as pd
 import numpy as np
 import time

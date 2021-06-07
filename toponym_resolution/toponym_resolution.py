@@ -2,13 +2,6 @@ import pandas as pd
 from pathlib import Path
 from tools import eval_methods, resolution_methods
 import numpy as np
-from sklearn.model_selection import train_test_split, GridSearchCV
-from sklearn.svm import LinearSVC, SVC
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import classification_report, f1_score
-import random
-import itertools
-from tqdm import tqdm
 import pickle
 
 

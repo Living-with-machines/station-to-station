@@ -1,15 +1,9 @@
-import xml.etree.ElementTree as ET
 import pandas as pd
 import zipfile
 import re
-import json
 import collections
 from lxml import etree
-from xml.etree.ElementTree import XML
-from random import shuffle
 import pathlib
-import itertools
-import numpy as np
 import utils
 import random
 

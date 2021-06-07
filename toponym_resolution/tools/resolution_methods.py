@@ -3,10 +3,9 @@ import pandas as pd
 from haversine import haversine
 from ast import literal_eval
 import re
-from sklearn.model_selection import train_test_split, GridSearchCV
-from sklearn.svm import LinearSVC, SVC
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import classification_report, f1_score
+from sklearn.model_selection import GridSearchCV
+from sklearn.svm import SVC
+from sklearn.metrics import classification_report
 from urllib.parse import quote
 import random
 import pathlib

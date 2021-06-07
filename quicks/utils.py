@@ -1,10 +1,7 @@
 import re
-import json
 import string
 import pandas as pd
-import numpy as np
 import dateparser
-from pathlib import Path
 from difflib import SequenceMatcher
 
 # Load dictionary of companies from Quicks intro:

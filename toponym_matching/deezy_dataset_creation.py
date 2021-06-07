@@ -1,15 +1,10 @@
 import argparse
-import re
-import os
-import sys
 import datetime
 import pandas as pd
 from pathlib import Path
-from random import shuffle
 import multiprocessing as mp
 from geopy.distance import great_circle
 from Levenshtein import distance as levDist
-from IPython.display import display, clear_output
 import random
 import tqdm
 
@@ -198,7 +193,7 @@ def generate_cands(place_id):
             
             n_final_wrong = len(final_cands_chall)
 
-            shuffle(challenging_alt_names)
+            random.shuffle(challenging_alt_names)
             
             # we add the positive as well with the label
             for i in range(n_final_wrong):
@@ -235,7 +230,7 @@ def generate_cands(place_id):
 
             n_final_wrong = len(final_cands_trivial)
 
-            shuffle(trivial_alt_names)
+            random.shuffle(trivial_alt_names)
 
             # we add the positive as well with the label
             for i in range(n_final_wrong):
@@ -296,7 +291,7 @@ def process_args(number_cpus, input_gazetteer):
 
     wiki_titles = [x for x in wiki_ids.keys()]
 
-    shuffle(wiki_titles)
+    random.shuffle(wiki_titles)
     
     # we organize it in chunks, each chink has titles_per_chunk titles
     wiki_titles_splits = list(chunks(wiki_titles, titles_per_chunk))

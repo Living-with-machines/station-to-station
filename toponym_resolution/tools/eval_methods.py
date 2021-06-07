@@ -1,9 +1,5 @@
-import pandas as pd
 from haversine import haversine
-from sklearn.metrics import hamming_loss
-from sklearn.metrics import jaccard_score
 from sklearn.metrics import accuracy_score
-from sklearn.metrics import zero_one_loss
 
 # ----------------------------------
 # CANDIDATE SELECTION

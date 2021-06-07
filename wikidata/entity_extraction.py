@@ -1,13 +1,10 @@
 import bz2
 import json
-import glob
 import pandas as pd
 import pydash
-import ast
 from tqdm import tqdm
 import pathlib
 import re
-from pathlib import Path
 
 pathlib.Path('../processed/wikidata/').mkdir(parents=True, exist_ok=True)
 

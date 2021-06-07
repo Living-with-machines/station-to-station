@@ -1,7 +1,6 @@
 import pandas as pd
 import geopandas as gpd
-import shapefile
-from shapely.geometry import shape, Point
+from shapely.geometry import Point
 import pyproj
 from pathlib import Path
 import glob

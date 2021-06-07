@@ -1,18 +1,7 @@
 import pandas as pd
-import glob
-
-from collections import Counter
-from  itertools import chain
-import pydash
 import ast
 import re
 from pathlib import Path
-from wikimapper import WikiMapper
-import wget
-
-import numpy as np
-
-from tqdm.notebook import trange, tqdm
 
 ### --------------------------------------------
 ### Load GB gazetteer
