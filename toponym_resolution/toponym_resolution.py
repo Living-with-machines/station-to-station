@@ -82,7 +82,7 @@ for num_candidates in num_candidates_list:
 
         code_folder = str(Path("../../").resolve()) + "/"
         filter="all"
-        feature_combination = "allfeatures" # Uncomment if you want to use all features 
+        feature_combination = "allfeatures"
         cross_val = False
 
         # Apply all features combination to test set:
