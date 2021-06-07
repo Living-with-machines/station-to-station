@@ -564,7 +564,7 @@ def capture_dates(description):
     capturedClo = list(set(clst+clrv+clfl+clflrv))
     # If "still open" or "still in use" in description, add date of first edition (2001) as closing date:
     if "still open" in description.lower() or "still in use" in description.lower():
-        capturedClo.append("31 December 2001")
+        capturedClo.append("still open")
         
     # If no closing date has been found, add last-in-brad date if exists:
     if not capturedClo:
