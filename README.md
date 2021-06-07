@@ -86,33 +86,24 @@ python -m ipykernel install --user --name py37station --display-name "Python (py
 
 ## Content overview
 
-* Resources, inputs and outputs (see [below](#data-and-resources)):
+* Resources, inputs and outputs:
     * `resources/`: folder where resources required to run the experiments are stored.
     * `processed/`: folder where processed data and resources are stored.
-* Processing code (see [below](#data-processing)):
+* Processing code:
     * `quick/`: code for parsing and processing Quick's _Chronology_.
     * `wikidata`: code for processing Wikidata, to be used in the linking experiments.
     * `toponym_matching`: code to create the DeezyMatch datasets and models.
-* Linking code (see [below](#running-the-experiments)):
+* Linking code:
     * `toponym_resolution`: code for linking Quick's _Chronology_ to Wikidata.
     
-### Data and resources
     
-Follow the instruction in this order:
+To run the experiments, follow the instructions in this order:
 * Resources [README](https://github.com/Living-with-machines/station-to-station/blob/master/resources/README.md).
 * Processed [README](https://github.com/Living-with-machines/station-to-station/blob/master/processed/README.md).
-
-### Data processing
-
-Follow the instruction in this order:
 * Quicks [README](https://github.com/Living-with-machines/station-to-station/blob/master/quicks/README.md).
 * Wikidata [README](https://github.com/Living-with-machines/station-to-station/blob/master/wikidata/README.md).
-* Toponym matching [README](https://github.com/Living-with-machines/station-to-station/blob/master/toponym_matching/README.md)
-
-### Running the experiments
-
-To run the experiments (after having followed the steps described above):
-* Toponym resolution [README](https://github.com/Living-with-machines/station-to-station/blob/master/toponym_resolution/README.md)
+* Toponym matching [README](https://github.com/Living-with-machines/station-to-station/blob/master/toponym_matching/README.md).
+* Toponym resolution [README](https://github.com/Living-with-machines/station-to-station/blob/master/toponym_resolution/README.md).
 
 
 ## Citation
