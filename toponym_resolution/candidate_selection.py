@@ -94,9 +94,8 @@ inputfile = "input_dfm"
 candrank_metric = "faiss" # 'faiss', 'cosine', 'conf'
 candrank_thr = 3
 
-# This is a default value. The threshold if we use one of
-# two metrics should not be higher than 1 (all values are
-# between 0 and 1).
+# The following is a default value. The threshold if we use one of the other
+# two metrics should not be higher than 1.
 if candrank_metric in ['cosine', 'conf']:
     candrank_thr = 1
 
