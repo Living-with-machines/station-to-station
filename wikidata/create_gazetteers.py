@@ -14,6 +14,32 @@ import re
 # Create an approximate subset with entities in the UK
 # ====================================================
 
+
+# This function performs an approximate filtering of locations in
+# the United Kingdom. First, it filters based on Wikidata country
+# information: if an entry's country is UK, the entry is automatically
+# accepted, if an entry's country is France and Belgium and Ireland,
+# it's automatically discarded. We specify these three countries (instead
+# of having not a generic "else") because the country information of an
+# entry may be missing, for example. The remaining entrries are filtered
+# by their position within the predefined (very) approximate boundary
+# box. The goal in this step is to reduce the knowledge base to a more
+# manageable size, removing obvious non-GB entries, which we will
+# refine later based on a GB shapefile.
+def filter_uk(lat, lon, countries):
+    bbox = (-9.05,48.78,2.41,61.28)
+    countries = ast.literal_eval(countries)
+    for c in countries:
+        if c == "Q145": # United Kingdom
+            return True
+        if c == "Q142" or c == "Q31" or c == "Q27": # France and Belgium and Ireland
+            return False
+    if float(lat) >= bbox[1] and float(lat) <= bbox[3] and float(lon) >= bbox[0] and float(lon) <= bbox[2]:
+        return True
+    else:
+        return False
+            
+
 print("\nCreating the approximate UK gazetteer.")
 
 if not Path("../processed/wikidata/uk_approx_gazetteer.csv").exists():
@@ -35,19 +61,6 @@ if not Path("../processed/wikidata/uk_approx_gazetteer.csv").exists():
     else:
         df = pd.concat(li, axis=0, ignore_index=True)
         df = df.drop(columns=['Unnamed: 0'])
-
-        def filter_uk(lat, lon, countries):
-            bbox = (-9.05,48.78,2.41,61.28)
-            countries = ast.literal_eval(countries)
-            for c in countries:
-                if c == "Q145": # United Kingdom
-                    return True
-                if c == "Q142" or c == "Q31" or c == "Q27": # France and Belgium and Ireland
-                    return False
-            if float(lat) >= bbox[1] and float(lat) <= bbox[3] and float(lon) >= bbox[0] and float(lon) <= bbox[2]:
-                return True
-            else:
-                return False
 
         mask = df.apply(lambda x: filter_uk(x['latitude'], x['longitude'], x['countries']), axis=1)
         ukdf = df[mask]
@@ -84,7 +97,7 @@ geodf = gpd.GeoDataFrame(gbdf).set_crs(epsg=27700)
 
 # Inner merge if a location is contained in one of the shapefile polygons (i.e. if a
 # location is in Great Britain):
-print("* Filtering out loctions not in GB.")
+print("* Filtering out locations not in GB.")
 data_merged_inner = gpd.sjoin(shapefile, geodf, how="inner", op='contains')
 cols = data_merged_inner.columns.tolist()
 cols = cols[16:] # Drop shapefile columns
