@@ -12,54 +12,112 @@
 
 This repository provides underlying code and materials for the paper `Station to Station: Linking and enriching historical British railway data`.
 
-## Table of contents
+Table of contents
+--------------------
 
-This is the main directory for Place Linking experiments, which contains:
-* `resources/`: folder where required data and resources are stored.
-* `processed/`: folder where processed data and resources are stored.
-* `quick/`: parsing and processing of Quick's _Chronology_.
-* `wikidata`: processing of Wikidata, to be used in linking experiments.
-* `toponym_matching`: scripts to create the DeezyMatch datasets and models.
-* `toponym_resolution`: where toponym resolution happens.
+- [Installation and setup](#installation)
+- [Description of directories](#directory-structure)
+- [Content overview](#content-overview)
+- [Datasets and resources](#datasets-and-resources)
+
+## Directory structure
+
+Our code relies on the following directory structure:
+
+```bash
+station-to-station/
+├── processed/
+│   ├── deezymatch/
+│   ├── quicks/
+│   ├── resolution/
+│   └── wikidata/
+├── resources/
+│   ├── deezymatch/
+│   ├── geonames/
+│   ├── geoshapefiles/
+│   ├── quicks/
+│   ├── wikidata/
+│   ├── wikigaz/
+│   └── wikipedia/
+├── quicks/
+├── wikidata/
+├── toponym_matching/
+└── toponym_resolution/
+    ├── supervised_ranking/
+    │   ├── feature_files/
+    │   └── models/
+    └── tools/
+```
 
 ## Installation
 
-**[TO DO]**
+* We recommend installation via Anaconda. Refer to [Anaconda website and follow the instructions](https://docs.anaconda.com/anaconda/install/).
 
-## Experiments
+* Create a new environment:
 
-**[TO DO: Update]**
+```bash
+conda create -n py37station python=3.7
+```
 
-To reproduce this experiment:
+* Activate the environment:
 
-1. Process the Quicks dataset ([readme](https://github.com/Living-with-machines/PlaceLinking/blob/quicks_wiki_alignment/quick/README.md) and [notebook](https://github.com/Living-with-machines/PlaceLinking/blob/quicks_wiki_alignment/quick/process_railway_stations.ipynb)). This step will output:
-    * `quick/outputs/quicks_processed.pkl` and `quick/outputs/quicks_processed.tsv`: structured Quick's dataset.
-    * `quick/outputs/quicks_parsed.pkl` and `quick/outputs/quicks_parsed.tsv`: structured Quick's dataset with regex-parsed descriptions.
-    * `toponym_matching/toponyms/quicks_mainst_queries.txt`: Quick's main entries formatted as queries for DeezyMatch.
-    * `toponym_matching/toponyms/quicks_subst_queries.txt`: Quick's sub entries formatted as queries for DeezyMatch.
-    * `toponym_matching/toponyms/quicks_altnames_queries.txt`: Quick's altnames formatted as queries for DeezyMatch.
+```bash
+conda activate py37station
+```
+
+* Clone the repository:
+
+```bash
+git clone https://github.com/Living-with-machines/station-to-station.git
+```
+
+* Install the requirements:
+
+```bash
+cd /path/to/my/station-to-station
+pip install -r requirements.txt
+```
+
+* To allow the newly created `py37station` environment to show up in the notebooks, run:
+
+```bash
+python -m ipykernel install --user --name py37station --display-name "Python (py37station)"
+```
+
+## Content overview
+
+* Resources, inputs and outputs (see [below](#data-and-resources)):
+    * `resources/`: folder where resources required to run the experiments are stored.
+    * `processed/`: folder where processed data and resources are stored.
+* Processing code (see [below](#data-processing)):
+    * `quick/`: code for parsing and processing Quick's _Chronology_.
+    * `wikidata`: code for processing Wikidata, to be used in the linking experiments.
+    * `toponym_matching`: code to create the DeezyMatch datasets and models.
+* Linking code (see [below](#running-the-experiments)):
+    * `toponym_resolution`: code for linking Quick's _Chronology_ to Wikidata.
     
-2. Process Wikidata ([readme](https://github.com/Living-with-machines/PlaceLinking/blob/quicks_wiki_alignment/wikidata/README.md), [script](https://github.com/Living-with-machines/PlaceLinking/blob/quicks_wiki_alignment/wikidata/entity_extraction.py), and [notebook](https://github.com/Living-with-machines/PlaceLinking/blob/quicks_wiki_alignment/wikidata/wikidata_candidate_processing.ipynb)). This step will output:
-    * `wikidata/british_isles.csv`: a subset of Wikidata, containing entities that are located either in the United Kingdom or Ireland.
-    * An altname-centric British Wikidata gazetteer: `toponym_matching/gazetteers/britwikidata_gazetteer.pkl`
-    * An altname-centric British Wikidata gazetteer with only railway stations: `toponym_matching/gazetteers/stnwikidata_gazetteer.pkl`
-    * And the corresponding candidates (aka unique altnames) input file for DeezyMatch's candidate ranker: `toponym_matching/gazetteers/britwikidata_candidates.txt` and `toponym_matching/gazetteers/stnwikidata_candidates.txt`.
+### Data and resources
     
-3. Run DeezyMatch to obtain candidates for queries ([readme](https://github.com/Living-with-machines/PlaceLinking/blob/quicks_wiki_alignment/toponym_matching/README.md) and [script](https://github.com/Living-with-machines/PlaceLinking/blob/quicks_wiki_alignment/toponym_matching/candidate_selection_quicks_wikidata.py)). This step runs four different DeezyMatch scenarios, query/candidate rankings are stored in `toponym_matching/ranker_results/`:
-    * Quick's main entries as queries; Wikidata British railway station gazetteer entries as candidates.
-    * Quick's sub entries as queries; Wikidata British railway station gazetteer entries as candidates.
-    * Quick's alternate names as queries; Wikidata British railway station gazetteer entries as candidates.
-    * Quick's main entries as queries; Wikidata British full gazetteer entries as candidates.
-    
-4. Find Wikidata candidates for Quick's queries ([notebook](https://github.com/Living-with-machines/PlaceLinking/blob/quicks_wiki_alignment/toponym_resolution/quicks_wikidata/quicks_to_wikidata_candrank.ipynb)). This notebook returns a dataframe with the structured Quick's dataset with the best Wikidata candidates for each entry.
+Follow the instruction in this order:
+* Resources [README](https://github.com/Living-with-machines/station-to-station/blob/master/resources/README.md).
+* Processed [README](https://github.com/Living-with-machines/station-to-station/blob/master/processed/README.md).
 
-## Datasets and resources
+### Data processing
 
-All produced datasets and resources (including the DeezyMatch models) can be found in Zenodo [here](**TODO add link**).
+Follow the instruction in this order:
+* Quicks [README](https://github.com/Living-with-machines/station-to-station/blob/master/quicks/README.md).
+* Wikidata [README](https://github.com/Living-with-machines/station-to-station/blob/master/wikidata/README.md).
+* Toponym matching [README](https://github.com/Living-with-machines/station-to-station/blob/master/toponym_matching/README.md)
+
+### Running the experiments
+
+To run the experiments (after having followed the steps described above):
+* Toponym resolution [README](https://github.com/Living-with-machines/station-to-station/blob/master/toponym_resolution/README.md)
+
 
 ## Citation
 
-Please acknowledge our work if you use the code or derived data in your work, by citing:
+Please acknowledge our work if you use the code or derived data, by citing:
 
 ```
 Kaspar Beelen, Mariona Coll Ardanuy, Jon Lawrence, Katherine McDonough, Federico Nanni, Joshua Rhodes, Giorgia Tolfo, and Daniel CS Wilson. "Station to Station: linking and enriching historical British railway data." In XXXXXX (XXXX), pp. XXX--XXX. 2021.
@@ -99,7 +157,9 @@ In the paper, authors are listed in alphabetical order. The following are sorted
  
 ## Acknowledgements
 
-We thank Ted Cheers and the Railway and Canal Historical Society for sharing the OOXML-formatted _Railway Passenger Stations in Great Britain: a Chronology_ byMichael Quick. Work for this paper was produced as part of Living with Machines. This project, funded by the UK Research and Innovation (UKRI) Strategic Priority Fund, is a multidisciplinary collaboration delivered by the Arts and Humanities Research Council (AHRC), with The Alan Turing Institute, the British Library and the Universities of Cambridge, East Anglia, Exeter, and Queen Mary University of London.
+Original data from _Railway Passenger Stations in Great Britain: a Chronology_ by Michael Quick. Used with permission from The Railway and Canal Historical Society ©.
+
+Work for this paper was produced as part of Living with Machines. This project, funded by the UK Research and Innovation (UKRI) Strategic Priority Fund, is a multidisciplinary collaboration delivered by the Arts and Humanities Research Council (AHRC), with The Alan Turing Institute, the British Library and the Universities of Cambridge, East Anglia, Exeter, and Queen Mary University of London.
 
 ## License
 
