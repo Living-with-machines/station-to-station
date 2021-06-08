@@ -19,7 +19,9 @@ Table of contents
 - [Installation and setup](#installation)
 - [Directory structure](#directory-structure)
 - [Content overview](#content-overview)
-- [Datasets and resources](#datasets-and-resources)
+- [Citation](#citation)
+- [Acknowledgements](#acknowledgements)
+- [License](#license)
 
 
 ## Installation
