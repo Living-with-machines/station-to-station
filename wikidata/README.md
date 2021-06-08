@@ -10,7 +10,11 @@ The scripts in this folder create the Wikidata-derived gazetteers that are used 
 
 ### Section 1: Extracting relevant entities
 
-Run `entity_extraction.py` to extract locations from Wikidata and relevant properties. 
+Run `entity_extraction.py` to extract locations from Wikidata and relevant properties, as follows:
+
+```bash
+python entity_extraction.py
+```
 
 This script is partially based on https://akbaritabar.netlify.app/how_to_use_a_wikidata_dump.
 
@@ -26,7 +30,13 @@ The `feature_exploration.ipynb` notebook allows exploring Wikidata features for 
 
 ### Section 2: Create gazetteers
 
-Run `create_gazetteers.py` to create three different Wikidata gazetteers:
+Run `create_gazetteers.py` to create different Wikidata gazetteers, as follows:
+
+```bash
+python create_gazetteers.py
+```
+
+This will create three different gazetteers:
 * Approximate UK gazetteer (point i)
 * GB gazetteer (point ii)
 * GB stations gazetteer (point iii)
@@ -70,7 +80,11 @@ The result is stored as `../processed/wikidata/gb_stations_gazetteer.csv`. See s
 
 ### Section 3: Expanding the altnames
 
-Run `extend_altnames.py` to extend the altnames of the GB gazetteer and the GB stations gazetteer, and to create altname-centric gazetteers (i.e. instead of WikidataID-centric).
+Run `extend_altnames.py` to extend the altnames of the GB gazetteer and the GB stations gazetteer, and to create altname-centric gazetteers (i.e. instead of WikidataID-centric), as follows:
+
+```bash
+python extend_altnames.py
+```
 
 The altnames come from the following sources:
 * Wikidata `alias_dict`, `english_label`, and `native_label` fields.

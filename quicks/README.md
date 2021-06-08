@@ -1,12 +1,17 @@
 # Process Quick's railway guide
 
+**Note:** The code in this folder parses and processes the Quick's _Chronology_ into structured datasets to be used in the experiments. To run this code, you would need access to the `.docx` version of the _Chronology_. However, you can skip this step, because the output files needed for running the experiments are provided in `processed/quicks/`.
+
+
+## Description of the dataset and derived data
+
 Michael Quick's _Railway Passenger Stations in Great Britain: A Chronology_ (_Quicks_ dataset for short) contains detailed information on railway stations in Great Britain, such as on opening and closing dates, companies operating at the stations, railway lines, alternate names, etc.
 
 The pdf is available [online](https://rchs.org.uk/wp-content/uploads/2020/09/Railway-Passenger-Stations-v5.02.pdf) and a docx file is available upon request.
 
 We have manually cropped section 4 out of the Word document and created a new Word document with it, making sure we keep the same format. The resulting Word document has 433 pages and is stored in `station-to-station/resources/quicks/` under the name `quick_section4.docx`.
 
-The python notebook `process_railway_stations.ipynb` reads the Quick's Section 4 Word document and identifies main stations, substations, and their description.
+The python script `process_railway_stations.py` reads the Quick's Section 4 Word document and identifies main stations, substations, and their description.
 
 It returns a dataframe `../processed/quicks/quicks_processed.pkl` with the following columns:
 
@@ -28,4 +33,4 @@ Column description:
 
 Besides, the notebook uses regular expressions on the Description to extract information on disambiguators (e.g. "near London") and railway companies (e.g. "[LY]" for `Lancashire and Yorkshire Railway`), map location information (e.g. "{Saffron Walden - Ashdon}" or "{map 16}"), alternate names (e.g. "GRAHAMSTON" for Barrhead), cross-referenced stations (e.g. "HEREFORD" for Barrs Court Junction), and opening and closing dates. This expanded dataset is stored as `../processed/quicks/quicks_parsed.pkl`.
 
-Finally, we create `dev` and `test` dataframes from manually annotated entries (i.e. Quicks entries manually annotated to Wikidata IDs). The resulting dataframes are stored as `../processed/quicks/quicks_dev.pkl` and `../processed/quicks/quicks_test.pkl`.
+Finally, we create `dev` and `test` dataframes from manually annotated entries (i.e. Quicks entries manually annotated to Wikidata IDs). The resulting dataframes are stored as `../processed/quicks/quicks_dev.tsv` and `../processed/quicks/quicks_test.tsv`.

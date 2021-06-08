@@ -12,42 +12,15 @@
 
 This repository provides underlying code and materials for the paper `Station to Station: Linking and enriching historical British railway data`.
 
+
 Table of contents
 --------------------
 
 - [Installation and setup](#installation)
-- [Description of directories](#directory-structure)
+- [Directory structure](#directory-structure)
 - [Content overview](#content-overview)
 - [Datasets and resources](#datasets-and-resources)
 
-## Directory structure
-
-Our code relies on the following directory structure:
-
-```bash
-station-to-station/
-├── processed/
-│   ├── deezymatch/
-│   ├── quicks/
-│   ├── resolution/
-│   └── wikidata/
-├── resources/
-│   ├── deezymatch/
-│   ├── geonames/
-│   ├── geoshapefiles/
-│   ├── quicks/
-│   ├── wikidata/
-│   ├── wikigaz/
-│   └── wikipedia/
-├── quicks/
-├── wikidata/
-├── toponym_matching/
-└── toponym_resolution/
-    ├── supervised_ranking/
-    │   ├── feature_files/
-    │   └── models/
-    └── tools/
-```
 
 ## Installation
 
@@ -83,6 +56,36 @@ pip install -r requirements.txt
 ```bash
 python -m ipykernel install --user --name py37station --display-name "Python (py37station)"
 ```
+
+
+## Directory structure
+
+Our code relies on the following directory structure:
+
+```bash
+station-to-station/
+├── processed/
+│   ├── deezymatch/
+│   ├── quicks/
+│   ├── ranklib/
+│   ├── resolution/
+│   └── wikidata/
+├── resources/
+│   ├── deezymatch/
+│   ├── geonames/
+│   ├── geoshapefiles/
+│   ├── quicks/
+│   ├── ranklib/
+│   ├── wikidata/
+│   ├── wikigaz/
+│   └── wikipedia/
+├── quicks/
+├── wikidata/
+├── toponym_matching/
+└── toponym_resolution/
+    └── tools/
+```
+
 
 ## Content overview
 

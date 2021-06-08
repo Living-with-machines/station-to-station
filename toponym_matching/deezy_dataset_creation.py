@@ -272,7 +272,7 @@ def main(kilometre_distance, N, titles_per_chunk, out_file):
             out_file.write('\t'.join(el)+"\n")
             
 def process_args(number_cpus, input_gazetteer):
-    gazdf = pd.read_pickle(input_gazetteer)
+    gazdf = pd.read_csv(input_gazetteer, sep="\t")
     gazdf = gazdf[gazdf['altname'].str.len() < 50]
     
     wiki_ids = {row["wkid"]:{"placename":row["altname"], "altnames":set(),"lat":"","lon":""} for i, row in gazdf.iterrows()}
@@ -324,7 +324,7 @@ if __name__ == '__main__':
     
     gazetteer = args.gazetteer # gb or gb_stations
     
-    input_gazetteer = "../processed/wikidata/altname_" + gazetteer + "_gazetteer.pkl"
+    input_gazetteer = "../processed/wikidata/altname_" + gazetteer + "_gazetteer.tsv"
     output_dataset = "../processed/deezymatch/datasets/" + gazetteer + "_toponym_pairs.txt"
     Path("../processed/deezymatch/datasets/").mkdir(parents=True, exist_ok=True)
     

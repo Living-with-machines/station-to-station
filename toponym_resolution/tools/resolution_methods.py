@@ -438,8 +438,8 @@ def convert_feature_file_format(partition,features, filter):
     else:
         outfile = partition+"_all-ranklib.tsv"
 
-    out_feat_folder = "supervised_ranking/feature_files/"
-    out_model_folder = "supervised_ranking/models/"
+    out_feat_folder = "../processed/ranklib/"
+    out_model_folder = "../processed/ranklib/"
     pathlib.Path(out_feat_folder).mkdir(parents=True, exist_ok=True)
     pathlib.Path(out_model_folder).mkdir(parents=True, exist_ok=True)
     out = open(out_feat_folder+ outfile,"w")

@@ -95,6 +95,9 @@ else:
 
     ### Capture opening and closing dates
     parsedf[['FirstOpening', 'LastClosing', 'Interrupted']] = parsedf.apply(lambda row: pd.Series(list(utils.capture_dates(row["Description"]))), axis = 1)
+    
+    ### Drop description from dataframe before storing it
+    parsedf = parsedf.drop(columns=["Description"])
 
     ### Store resulting dataframe
     parsedf.to_pickle('../processed/quicks/quicks_parsed.pkl')
@@ -107,7 +110,6 @@ else:
     annotations = annotations[annotations["Final Wikidata ID"] != "parsing_error"]
     annotations = annotations[annotations["Final Wikidata ID"] != "unknown"]
 
-    annotations = annotations.drop(columns=["DevTest"])
     annotations = annotations.sample(frac=1, random_state=42).reset_index(drop=True)
 
     # Split into train and test:
@@ -118,8 +120,8 @@ else:
     df_dev = annotations[annotations.SubId.isin(train_q)]
     df_test = annotations[annotations.SubId.isin(test_q)]
 
-    df_test = pd.merge(df_test, parsedf, on=["MainId", "SubId", "MainStation", "SubStation", "SubStFormatted", "Description"])
-    df_dev = pd.merge(df_dev, parsedf, on=["MainId", "SubId", "MainStation", "SubStation", "SubStFormatted", "Description"])
+    df_test = pd.merge(df_test, parsedf, on=["MainId", "SubId", "MainStation", "SubStation", "SubStFormatted"])
+    df_dev = pd.merge(df_dev, parsedf, on=["MainId", "SubId", "MainStation", "SubStation", "SubStFormatted"])
 
     df_dev.to_csv('../processed/quicks/quicks_dev.tsv', sep="\t", index=False)
     df_test.to_csv('../processed/quicks/quicks_test.tsv', sep="\t", index=False)

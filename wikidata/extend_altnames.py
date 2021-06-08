@@ -28,8 +28,8 @@ stationdf = pd.read_csv("../processed/wikidata/gb_stations_gazetteer.csv", heade
 # The English WikiGazetteer can be downloaded from https://zenodo.org/record/4034819/: download the .zip. The only file we will need is 'wikigaz_en_basic.pkl', which should be stored in ../resources/wikigaz/.
 print("\nCreating the English WikiGazetteer altnames dataframe.")
 
-if not Path("../resources/wikigaz/wikigaz_altnames.pkl").exists():
-    wikigaz_path = "/resources/wikigazetteer/wikigaz_en_basic.pkl"
+if not Path("../processed/wikidata/wikigaz_altnames.pkl").exists():
+    wikigaz_path = "../resources/wikigaz/wikigaz_en_basic.pkl"
     wikigaz_en = pd.read_pickle(wikigaz_path)
 
     # Filter entries if in British Isles boundary box and altname source is either wikimain or wikiredirect (not accurate,
@@ -40,9 +40,9 @@ if not Path("../resources/wikigaz/wikigaz_altnames.pkl").exists():
 
     wikigaz_altnames = wikigaz_en[["pid", "altname"]]
     wikigaz_altnames = wikigaz_altnames.drop_duplicates(subset=["pid", "altname"], ignore_index = True)
-    wikigaz_altnames.to_pickle("../resources/wikigaz/wikigaz_altnames.pkl")
+    wikigaz_altnames.to_pickle("../processed/wikidata/wikigaz_altnames.pkl")
     
-wikigaz_altnames = pd.read_pickle("../resources/wikigaz/wikigaz_altnames.pkl")
+wikigaz_altnames = pd.read_pickle("../processed/wikidata/wikigaz_altnames.pkl")
         
     
 ### --------------------------------------------
@@ -59,7 +59,7 @@ wikigaz_altnames = pd.read_pickle("../resources/wikigaz/wikigaz_altnames.pkl")
 
 print("\nProcessing geonames altnames.")
 
-if not Path("../resources/geonames/geonames_altnames.pkl").exists():
+if not Path("../processed/wikidata/geonames_altnames.pkl").exists():
     geoaltnames = pd.read_csv("../resources/geonames/alternateNamesV2.txt", sep="\t", names=["alternateNameId", "geonameid", "isolanguage", "alternateName", "isPreferredName", "isShortName", "isColloquial", "isHistoric", "from", "to"], index_col=None, low_memory=False)
 
     # Filter out alternate names that are actually pseudocodes:
@@ -125,9 +125,9 @@ if not Path("../resources/geonames/geonames_altnames.pkl").exists():
 
     # Convert geonames ids to strings:
     geonames_altnames.geonameid = geonames_altnames.geonameid.astype(str)
-    geonames_altnames.to_pickle("../resources/geonames/geonames_altnames.pkl")
+    geonames_altnames.to_pickle("../processed/wikidata/geonames_altnames.pkl")
 
-geonames_altnames = pd.read_pickle("../resources/geonames/geonames_altnames.pkl")
+geonames_altnames = pd.read_pickle("../processed/wikidata/geonames_altnames.pkl")
 
 
 ### --------------------------------------------

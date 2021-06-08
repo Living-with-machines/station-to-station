@@ -16,7 +16,7 @@ gazetteer_df = pd.read_csv("../processed/wikidata/gb_gazetteer.csv", header=0, i
 
 
 # Load pickle with wikipedia inlinks
-with open("../processed/wikipedia/overall_entity_freq.pickle", 'rb') as fp:
+with open("../resources/wikipedia/overall_entity_freq.pickle", 'rb') as fp:
     wikipedia_entity_overall_dict = pickle.load(fp)
 
     
