@@ -15,7 +15,7 @@ python deezy_dataset_creation.py -g gb_stations
 
 ### Train DeezyMatch models
 
-Run [deezy_model_training.py](https://github.com/Living-with-machines/PlaceLinking/blob/fuzzy_matching/toponym_matching/train_DMmodels.ipynb) to train the model we will use to find and rank Wikidata candidates for each entry in Quicks. This will also create vectors for all alternate names in both the `gb` and the `gb_stations` gazetteers.
+Run `deezy_model_training.py` to train the model we will use to find and rank Wikidata candidates for each entry in Quicks. This will also create vectors for all alternate names in both the `gb` and the `gb_stations` gazetteers.
 
 ```bash
 python deezy_model_training.py
