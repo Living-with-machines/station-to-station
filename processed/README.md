@@ -9,11 +9,11 @@ This directory keeps all processed files and resources used in our experiments.
 Since we cannot share the original `.docx` from which we have created the processed and parsed version of Quick's _Chronology_, we instead share the structured version (and derived data) of the dataset (resulting from running the code in `station-to-station/quicks/`), that we use in our experiments. You can download the files from [here](https://thealanturininstitute-my.sharepoint.com/:u:/g/personal/mcollardanuy_turing_ac_uk/EapaANpL-XBKk9CYrXBD7_ABEPypzWAlhGMhiJyBM_p9uA?e=o1ykq9).
 
 Please download the compressed file `processed.zip` and unzip it, so the following directories hang directly from the `processed/` folder:
-* [`deezymatch/`]
-* [`quicks/`]
-* [`ranklib/`]
-* [`resolution/`]
-* [`wikidata/`]
+* `deezymatch/`
+* `quicks/`
+* `ranklib/`
+* `resolution/`
+* `wikidata/`
 
 Only the `quicks/` directory should contain files.
 
