@@ -4,9 +4,9 @@ The scripts in this folder create the Wikidata-derived gazetteers that are used 
 
 ### Table of contents
 
-- [Entity extraction](#section-1-extracting-relevant-entities)
-- [Create gazetteers](#section-2-create-gazetteers)
-- [Extend altnames](#section-3-expanding-the-altnames)
+- [Section 1: Extracting relevant entities](#section-1-extracting-relevant-entities)
+- [Section 2: Create gazetteers](#section-2-create-gazetteers)
+- [Section 3: Expanding the altnames](#section-3-expanding-the-altnames)
 
 ### Section 1: Extracting relevant entities
 
