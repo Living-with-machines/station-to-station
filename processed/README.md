@@ -15,6 +15,8 @@ Please download the compressed file `processed.zip` and unzip it, so the followi
 * `resolution/`
 * `wikidata/`
 
+**[WARNING]** Note that the these directories should be located **directly under** the main `processed/` folder (not `processed/processed/`).
+
 Only the `quicks/` directory should contain files.
 
 This is the file structure **before** running any experiments:
