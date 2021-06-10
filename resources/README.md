@@ -18,6 +18,8 @@ Download the compressed file `resources.zip` and unzip it, so the following dire
 * `wikigaz/`
 * `wikipedia/`
 
+**[WARNING]** Note that the these directories should be located **directly under** the main `resources/` folder (not `resources/resources/`).
+
 You will realize that some of the directories will be empty. This is because we cannot share all the resources we used in our experiments. Please follow the instructions below to obtain the remaining files and store them in the right location.
 
 ## Obtain remaining resources
