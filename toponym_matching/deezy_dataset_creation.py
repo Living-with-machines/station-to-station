@@ -1,15 +1,10 @@
 import argparse
-import re
-import os
-import sys
 import datetime
 import pandas as pd
 from pathlib import Path
-from random import shuffle
 import multiprocessing as mp
 from geopy.distance import great_circle
 from Levenshtein import distance as levDist
-from IPython.display import display, clear_output
 import random
 import tqdm
 
@@ -198,7 +193,7 @@ def generate_cands(place_id):
             
             n_final_wrong = len(final_cands_chall)
 
-            shuffle(challenging_alt_names)
+            random.shuffle(challenging_alt_names)
             
             # we add the positive as well with the label
             for i in range(n_final_wrong):
@@ -235,7 +230,7 @@ def generate_cands(place_id):
 
             n_final_wrong = len(final_cands_trivial)
 
-            shuffle(trivial_alt_names)
+            random.shuffle(trivial_alt_names)
 
             # we add the positive as well with the label
             for i in range(n_final_wrong):
@@ -277,7 +272,7 @@ def main(kilometre_distance, N, titles_per_chunk, out_file):
             out_file.write('\t'.join(el)+"\n")
             
 def process_args(number_cpus, input_gazetteer):
-    gazdf = pd.read_pickle(input_gazetteer)
+    gazdf = pd.read_csv(input_gazetteer, sep="\t")
     gazdf = gazdf[gazdf['altname'].str.len() < 50]
     
     wiki_ids = {row["wkid"]:{"placename":row["altname"], "altnames":set(),"lat":"","lon":""} for i, row in gazdf.iterrows()}
@@ -296,7 +291,7 @@ def process_args(number_cpus, input_gazetteer):
 
     wiki_titles = [x for x in wiki_ids.keys()]
 
-    shuffle(wiki_titles)
+    random.shuffle(wiki_titles)
     
     # we organize it in chunks, each chink has titles_per_chunk titles
     wiki_titles_splits = list(chunks(wiki_titles, titles_per_chunk))
@@ -316,7 +311,7 @@ if __name__ == '__main__':
                     help="Gazetter from which to create the toponym matching dataset. Options:\n*british_isles\n*british_isles_stations", required=True)
     parser.add_argument("-n", "--number_cpus", default=-1, 
                     help="Number of CPUs to be used for processing. Default: -1 (use all)")
-    parser.add_argument("-tc", "--titles_per_chunk", default=100, 
+    parser.add_argument("-tc", "--titles_per_chunk", default=5000, 
                     help="Number of titles per chunk")
     parser.add_argument("-km", "--kilometre_distance", default=50, 
                     help="Minimum distance of negative toponym pair")
@@ -327,11 +322,11 @@ if __name__ == '__main__':
     number_cpus = int(args.number_cpus) # Use all
     titles_per_chunk = int(args.titles_per_chunk)
     
-    gazetteer = args.gazetteer # british_isles or british_isles_stations
+    gazetteer = args.gazetteer # gb or gb_stations
     
-    input_gazetteer = "../processed/wikidata/altname_" + gazetteer + "_gazetteer.pkl"
+    input_gazetteer = "../processed/wikidata/altname_" + gazetteer + "_gazetteer.tsv"
     output_dataset = "../processed/deezymatch/datasets/" + gazetteer + "_toponym_pairs.txt"
-    Path(output_dataset).mkdir(parents=True, exist_ok=True)
+    Path("../processed/deezymatch/datasets/").mkdir(parents=True, exist_ok=True)
     
     output_file = open(output_dataset, "w")
     N, wiki_titles, wiki_titles_splits, wiki_ids, altnames = process_args(number_cpus, input_gazetteer)

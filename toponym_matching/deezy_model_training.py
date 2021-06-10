@@ -1,40 +1,21 @@
 from DeezyMatch import train as dm_train
-from DeezyMatch import plot_log
-from DeezyMatch import finetune as dm_finetune
-from DeezyMatch import inference as dm_inference
 from DeezyMatch import inference as dm_inference
 from DeezyMatch import combine_vecs
-
 from pathlib import Path
-from shutil import copyfile
-
 import pandas as pd
 import numpy as np
 import time
 
 # --------------------------------------
-# TRAIN THE BRITISH ISLES DEEZYMATCH MODEL
+# TRAIN THE GB DEEZYMATCH MODEL
 # --------------------------------------
 
 # If model does not exist already, train a new model:
-if not Path('../processed/deezymatch/models/wikidata_british_isles/wikidata_british_isles.model').is_file():
+if not Path('../processed/deezymatch/models/wikidata_gb/wikidata_gb.model').is_file():
     # train a new model
     dm_train(input_file_path="../resources/deezymatch/input_dfm.yaml",
-         dataset_path="../processed/deezymatch/datasets/british_isles_toponym_pairs.txt",
-         model_name="wikidata_british_isles")
-    
-
-# --------------------------------------
-# FINE-TUNE THE BRITISH ISLES DEEZYMATCH MODEL WITH THE STATIONS DATASET
-# --------------------------------------
-
-if not Path('../processed/deezymatch/models/wikidata_british_isles_stations/wikidata_british_isles_stations.model').is_file():
-# fine-tune a pretrained model stored at pretrained_model_path and pretrained_vocab_path 
-    dm_finetune(input_file_path="../resources/deezymatch/input_dfm.yaml", 
-            dataset_path="../processed/deezymatch/datasets/british_isles_stations_toponym_pairs.txt", 
-            model_name="wikidata_british_isles_stations",
-            pretrained_model_path="../processed/deezymatch/models/wikidata_british_isles/wikidata_british_isles.model", 
-            pretrained_vocab_path="../processed/deezymatch/models/wikidata_british_isles/wikidata_british_isles.vocab")
+         dataset_path="../processed/deezymatch/datasets/gb_toponym_pairs.txt",
+         model_name="wikidata_gb")
 
 
 # --------------------------------------
@@ -86,34 +67,23 @@ def findcandidates(candidates, dm_model, inputfile):
 ##### IN USE
         
 # Generate candidate vectors for the British Isles stations gazetteer
-wkgazetteer = pd.read_pickle("../processed/wikidata/altname_british_isles_stations_gazetteer.pkl")
+wkgazetteer = pd.read_csv("../processed/wikidata/altname_gb_stations_gazetteer.tsv", sep="\t")
 unique_placenames_array = list(set(list(np.array(wkgazetteer["altname"]))))
-format_for_candranker("../processed/deezymatch/candidate_toponyms/british_isles_stations", unique_placenames_array)
+format_for_candranker("../processed/deezymatch/candidate_toponyms/gb_stations", unique_placenames_array)
 
-candidates = "british_isles_stations"
-dm_model = "wikidata_british_isles_stations"
-inputfile = "input_dfm"
-
-findcandidates(candidates, dm_model, inputfile)
-        
-# Generate candidate vectors for the British Isles stations gazetteer
-wkgazetteer = pd.read_pickle("../processed/wikidata/altname_british_isles_stations_gazetteer.pkl")
-unique_placenames_array = list(set(list(np.array(wkgazetteer["altname"]))))
-format_for_candranker("../processed/deezymatch/candidate_toponyms/british_isles_stations", unique_placenames_array)
-
-candidates = "british_isles_stations"
-dm_model = "wikidata_british_isles"
+candidates = "gb_stations"
+dm_model = "wikidata_gb"
 inputfile = "input_dfm"
 
 findcandidates(candidates, dm_model, inputfile)
 
 # Generate candidate vectors for the British Isles gazetteer
-wkgazetteer = pd.read_pickle("../processed/wikidata/altname_british_isles_gazetteer.pkl")
+wkgazetteer = pd.read_csv("../processed/wikidata/altname_gb_gazetteer.tsv", sep="\t")
 unique_placenames_array = list(set(list(np.array(wkgazetteer["altname"]))))
-format_for_candranker("../processed/deezymatch/candidate_toponyms/british_isles", unique_placenames_array)
+format_for_candranker("../processed/deezymatch/candidate_toponyms/gb", unique_placenames_array)
 
-candidates = "british_isles"
-dm_model = "wikidata_british_isles"
+candidates = "gb"
+dm_model = "wikidata_gb"
 inputfile = "input_dfm"
 
 findcandidates(candidates, dm_model, inputfile)

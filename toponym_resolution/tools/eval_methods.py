@@ -1,15 +1,11 @@
-import pandas as pd
 from haversine import haversine
-from sklearn.metrics import hamming_loss
-from sklearn.metrics import jaccard_score
 from sklearn.metrics import accuracy_score
-from sklearn.metrics import zero_one_loss
 
 # ----------------------------------
 # CANDIDATE SELECTION
 # ----------------------------------
 
-def get_true_and_ranking(row,approach, relv_cols, reverse, exact_station):
+def get_true_and_ranking(row,approach, relv_cols, exact_station):
     # Combine candidates from different columns:
     dCandidates = dict()
     for rc in relv_cols:
@@ -25,19 +21,19 @@ def get_true_and_ranking(row,approach, relv_cols, reverse, exact_station):
     if exact_station == False:
         true = true.replace("ppl:", "")
         true = true.replace("opl:", "")
-    ranking = [[k,v] for k, v in sorted(dCandidates.items(), key=lambda item: item[1], reverse = reverse)]
+    ranking = [[k,v] for k, v in sorted(dCandidates.items(), key=lambda item: item[1], reverse=True)]
     return true, ranking
 
-def isRetrieved(row, approach, relv_cols, reverse, exact_station):
-    true, ranking = get_true_and_ranking(row, approach, relv_cols, reverse, exact_station)
+def isRetrieved(row, approach, relv_cols, exact_station):
+    true, ranking = get_true_and_ranking(row, approach, relv_cols, exact_station)
     retrieved = [x[0] for x in ranking]
     if true in retrieved:
         return 1.0
     else:
         return 0.0
 
-def pAt(row, approach, relv_cols, reverse, exact_station):
-    true, ranking = get_true_and_ranking(row, approach, relv_cols, reverse, exact_station)
+def pAt(row, approach, relv_cols, exact_station):
+    true, ranking = get_true_and_ranking(row, approach, relv_cols, exact_station)
     positive = 0
     overall = 0
     if len(ranking)>0:
@@ -49,8 +45,8 @@ def pAt(row, approach, relv_cols, reverse, exact_station):
     
     return 0.0 # note that if the correct one is not retrieved at all, we give 0
 
-def avgP (row, approach, relv_cols, reverse, exact_station):
-    true, ranking = get_true_and_ranking(row, approach, relv_cols, reverse, exact_station)
+def avgP (row, approach, relv_cols, exact_station):
+    true, ranking = get_true_and_ranking(row, approach, relv_cols, exact_station)
     positive = 0
     overall = []
     if len(ranking)>0:

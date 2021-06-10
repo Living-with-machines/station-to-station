@@ -1,35 +1,24 @@
 import pandas as pd
-import glob
-
-from collections import Counter
-from  itertools import chain
-import pydash
 import ast
 import re
 from pathlib import Path
-from wikimapper import WikiMapper
-import wget
-
-import numpy as np
-
-from tqdm.notebook import trange, tqdm
 
 ### --------------------------------------------
-### Load British Isles gazetteer
+### Load GB gazetteer
 ### --------------------------------------------
 
-# The british_isles_gazetteer.csv file is an output from entity_extraction.py, which is stored in ../resources/wikidata/.
-print("Loading the British Isles gazetteer.")
-britdf = pd.read_csv("../processed/wikidata/british_isles_gazetteer.csv", header=0, index_col=None, low_memory=False)
+# The gb_gazetteer.csv file is an output from create_gazetteers.py.
+print("Loading the GB gazetteer.")
+britdf = pd.read_csv("../processed/wikidata/gb_gazetteer.csv", header=0, index_col=None, low_memory=False)
 
 
 ### --------------------------------------------
-### Load British Isles stations gazetteer
+### Load GB stations gazetteer
 ### --------------------------------------------
 
-# The british_isles_gazetteer.csv file is an output from entity_extraction.py, which is stored in ../resources/wikidata/.
-print("\nLoading the British Isles stations gazetteer.")
-stationdf = pd.read_csv("../processed/wikidata/british_isles_stations_gazetteer.csv", header=0, index_col=None, low_memory=False)
+# The gb_stations_gazetteer.csv file is an output from create_gazetteers.py.
+print("\nLoading the GB stations gazetteer.")
+stationdf = pd.read_csv("../processed/wikidata/gb_stations_gazetteer.csv", header=0, index_col=None, low_memory=False)
 
 
 ### --------------------------------------------
@@ -39,20 +28,21 @@ stationdf = pd.read_csv("../processed/wikidata/british_isles_stations_gazetteer.
 # The English WikiGazetteer can be downloaded from https://zenodo.org/record/4034819/: download the .zip. The only file we will need is 'wikigaz_en_basic.pkl', which should be stored in ../resources/wikigaz/.
 print("\nCreating the English WikiGazetteer altnames dataframe.")
 
-if not Path("../resources/wikigaz/wikigaz_altnames.pkl").exists():
-    wikigaz_path = "/resources/wikigazetteer/wikigaz_en_basic.pkl"
+if not Path("../processed/wikidata/wikigaz_altnames.pkl").exists():
+    wikigaz_path = "../resources/wikigaz/wikigaz_en_basic.pkl"
     wikigaz_en = pd.read_pickle(wikigaz_path)
 
-    # Filter entries if in British Isles boundary box and altname source is either wikimain or wikiredirect.
-    bbox = (-11.31,48.78,2.41,61.28)
+    # Filter entries if in British Isles boundary box and altname source is either wikimain or wikiredirect (not accurate,
+    # this step is just for speed in linking wikigaz with wikidata).
+    bbox = (-9.05,48.78,2.41,61.28)
     wikigaz_en = wikigaz_en[(wikigaz_en["lat"] >= bbox[1]) & (wikigaz_en["lat"] <= bbox[3]) & (wikigaz_en["lon"] >= bbox[0]) & (wikigaz_en["lon"] <= bbox[2])]
     wikigaz_en = wikigaz_en[wikigaz_en["source"].isin(["wikimain", "wikiredirect"])]
 
     wikigaz_altnames = wikigaz_en[["pid", "altname"]]
     wikigaz_altnames = wikigaz_altnames.drop_duplicates(subset=["pid", "altname"], ignore_index = True)
-    wikigaz_altnames.to_pickle("../resources/wikigaz/wikigaz_altnames.pkl")
+    wikigaz_altnames.to_pickle("../processed/wikidata/wikigaz_altnames.pkl")
     
-wikigaz_altnames = pd.read_pickle("../resources/wikigaz/wikigaz_altnames.pkl")
+wikigaz_altnames = pd.read_pickle("../processed/wikidata/wikigaz_altnames.pkl")
         
     
 ### --------------------------------------------
@@ -60,18 +50,16 @@ wikigaz_altnames = pd.read_pickle("../resources/wikigaz/wikigaz_altnames.pkl")
 ### --------------------------------------------
 
 # We need to download the following files from geonames:
-# * http://download.geonames.org/export/dump/IE.zip
 # * http://download.geonames.org/export/dump/GB.zip
 # * http://download.geonames.org/export/dump/alternateNamesV2.zip
 #
 # Unzip the files, and make sure the following files should be stored in ../resources/geonames/:
 # * alternateNamesV2.txt
 # * GB.txt
-# * IE.txt
 
 print("\nProcessing geonames altnames.")
 
-if not Path("../resources/geonames/geonames_altnames.pkl").exists():
+if not Path("../processed/wikidata/geonames_altnames.pkl").exists():
     geoaltnames = pd.read_csv("../resources/geonames/alternateNamesV2.txt", sep="\t", names=["alternateNameId", "geonameid", "isolanguage", "alternateName", "isPreferredName", "isShortName", "isColloquial", "isHistoric", "from", "to"], index_col=None, low_memory=False)
 
     # Filter out alternate names that are actually pseudocodes:
@@ -105,16 +93,8 @@ if not Path("../resources/geonames/geonames_altnames.pkl").exists():
     gb_altnames = list(set(gb_altnames))
     gb_geonames = pd.DataFrame(gb_altnames, columns = ["geonameid", "alternateName"])
 
-    # Keep asciiname and alternateName from the IE database:
-    ie_geonames = pd.read_csv("../resources/geonames/IE.txt", sep="\t", names=["geonameid", "name", "asciiname", "alternatenames", "latitude", "longitude", "fclass", "fcode", "ccode", "cc2", "admin1", "admin2", "admin3", "admin4", "population", "elevation", "dem", "timezone", "moddate"], index_col=None, low_memory=False)
-    ie_geonames = ie_geonames.drop(columns=["alternatenames", "latitude", "longitude", "fclass", "fcode", "ccode", "cc2", "admin1", "admin2", "admin3", "admin4", "population", "elevation", "dem", "timezone", "moddate"])
-    ie_altnames = list(set(ie_geonames.groupby(['geonameid', 'name']).groups))
-    ie_altnames.extend(list(set(ie_geonames.groupby(['geonameid', 'asciiname']).groups)))
-    ie_altnames = list(set(ie_altnames))
-    ie_geonames = pd.DataFrame(ie_altnames, columns = ["geonameid", "alternateName"])
-
     # Concatenate all altname dataframes and filter relevant rows:
-    geonames_altnames = pd.concat([geoaltnames, gb_geonames, ie_geonames], ignore_index=True)
+    geonames_altnames = pd.concat([geoaltnames, gb_geonames], ignore_index=True)
     geonames_altnames = geonames_altnames.drop_duplicates(ignore_index=True)
 
     # Filter out alternate names if they are not in Latin alphabet:
@@ -145,18 +125,18 @@ if not Path("../resources/geonames/geonames_altnames.pkl").exists():
 
     # Convert geonames ids to strings:
     geonames_altnames.geonameid = geonames_altnames.geonameid.astype(str)
-    geonames_altnames.to_pickle("../resources/geonames/geonames_altnames.pkl")
+    geonames_altnames.to_pickle("../processed/wikidata/geonames_altnames.pkl")
 
-geonames_altnames = pd.read_pickle("../resources/geonames/geonames_altnames.pkl")
+geonames_altnames = pd.read_pickle("../processed/wikidata/geonames_altnames.pkl")
 
 
 ### --------------------------------------------
-### Create an altnames-centric gazetteer of the British Isles
+### Create an altnames-centric gazetteer of GB
 ### --------------------------------------------
 
-print("\nCreating an altnames-centric gazetteer of the British Isles.")
+print("\nCreating an altnames-centric gazetteer of GB.")
 
-if not Path("../processed/wikidata/altname_british_isles_gazetteer.pkl").exists():
+if not Path("../processed/wikidata/altname_gb_gazetteer.pkl").exists():
     def obtain_altnames(elabel, aliases, nativelabel, wikipedia_title, geonamesIDs, wikigaz_altnames, geoaltnames):
 
         altnames = dict()
@@ -195,7 +175,7 @@ if not Path("../processed/wikidata/altname_british_isles_gazetteer.pkl").exists(
 
         return altnames
 
-    # Apply to British Isles gazetteer dataframe:
+    # Apply to GB gazetteer dataframe:
     wkid = []
     altname = []
     source = []
@@ -221,18 +201,18 @@ if not Path("../processed/wikidata/altname_british_isles_gazetteer.pkl").exists(
 
     wkdtgazetteer = wkdtgazetteer.drop_duplicates(subset = ['wkid', 'altname'])
     wkdtgazetteer = wkdtgazetteer[wkdtgazetteer['altname'].notna()]
-    wkdtgazetteer.to_pickle("../processed/wikidata/altname_british_isles_gazetteer.pkl")
+    wkdtgazetteer.to_csv("../processed/wikidata/altname_gb_gazetteer.tsv", sep="\t", index=False)
     
-wkdtgazetteer = pd.read_pickle("../processed/wikidata/altname_british_isles_gazetteer.pkl")
+wkdtgazetteer = pd.read_csv("../processed/wikidata/altname_gb_gazetteer.tsv", sep="\t")
 
 
 ### --------------------------------------------
-### Create an altnames-centric gazetteer of the British Isles stations
+### Create an altnames-centric gazetteer of GB stations
 ### --------------------------------------------
 
-print("\nCreating an altnames-centric gazetteer of the British Isles stations.")
+print("\nCreating an altnames-centric gazetteer of GB stations.")
 
-wkdtgazetteer = pd.read_pickle("../processed/wikidata/altname_british_isles_gazetteer.pkl")
+wkdtgazetteer = pd.read_csv("../processed/wikidata/altname_gb_gazetteer.tsv", sep="\t")
 wkdtgazetteer_stn = wkdtgazetteer[wkdtgazetteer["wkid"].isin(stationdf["wikidata_id"])]
 
 # Most railway stations end with "station" or "railway station", but Quick's guide
@@ -254,6 +234,6 @@ wkdtgazetteer_stn = wkdtgazetteer_stn.drop_duplicates(subset = ['wkid', 'altname
 wkdtgazetteer_stn = wkdtgazetteer_stn[wkdtgazetteer_stn['altname'].notna()]
 wkdtgazetteer_stn = wkdtgazetteer_stn.reset_index(drop=True)
 
-wkdtgazetteer_stn.to_pickle("../processed/wikidata/altname_british_isles_stations_gazetteer.pkl")
+wkdtgazetteer_stn.to_csv("../processed/wikidata/altname_gb_stations_gazetteer.tsv", sep="\t", index=False)
 
 print("\nDone!")

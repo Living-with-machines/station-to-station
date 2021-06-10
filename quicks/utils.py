@@ -1,10 +1,7 @@
 import re
-import json
 import string
 import pandas as pd
-import numpy as np
 import dateparser
-from pathlib import Path
 from difflib import SequenceMatcher
 
 # Load dictionary of companies from Quicks intro:
@@ -564,7 +561,7 @@ def capture_dates(description):
     capturedClo = list(set(clst+clrv+clfl+clflrv))
     # If "still open" or "still in use" in description, add date of first edition (2001) as closing date:
     if "still open" in description.lower() or "still in use" in description.lower():
-        capturedClo.append("31 December 2001")
+        capturedClo.append("still open")
         
     # If no closing date has been found, add last-in-brad date if exists:
     if not capturedClo:
@@ -594,28 +591,6 @@ def capture_dates(description):
         hiatus = True if len(closing_dates) > 1 else False
     
     return first_opening_date, last_closing_date, hiatus
-    
-    
-# -----------------------------------------------
-def format_for_candranker(output_dir, output_filename,  unique_placenames_array):
-    """
-    This function returns the unique alternate names in a given gazetteer
-    in the format required by DeezyMatch candidate ranker.
-    
-    Arguments:
-        output_dir (str): directory where DeezyMatch query files are stored.
-        outpuf_filename (str): filename of the query file.
-        unique_placenames_array (list): unique names that will be Deezy
-                                        Match queries.
-    """
-    gazname = output_dir + output_filename
-
-    with open(gazname + ".txt", "w") as fw:
-        for pl in unique_placenames_array:
-            pl = pl.strip()
-            if pl:
-                pl = pl.replace('"', "")
-                fw.write(pl.strip() + "\t0\tfalse\n")
                 
                 
 # -----------------------------------------------
@@ -634,4 +609,5 @@ def prepare_alt_queries(parsedf, scen, split):
     df_tmp[scen] = names
     df_tmp["MainId"] = mainId
     df_tmp["SubId"] = substId
-    df_tmp.to_pickle("../processed/quicks/quicks_" + scen.lower() + "_" + split.lower() + ".pkl")
+#     df_tmp.to_pickle("../processed/quicks/quicks_" + scen.lower() + "_" + split.lower() + ".pkl")
+    df_tmp.to_csv("../processed/quicks/quicks_" + scen.lower() + "_" + split.lower() + ".tsv", sep="\t", index=False)
