@@ -16,46 +16,58 @@ def perform_candrank(setting, approach, num_candidates, dm_model, inputfile, can
         alts_df = pd.read_csv("../processed/quicks/quicks_altname_" + setting + ".tsv", sep="\t")
         wkdt_df_places = pd.read_csv("../processed/wikidata/altname_gb_gazetteer.tsv", sep="\t")
         wkdt_df_stations = pd.read_csv("../processed/wikidata/altname_gb_stations_gazetteer.tsv", sep="\t")
+        wkdt_df_ids = wkdt_df_places.wkid.unique()
 
         # ---------------
         # Skyline
-        df["skyline"] = df.apply(lambda row: selection_methods.skyline_match(row["Final Wikidata ID"], wkdt_df_places), axis=1)
+        df["skyline"] = df.progress_apply(lambda row: selection_methods.skyline_match(row["Final Wikidata ID"], wkdt_df_ids), axis=1)
         print("Skyline done!")
 
         if approach == "perfect_match":
             # ---------------
             # Perfect Match
-            df["cr_perfect_match_stations"] = df.apply(lambda row: selection_methods.perfect_match(row["SubStFormatted"], wkdt_df_stations), axis=1)
-            df["cr_perfect_match_places"] = df.apply(lambda row: selection_methods.perfect_match(row["MainStation"], wkdt_df_places), axis=1)
-            alts_df["cr_perfect_match_alts"] = alts_df.apply(lambda row: selection_methods.perfect_match(row["Altname"], wkdt_df_stations), axis=1)
+            df["cr_perfect_match_stations"] = df.progress_apply(lambda row: selection_methods.perfect_match(row["SubStFormatted"], wkdt_df_stations), axis=1)
+            df["cr_perfect_match_places"] = df.progress_apply(lambda row: selection_methods.perfect_match(row["MainStation"], wkdt_df_places), axis=1)
+            alts_df["cr_perfect_match_alts"] = alts_df.progress_apply(lambda row: selection_methods.perfect_match(row["Altname"], wkdt_df_stations), axis=1)
             print("Perfect match done!") 
 
         if approach == "partial_match":
             # ---------------
             # Partial Match
-            df["cr_partial_match_stations"] = df.apply(lambda row: selection_methods.partial_match(row["SubStFormatted"], wkdt_df_stations, num_candidates), axis=1)
-            df["cr_partial_match_places"] = df.apply(lambda row: selection_methods.partial_match(row["MainStation"], wkdt_df_places, num_candidates), axis=1)
-            alts_df["cr_partial_match_alts"] = alts_df.apply(lambda row: selection_methods.partial_match(row["Altname"], wkdt_df_stations, num_candidates), axis=1)
+            df["cr_partial_match_stations"] = df.progress_apply(lambda row: selection_methods.partial_match(row["SubStFormatted"], wkdt_df_stations, num_candidates), axis=1)
+            df["cr_partial_match_places"] = df.progress_apply(lambda row: selection_methods.partial_match(row["MainStation"], wkdt_df_places, num_candidates), axis=1)
+            alts_df["cr_partial_match_alts"] = alts_df.progress_apply(lambda row: selection_methods.partial_match(row["Altname"], wkdt_df_stations, num_candidates), axis=1)
             print("Partial match done!")
 
         if approach == "deezy_match":
-            
+
             # ---------------
             # DeezyMatch
             candidates = "gb_stations"
             queries = "quicks_stations"
-            quicks_query_column = "SubStFormatted"
-            df["cr_deezy_match_stations"] = selection_methods.find_deezymatch_candidates(wkdt_df_stations, df, quicks_query_column, dm_model, inputfile, candidates, queries, candrank_metric, candrank_thr, num_candidates)
+            query_column = "SubStFormatted"
+            ranked_candidates = selection_methods.find_deezymatch_candidates(wkdt_df_stations, df, query_column, dm_model, inputfile, candidates, queries, candrank_metric, candrank_thr, num_candidates)
+            df = pd.merge(left=df, right=ranked_candidates, how="left", left_on=query_column, right_on="query")
+            df = df.rename(columns={"wkcands":"cr_deezy_match_stations"})
+            df = df.drop(columns = ["query"])
+            print("Deezy match done!")
 
             candidates = "gb"
             queries = "quicks_places"
-            quicks_query_column = "MainStation"
-            df["cr_deezy_match_places"] = selection_methods.find_deezymatch_candidates(wkdt_df_places, df, quicks_query_column, dm_model, inputfile, candidates, queries, candrank_metric, candrank_thr, num_candidates)
+            query_column = "MainStation"
+            ranked_candidates = selection_methods.find_deezymatch_candidates(wkdt_df_places, df, query_column, dm_model, inputfile, candidates, queries, candrank_metric, candrank_thr, num_candidates)
+            df = pd.merge(left=df, right=ranked_candidates, how="left", left_on=query_column, right_on="query")
+            df = df.rename(columns={"wkcands":"cr_deezy_match_places"})
+            df = df.drop(columns = ["query"])
+            print("Deezy match done!")
 
             candidates = "gb_stations"
             queries = "quicks_altns"
-            quicks_query_column = "Altname"
-            alts_df["cr_deezy_match_alts"] = selection_methods.find_deezymatch_candidates(wkdt_df_stations, alts_df, quicks_query_column, dm_model, inputfile, candidates, queries, candrank_metric, candrank_thr, num_candidates)
+            query_column = "Altname"
+            ranked_candidates = selection_methods.find_deezymatch_candidates(wkdt_df_stations, alts_df, query_column, dm_model, inputfile, candidates, queries, candrank_metric, candrank_thr, num_candidates)
+            alts_df = pd.merge(left=alts_df, right=ranked_candidates, how="left", left_on=query_column, right_on="query")
+            alts_df = alts_df.rename(columns={"wkcands":"cr_deezy_match_alts"})
+            alts_df = alts_df.drop(columns = ["query"])
             print("Deezy match done!")
 
         # Add altnames to dataframe:
@@ -84,9 +96,9 @@ def perform_candrank(setting, approach, num_candidates, dm_model, inputfile, can
 # Run the different candrank experiments
 
 # Options (looped over at the end of the script):
-devtest_settings = ["dev", "test"]
 cr_approaches = ["deezy_match", "partial_match", "perfect_match"]
 ncand_options = [1, 3, 5]
+devtest_settings = ["dev", "test"]
 
 # DeezyMatch parameters:
 dm_model = "wikidata_gb"
@@ -100,7 +112,7 @@ if candrank_metric in ['cosine', 'conf']:
     candrank_thr = 1
 
 # Loop over all possible scenarios:
-for setting in devtest_settings:
-    for approach in cr_approaches:
-        for num_candidates in ncand_options:
+for approach in cr_approaches:
+    for num_candidates in ncand_options:
+        for setting in devtest_settings:
             perform_candrank(setting, approach, num_candidates, dm_model, inputfile, candrank_metric, candrank_thr)

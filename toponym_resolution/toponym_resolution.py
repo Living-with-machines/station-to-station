@@ -6,9 +6,9 @@ import pickle
 
 
 # Options for experiments
-num_candidates_list = [1, 3, 5]
+num_candidates_list = [1, 5] # [1, 3, 5]
 settings = ["test", "dev"]
-candrank_approaches = ["deezy_match", "partial_match", "perfect_match"]
+candrank_approaches = ["deezy_match"] #, "partial_match", "perfect_match"]
 
 
 # Load gazetteer

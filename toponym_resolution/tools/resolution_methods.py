@@ -348,21 +348,40 @@ def our_method_comb_keepconf(df, clf_stations, use_cols_stations, clf_places, us
 # Baselines
 # ----------------------------------
 
-def candrank_most_confident(features_df, test_df):    
+def candrank_most_confident(features_df, test_df):
     
     dResolved = dict()
     for subid in list(set(list(features_df.SubId.unique()))):
         
         predicted_final = ""
         predicted_probs = 0.0
+        
+        # Subset of candidates and their features:
+        tmp_features_df = features_df[features_df.SubId==subid]
+        
+        # Shuffle to avoid a bias towards first entry:
+        tmp_features_df = tmp_features_df.sample(frac=1)
 
-        cands = features_df[features_df.SubId==subid].Candidate.values
+        cands = tmp_features_df.Candidate.values
         
-        predicted_station = cands[features_df[features_df.SubId==subid]['f_0'].argmax()]
-        predicted_place = cands[features_df[features_df.SubId==subid]['f_1'].argmax()]
+        # Pick candidate with higher station/place string confidence.
+        # If more than one, then pick first (randomized three lines
+        # above):
+        predicted_station = cands[tmp_features_df['f_0'].argmax()]
+        predicted_place = cands[tmp_features_df['f_1'].argmax()]
+        predicted_altn = cands[tmp_features_df['f_2'].argmax()]
         
-        dResolved[subid] = predicted_place
-        if predicted_station:
+        station_max_value = tmp_features_df[tmp_features_df["Candidate"] == predicted_station].iloc[0].f_0
+        place_max_value = tmp_features_df[tmp_features_df["Candidate"] == predicted_place].iloc[0].f_1
+        altn_max_value = tmp_features_df[tmp_features_df["Candidate"] == predicted_altn].iloc[0].f_2
+        
+        # Select the candidate for which confidence is higher, favouring
+        # station in case of tie:
+        if place_max_value > station_max_value:
+            dResolved[subid] = predicted_place
+        elif altn_max_value > station_max_value:
+            dResolved[subid] = predicted_altn
+        else:
             dResolved[subid] = predicted_station
         
     test_df["candrank_most_confident"] = test_df['SubId'].map(dResolved)
@@ -377,10 +396,16 @@ def wikipedia_most_relevant(features_df, test_df):
         
         predicted_final = ""
         predicted_probs = 0.0
-
-        cands = features_df[features_df.SubId==subid].Candidate.values
         
-        predicted = cands[features_df[features_df.SubId==subid]['f_8'].argmax()]
+        # Subset of candidates and their features:
+        tmp_features_df = features_df[features_df.SubId==subid]
+        
+        # Shuffle to avoid a bias towards first entry:
+        tmp_features_df = tmp_features_df.sample(frac=1)
+
+        cands = tmp_features_df.Candidate.values
+        
+        predicted = cands[tmp_features_df['f_8'].argmax()]
         
         dResolved[subid] = predicted
         
@@ -396,10 +421,16 @@ def semantically_most_similar(features_df, test_df):
         
         predicted_final = ""
         predicted_probs = 0.0
-
-        cands = features_df[features_df.SubId==subid].Candidate.values
         
-        predicted = cands[features_df[features_df.SubId==subid]['f_3'].argmax()]
+        # Subset of candidates and their features:
+        tmp_features_df = features_df[features_df.SubId==subid]
+        
+        # Shuffle to avoid a bias towards first entry:
+        tmp_features_df = tmp_features_df.sample(frac=1)
+
+        cands = tmp_features_df.Candidate.values
+        
+        predicted = cands[tmp_features_df['f_3'].argmax()]
         
         dResolved[subid] = predicted
         
