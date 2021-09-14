@@ -95,12 +95,12 @@ else:
 
     ### Capture opening and closing dates
     parsedf[['FirstOpening', 'LastClosing', 'Interrupted']] = parsedf.apply(lambda row: pd.Series(list(utils.capture_dates(row["Description"]))), axis = 1)
-    
-    ### Drop description from dataframe before storing it
-    parsedf = parsedf.drop(columns=["Description"])
 
     ### Store resulting dataframe
     parsedf.to_pickle('../processed/quicks/quicks_parsed.pkl')
+    
+    ### Drop description from dataframe for next steps:
+    parsedf = parsedf.drop(columns=["Description"])
 
     ### Create dev and test dataframes
     # **Note:** You will need to have the `annotations.tsv` file in `resources`.

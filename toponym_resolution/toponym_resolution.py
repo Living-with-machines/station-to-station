@@ -31,7 +31,7 @@ for num_candidates in num_candidates_list:
             if not Path(features_file).is_file():
                 df = pd.read_pickle("../processed/resolution/candranking_" + candrank + "_" + setting + str(num_candidates) + ".pkl")
                 exp_df = resolution_methods.feature_selection(candrank, df, gazetteer_df, wikipedia_entity_overall_dict)
-                exp_df.drop_duplicates(subset=['Query','Candidate'], inplace=True)
+                exp_df.drop_duplicates(subset=['SubId','Candidate'], inplace=True)
                 exp_df.to_csv(features_file, sep="\t")
 
     
@@ -53,8 +53,9 @@ for num_candidates in num_candidates_list:
         # Baselines
         # -------------------------------
 
-        # Apply candrank-most-confident baseline
-        results_test_df = resolution_methods.candrank_most_confident(features_test_df, results_test_df)
+        # Apply candrank-most-confident baseline (five runs because it's unstable)
+        for nrun in range(1,6):
+            results_test_df = resolution_methods.candrank_most_confident(features_test_df, results_test_df, nrun)
 
         # Apply wikipedia-most-relevant baseline
         results_test_df = resolution_methods.wikipedia_most_relevant(features_test_df, results_test_df)
@@ -76,9 +77,10 @@ for num_candidates in num_candidates_list:
         code_folder = str(Path("../../").resolve()) + "/"
         filter="all"
         cross_val = False
-
-        # Apply all features combination to test set:
-        results_test_df = resolution_methods.ranklib(features_dev_df,features_test_df,filter,code_folder,cross_val,results_test_df)
+        
+        for nrun in range(1,6): # Five runs because it is unstable
+            # Apply all features combination to test set:
+            results_test_df = resolution_methods.ranklib(features_dev_df,features_test_df,filter,code_folder,cross_val,results_test_df,nrun)
 
         # -------------------------------
         # Our method simple: one classifier for all entries
