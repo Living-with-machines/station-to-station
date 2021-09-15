@@ -347,9 +347,9 @@ def our_method_comb_keepconf(df, clf_stations, use_cols_stations, clf_places, us
     results_test_df["prediction_type"] = results_test_df['SubId'].map(dTypePrediction)
     results_test_df["prediction_latitude"] = results_test_df['SubId'].map(dLatitude)
     results_test_df["prediction_longitude"] = results_test_df['SubId'].map(dLongitude)
-    results_test_df["best_station"] = results_test_df['SubId'].map(dStationPrediction)
+    results_test_df["selected_station"] = results_test_df['SubId'].map(dStationPrediction)
     results_test_df["conf_station"] = results_test_df['SubId'].map(dStationsConf)
-    results_test_df["best_place"] = results_test_df['SubId'].map(dPlacePrediction)
+    results_test_df["selected_place"] = results_test_df['SubId'].map(dPlacePrediction)
     results_test_df["conf_place"] = results_test_df['SubId'].map(dPlacesConf)
     
     return results_test_df

@@ -8,6 +8,7 @@ from pathlib import Path
 from collections import OrderedDict
 from tools import eval_methods, selection_methods, resolution_methods
 from tqdm.auto import tqdm
+from dateutil import parser
 import pickle
 import re
 tqdm.pandas()
@@ -156,7 +157,6 @@ results_test_df = resolution_methods.our_method_comb_keepconf(features_test_df, 
 
 results_test_df.to_csv("../processed/resolution/resolved_deezy_match_allquicks_nv1.tsv", sep="\t", index=False)
 
-
 # -------------------------------
 # Filter out ghost entries and cross-references
 # -------------------------------
@@ -215,7 +215,6 @@ for m_id in main_ids:
                     else:
                         df.loc[df.SubId == m_subid, 'filter_out_ghost_entry'] = False
 
-
 # Replace empty values by "unknown":
 df["LastClosing"].fillna("unknown", inplace=True)
 df["FirstOpening"].fillna("unknown", inplace=True)
@@ -224,10 +223,31 @@ df["prediction_label"].fillna("unknown", inplace=True)
 df["prediction_type"].fillna("unknown", inplace=True)
 df["prediction_latitude"].fillna("unknown", inplace=True)
 df["prediction_longitude"].fillna("unknown", inplace=True)
-df["best_station"].fillna("unknown", inplace=True)
+df["selected_station"].fillna("unknown", inplace=True)
 df["conf_station"].fillna(0.0, inplace=True)
-df["best_place"].fillna("unknown", inplace=True)
+df["selected_place"].fillna("unknown", inplace=True)
 df["conf_place"].fillna(0.0, inplace=True)
+
+# -------------------------------
+# Normalize opening and closing dates
+# -------------------------------
+
+def normalize_dates(i):
+    # Catch errors
+    i = i.replace("Sep tember", "September")
+    i = i.replace("Oct ober", "October")
+    i = i.replace("Dec ember", "December")
+    i = i.replace("Apr il", "April")
+    i = i.replace("29 February 1937", "28 February 1937") # Error in original dataset!
+    if i == "still open":
+        return "still open"
+    elif not i == "unknown":
+        d = parser.parse(i)
+        return d.strftime("%Y-%m-%d")
+    return "unknown"
+
+df["FirstOpening"] = df['FirstOpening'].apply(lambda x: normalize_dates(x))
+df["LastClosing"] = df['LastClosing'].apply(lambda x: normalize_dates(x))
 
 # Store resolved dataset:
 df = df.drop(["Description", "Disambiguator", "Companies", "LocsMaps", "LocsMapsDescr"], axis=1)
