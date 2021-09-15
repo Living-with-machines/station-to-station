@@ -252,4 +252,4 @@ df["LastClosing"] = df['LastClosing'].apply(lambda x: normalize_dates(x))
 # Store resolved dataset:
 df = df.drop(["Description", "Disambiguator", "Companies", "LocsMaps", "LocsMapsDescr"], axis=1)
 df = df.rename({"MainId":"PlaceId", "SubId":"StationId", "MainStation":"Place", "SubStFormatted":"Station", "SubStation":"AbbrStation", "FirstCompanyWkdt":"Company", "AltCompaniesWkdt":"AltCompanies", "FirstOpening":"Opening", "LastClosing":"Closing"}, axis=1)
-df.to_csv("../processed/resolution/resolved_deezy_match_allquicks_nv1_filtered.tsv", sep="\t", index=False)
+df.to_csv("../processed/resolution/StopsGB.tsv", sep="\t", index=False)
