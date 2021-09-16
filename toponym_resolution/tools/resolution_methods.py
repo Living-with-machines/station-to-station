@@ -198,17 +198,17 @@ def feature_selection(candrank, df, gazetteer_df, wikipedia_entity_overall_dict,
 def train_classifier(inpdf, use_cols):
     
     df = inpdf.copy()
-    df.drop_duplicates(subset=['Query','Candidate'], inplace=True)
+    df.drop_duplicates(subset=['SubId','Candidate'], inplace=True)
     
     # Split dev set into train and test:
-    queries = list(df.Query.unique()) 
+    queries = list(df.SubId.unique()) 
     random.Random(42).shuffle(queries)
     test_cutoff = int(len(queries)*.5)
     train_q, test_q = queries[test_cutoff:],queries[:test_cutoff]
     print("Queries in train and test:", len(train_q),len(test_q))
     
-    train = df[df.Query.isin(train_q)]
-    test = df[df.Query.isin(test_q)]
+    train = df[df.SubId.isin(train_q)]
+    test = df[df.SubId.isin(test_q)]
     X_train = train[use_cols].values
     y_train = train.Label.values
     X_test = test[use_cols].values
@@ -301,6 +301,10 @@ def our_method_comb_keepconf(df, clf_stations, use_cols_stations, clf_places, us
     dTypePrediction = dict()
     dLatitude = dict()
     dLongitude = dict()
+    dStationPrediction = dict()
+    dPlacePrediction = dict()
+    dEnglishLabel = dict()
+    
     for subid in list(set(list(df.SubId.unique()))):
         
         predicted_final_station = ""
@@ -331,15 +335,22 @@ def our_method_comb_keepconf(df, clf_stations, use_cols_stations, clf_places, us
             dResolved[subid] = predicted_final_place
             dTypePrediction[subid] = "place"
             
+        dStationPrediction[subid] = predicted_final_station
+        dPlacePrediction[subid] = predicted_final_place
+            
         dLatitude[subid] = gazetteer_df.loc[dResolved[subid]]["latitude"]
         dLongitude[subid] = gazetteer_df.loc[dResolved[subid]]["longitude"]
+        dEnglishLabel[subid] = gazetteer_df.loc[dResolved[subid]]["english_label"]
         
-    results_test_df["prediction"] = results_test_df['SubId'].map(dResolved)
-    results_test_df["typePrediction"] = results_test_df['SubId'].map(dTypePrediction)
-    results_test_df["station_conf"] = results_test_df['SubId'].map(dStationsConf)
-    results_test_df["place_conf"] = results_test_df['SubId'].map(dPlacesConf)
-    results_test_df["latitude"] = results_test_df['SubId'].map(dLatitude)
-    results_test_df["longitude"] = results_test_df['SubId'].map(dLongitude)
+    results_test_df["selected_entity"] = results_test_df['SubId'].map(dResolved)
+    results_test_df["selected_entity_label"] = results_test_df['SubId'].map(dEnglishLabel)
+    results_test_df["selected_entity_type"] = results_test_df['SubId'].map(dTypePrediction)
+    results_test_df["selected_entity_latitude"] = results_test_df['SubId'].map(dLatitude)
+    results_test_df["selected_entity_longitude"] = results_test_df['SubId'].map(dLongitude)
+    results_test_df["predicted_station"] = results_test_df['SubId'].map(dStationPrediction)
+    results_test_df["conf_station"] = results_test_df['SubId'].map(dStationsConf)
+    results_test_df["predicted_place"] = results_test_df['SubId'].map(dPlacePrediction)
+    results_test_df["conf_place"] = results_test_df['SubId'].map(dPlacesConf)
     
     return results_test_df
 
@@ -348,24 +359,43 @@ def our_method_comb_keepconf(df, clf_stations, use_cols_stations, clf_places, us
 # Baselines
 # ----------------------------------
 
-def candrank_most_confident(features_df, test_df):    
+def candrank_most_confident(features_df, test_df, nrun):
     
     dResolved = dict()
     for subid in list(set(list(features_df.SubId.unique()))):
         
         predicted_final = ""
         predicted_probs = 0.0
+        
+        # Subset of candidates and their features:
+        tmp_features_df = features_df[features_df.SubId==subid]
+        
+        # Shuffle to avoid a bias towards first entry:
+        tmp_features_df = tmp_features_df.sample(frac=1)
 
-        cands = features_df[features_df.SubId==subid].Candidate.values
+        cands = tmp_features_df.Candidate.values
         
-        predicted_station = cands[features_df[features_df.SubId==subid]['f_0'].argmax()]
-        predicted_place = cands[features_df[features_df.SubId==subid]['f_1'].argmax()]
+        # Pick candidate with higher station/place string confidence.
+        # If more than one, then pick first (randomized three lines
+        # above):
+        predicted_station = cands[tmp_features_df['f_0'].argmax()]
+        predicted_place = cands[tmp_features_df['f_1'].argmax()]
+        predicted_altn = cands[tmp_features_df['f_2'].argmax()]
         
-        dResolved[subid] = predicted_place
-        if predicted_station:
+        station_max_value = tmp_features_df[tmp_features_df["Candidate"] == predicted_station].iloc[0].f_0
+        place_max_value = tmp_features_df[tmp_features_df["Candidate"] == predicted_place].iloc[0].f_1
+        altn_max_value = tmp_features_df[tmp_features_df["Candidate"] == predicted_altn].iloc[0].f_2
+        
+        # Select the candidate for which confidence is higher, favouring
+        # station in case of tie:
+        if place_max_value > station_max_value:
+            dResolved[subid] = predicted_place
+        elif altn_max_value > station_max_value:
+            dResolved[subid] = predicted_altn
+        else:
             dResolved[subid] = predicted_station
         
-    test_df["candrank_most_confident"] = test_df['SubId'].map(dResolved)
+    test_df["candrank_most_confident_" + str(nrun)] = test_df['SubId'].map(dResolved)
     
     return test_df
 
@@ -377,10 +407,16 @@ def wikipedia_most_relevant(features_df, test_df):
         
         predicted_final = ""
         predicted_probs = 0.0
-
-        cands = features_df[features_df.SubId==subid].Candidate.values
         
-        predicted = cands[features_df[features_df.SubId==subid]['f_8'].argmax()]
+        # Subset of candidates and their features:
+        tmp_features_df = features_df[features_df.SubId==subid]
+        
+        # Shuffle to avoid a bias towards first entry:
+        tmp_features_df = tmp_features_df.sample(frac=1)
+
+        cands = tmp_features_df.Candidate.values
+        
+        predicted = cands[tmp_features_df['f_8'].argmax()]
         
         dResolved[subid] = predicted
         
@@ -396,10 +432,16 @@ def semantically_most_similar(features_df, test_df):
         
         predicted_final = ""
         predicted_probs = 0.0
-
-        cands = features_df[features_df.SubId==subid].Candidate.values
         
-        predicted = cands[features_df[features_df.SubId==subid]['f_3'].argmax()]
+        # Subset of candidates and their features:
+        tmp_features_df = features_df[features_df.SubId==subid]
+        
+        # Shuffle to avoid a bias towards first entry:
+        tmp_features_df = tmp_features_df.sample(frac=1)
+
+        cands = tmp_features_df.Candidate.values
+        
+        predicted = cands[tmp_features_df['f_3'].argmax()]
         
         dResolved[subid] = predicted
         
@@ -472,7 +514,7 @@ def convert_feature_file_format(partition,features, filter):
     out.close()
     return out_feat_folder+ outfile
 
-def ranklib(dev_feat_file,test_feat_file,filter,code_folder,cross_val,test_df):
+def ranklib(dev_feat_file,test_feat_file,filter,code_folder,cross_val,test_df,nrun):
 
     pathlib.Path(code_folder+"station-to-station/processed/ranklib/").mkdir(parents=True, exist_ok=True)
     dev = convert_feature_file_format("dev",dev_feat_file,filter=filter)
@@ -503,6 +545,6 @@ def ranklib(dev_feat_file,test_feat_file,filter,code_folder,cross_val,test_df):
             results[q_id] = scores[0][0]
         print ("feature used:",feature_used)
 
-    test_df["ranklib"] = test_df['SubId'].map(results)
+    test_df["ranklib_" + str(nrun)] = test_df['SubId'].map(results)
     
     return test_df
