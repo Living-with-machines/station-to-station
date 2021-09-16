@@ -176,14 +176,14 @@ def is_ref(desc):
     
 # ---------------------------------------------
 # Add column to dataframe that allows filtering out cross_ref entries:
-df["filter_out_cross_ref"] = True
-df.loc[df.apply(lambda x: is_ref(x["Description"]), axis=1), "filter_out_cross_ref"] = False
+df["cross_ref"] = True
+df.loc[df.apply(lambda x: is_ref(x["Description"]), axis=1), "cross_ref"] = False
 
 # ---------------------------------------------
 # Add column to dataframe that allows filtering out ghost place entries:
 main_ids = list(df.MainId.unique())
 
-df["filter_out_ghost_entry"] = False
+df["ghost_entry"] = False
 for m_id in main_ids:
     tdf = df[df["MainId"] == m_id]
     m_subid = df[df["MainId"] == m_id].iloc[0].SubId
@@ -197,12 +197,12 @@ for m_id in main_ids:
                 # Ghost FirstOpening value is given to station FirstOpening if empty:
                 if not type(df[df["SubId"] == s_id].iloc[0].FirstOpening) == str:
                     df.loc[df.SubId == s_id, 'FirstOpening'] = tdf.iloc[0].FirstOpening
-                    df.loc[df.SubId == m_subid, 'filter_out_ghost_entry'] = True
+                    df.loc[df.SubId == m_subid, 'ghost_entry'] = True
                     
                 # Ghost LastClosing value is given to station LastClosing if empty:
                 if not type(df[df["SubId"] == s_id].iloc[0].LastClosing) == str:
                     df.loc[df.SubId == s_id, 'LastClosing'] = tdf.iloc[0].LastClosing
-                    df.loc[df.SubId == m_subid, 'filter_out_ghost_entry'] = True
+                    df.loc[df.SubId == m_subid, 'ghost_entry'] = True
                     
                 # If ghost FirstCompanyWkdt is not empty and station FirstCompanyWkdt is empty,
                 # then station FirstCompanyWkdt gets the value from ghost FirstCompanyWkdt.
@@ -211,21 +211,21 @@ for m_id in main_ids:
                 if type(tdf.iloc[0].FirstCompanyWkdt) == str:
                     if not type(df[df["SubId"] == s_id].iloc[0].FirstCompanyWkdt) == str:
                         df.loc[df.SubId == s_id, 'FirstCompanyWkdt'] = tdf.iloc[0].FirstCompanyWkdt
-                        df.loc[df.SubId == m_subid, 'filter_out_ghost_entry'] = True
+                        df.loc[df.SubId == m_subid, 'ghost_entry'] = True
                     else:
-                        df.loc[df.SubId == m_subid, 'filter_out_ghost_entry'] = False
+                        df.loc[df.SubId == m_subid, 'ghost_entry'] = False
 
 # Replace empty values by "unknown":
 df["LastClosing"].fillna("unknown", inplace=True)
 df["FirstOpening"].fillna("unknown", inplace=True)
-df["prediction"].fillna("unknown", inplace=True)
-df["prediction_label"].fillna("unknown", inplace=True)
-df["prediction_type"].fillna("unknown", inplace=True)
-df["prediction_latitude"].fillna("unknown", inplace=True)
-df["prediction_longitude"].fillna("unknown", inplace=True)
-df["selected_station"].fillna("unknown", inplace=True)
+df["selected_entity"].fillna("unknown", inplace=True)
+df["selected_entity_label"].fillna("unknown", inplace=True)
+df["selected_entity_type"].fillna("unknown", inplace=True)
+df["selected_entity_latitude"].fillna("unknown", inplace=True)
+df["selected_entity_longitude"].fillna("unknown", inplace=True)
+df["predicted_station"].fillna("unknown", inplace=True)
 df["conf_station"].fillna(0.0, inplace=True)
-df["selected_place"].fillna("unknown", inplace=True)
+df["predicted_place"].fillna("unknown", inplace=True)
 df["conf_place"].fillna(0.0, inplace=True)
 
 # -------------------------------
