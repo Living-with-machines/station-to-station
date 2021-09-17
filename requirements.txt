@@ -1,0 +1,17 @@
+pandas==1.2.3
+lxml==4.5.2
+numpy==1.19.2
+dateparser==0.7.6
+geopy==2.0.0
+python-Levenshtein==0.12.0
+ipython==7.18.1
+ipython-genutils==0.2.0
+tqdm==4.59.0
+DeezyMatch==1.2.2
+scikit-learn==0.23.1
+haversine==2.3.0
+sentence-transformers==1.0.4
+geopandas==0.9.0
+Shapely==1.7.1
+pyproj==3.0.1
+pydash==4.8.0
