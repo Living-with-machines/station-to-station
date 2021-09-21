@@ -59,7 +59,6 @@ pip install -r requirements.txt
 python -m ipykernel install --user --name py37station --display-name "Python (py37station)"
 ```
 
-
 ## Directory structure
 
 Our code assumes the following directory structure:
@@ -88,7 +87,6 @@ station-to-station/
     └── tools/
 ```
 
-
 ## Content overview
 
 This is a summary of the contents of each folder:
@@ -106,23 +104,21 @@ This is a summary of the contents of each folder:
 ### Reproducing the experiments
 
 To run the linking experiments, follow the instructions in this order:
-* Resources → [README](https://github.com/Living-with-machines/station-to-station/blob/main/resources/README.md).
-* Processed → [README](https://github.com/Living-with-machines/station-to-station/blob/main/processed/README.md).
-* Wikidata → [README](https://github.com/Living-with-machines/station-to-station/blob/main/wikidata/README.md).
-* DeezyMatch → [README](https://github.com/Living-with-machines/station-to-station/blob/main/deezymatch/README.md).
-* Linking → [README: reproduce linking experiments](https://github.com/Living-with-machines/station-to-station/blob/main/linking/README_reproduce_experiments.md).
+1. Prepare the resources → [resources readme](https://github.com/Living-with-machines/station-to-station/blob/main/resources.md).
+2. Process Wikidata → [Wikidata readme](https://github.com/Living-with-machines/station-to-station/blob/main/wikidata/README.md).
+3. Create DeezyMatch datasets and models → [DeezyMatch readme](https://github.com/Living-with-machines/station-to-station/blob/main/deezymatch/README.md).
+4. Reproduce the linking experiments → [Readme: reproduce linking experiments](https://github.com/Living-with-machines/station-to-station/blob/main/linking/README_reproduce_experiments.md).
     
 ### Creating StopsGB from scratch
 
 :warning: You will only be able to create StopsGB from scratch if you have a copy of the MS Word version of _Railway Passenger Stations in Great Britain: a Chronology_ by Michael Quick.
 
-To create the full StopsGB, follow the instructions in this order:
-* Resources → [README](https://github.com/Living-with-machines/station-to-station/blob/main/resources/README.md).
-* Processed → [README](https://github.com/Living-with-machines/station-to-station/blob/main/processed/README.md).
-* Wikidata → [README](https://github.com/Living-with-machines/station-to-station/blob/main/wikidata/README.md).
-* DeezyMatch → [README](https://github.com/Living-with-machines/station-to-station/blob/main/deezymatch/README.md).
-* Quicks → [README](https://github.com/Living-with-machines/station-to-station/blob/main/quicks/README.md).
-* Linking → [README: create StopsGB](https://github.com/Living-with-machines/station-to-station/blob/main/linking/README_create_StopsGB.md).
+To create the full `StopsGB`, follow the instructions in this order:
+1. Prepare the `resources` folder → [resources readme](https://github.com/Living-with-machines/station-to-station/blob/main/resources.md).
+2. Process Wikidata → [Wikidata readme](https://github.com/Living-with-machines/station-to-station/blob/main/wikidata/README.md).
+3. Create DeezyMatch datasets and models → [DeezyMatch readme](https://github.com/Living-with-machines/station-to-station/blob/main/deezymatch/README.md).
+4. Process Quick's Chronology into StopsGB → [Quicks readme](https://github.com/Living-with-machines/station-to-station/blob/main/quicks/README.md).
+5. Resolve and georeference StopsGB → [Readme: create StopsGB](https://github.com/Living-with-machines/station-to-station/blob/main/linking/README_create_StopsGB.md).
 
 ## Citation
 
