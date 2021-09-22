@@ -1,16 +1,11 @@
 # Using DeezyMatch for toponym matching
 
-**Note:** The code in this folder relies on having previously processed Wikidata. Make sure you have followed [these steps](https://github.com/Living-with-machines/PlaceLinking/blob/master/wikidata/README.md) before trying to run the following scripts.
-
 ### Create a toponym matching dataset
 
-Run [deezy_dataset_creation.py] to create the toponym pairs dataset, which will be the training data to train a DeezyMatch model. You will need to specify the gazetteer you want to create the dataset from. Run the script both with `gb` and `gb_stations`:
+Run [deezy_dataset_creation.py] to create a toponym pairs dataset from the `station-to-station/processed/wikidata/altname_gb_gazetteer.tsv` dataframe (created from [these steps](https://github.com/Living-with-machines/station-to-station/blob/main/wikidata/README.md)), which will be used to train a DeezyMatch model. Run the script with `gb` as parameter (this parameter specifies that we're using the `gb` gazetteer to create the toponym pairs dataset):
+
 ```bash
 python deezy_dataset_creation.py -g gb
-```
-and:
-```bash
-python deezy_dataset_creation.py -g gb_stations
 ```
 
 ### Train DeezyMatch models
