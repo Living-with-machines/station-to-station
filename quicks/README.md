@@ -21,13 +21,13 @@ The python script `process_railway_stations.py` reads the Quick's Section 4 Word
 
 It returns a dataframe `station-to-station/resources/quicks/quicks_processed.pkl` with the following columns:
 
-| MainId | SubId | MainStation | SubStation | SubStFormatted                              | Description                                       |                                                   |                            |
-|--------|-------|------------------------|---------------------------------------------|---------------------------------------------------|---------------------------------------------------|----------------------------|
-| 1      | 1     | ABBEY                  | A TOWN                                      | ABBEY TOWN                                        | [NB] op 3 September 1856** as A; TOWN added 18... |                            |
+| MainId | SubId | MainStation | SubStation | SubStFormatted                              | Description                                       |
+|--------|-------|------------------------|---------------------------------------------|---------------------------------------------------|---------------------------------------------------|
+| 1      | 1     | ABBEY                  | A TOWN                                      | ABBEY TOWN                                        | [NB] op 3 September 1856** as A; TOWN added 18... |
 | 1      | 2     | ABBEY                  | A JUNCTION                                  | ABBEY JUNCTION                                    | [Cal] op 31 August 1870                           | (co ½ T 26 September)...   |
 | 1      | 3     | ABBEY                  | A JUNCTION                                  | ABBEY JUNCTION                                    | [NB] op 8 August 1870                             | (D&C 14) ; clo 1 Septem... |
-| 2      | 4     | ABBEY & WEST DEREHAM   | ABBEY & WEST DEREHAM ABBEY AND WEST DEREHAM | [GE] op 1 August 1882 (Thetford & Watton Times... |                                                   |                            |
-| 3      | 5     | ABBEY FOREGATE         | ABBEY FOREGATE                              | ABBEY FOREGATE                                    | – see SHREWSBURY.                                 |                            |
+| 2      | 4     | ABBEY & WEST DEREHAM   | ABBEY & WEST DEREHAM ABBEY AND WEST DEREHAM | [GE] op 1 August 1882 (Thetford & Watton Times... |
+| 3      | 5     | ABBEY FOREGATE         | ABBEY FOREGATE                              | ABBEY FOREGATE                                    | – see SHREWSBURY.                                 |
 
 Column description:
 * **MainId:** Internal autoincrement ID of the place where the station is located.
