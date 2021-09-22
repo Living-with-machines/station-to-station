@@ -2,6 +2,13 @@
 
 Several external resources have been employed in our experiments.
 
+## Table of contents
+
+- [Download resources from Zenodo](#download-resources-from-zenodo)
+- [Obtain remaining resources](#obtain-remaining-resources)
+- [Resources file structure](#resources-file-structure)
+- [Additional information](#additional-information)
+
 ## Download resources from Zenodo
 
 Many of the resources we use for our experiments can be downloaded from [here](https://thealanturininstitute-my.sharepoint.com/:u:/g/personal/mcollardanuy_turing_ac_uk/Ecmzmb2pwolKuFQMMbjYcWQBN3kYoXB2xRgZdRCP2ZVyEQ?e=eAadQH).
@@ -90,13 +97,15 @@ station-to-station/
 └── ...
 ```
 
-### Information about the resources we shared
+## Additional information
 
-#### DeezyMatch
+In this section, we provide additional information on the resources that we share via Zenodo.
+
+### DeezyMatch
 
 The DeezyMatch input file and vocabulary file have been adapted from the original files in the [DeezyMatch github repository](https://github.com/Living-with-machines/DeezyMatch/).
 
-#### Quicks
+### Quicks
 
 We are providing the following datasets used for the experiments on parsing the _Chronology_ and linking it to Wikidata:
 * `annotations.tsv`: this file contains the manual annotations performed by experts in our team.
@@ -107,7 +116,7 @@ We are providing the following datasets used for the experiments on parsing the 
 * `quicks_altname_dev.tsv`: Additional alternate names found in the _Chronology_ for the entries in `quicks_dev.tsv` (obtained from running the [code to parse the _Chronology_ document](https://github.com/Living-with-machines/station-to-station/tree/main/quicks)).
 * `quicks_altname_test.tsv`: Additional alternate names found in the _Chronology_ for the entries in `quicks_test.tsv` (obtained from running the [code to parse the _Chronology_ document](https://github.com/Living-with-machines/station-to-station/tree/main/quicks)).
 
-#### Wikigaz
+### Wikigaz
 
 We share a minimal version of the English WikiGazetteer (`wikigaz_en_basic.pkl`), obtained from the [Zenodo repository](https://zenodo.org/record/4034819#.YL8m8TZKi-8) of the following paper (see its [Github respository](https://github.com/Living-with-machines/LwM_SIGSPATIAL2020_ToponymMatching) as well):
 > ```
@@ -116,7 +125,7 @@ We share a minimal version of the English WikiGazetteer (`wikigaz_en_basic.pkl`)
 
 You can generate the complete WikiGazetteer from scratch following the instructions [here](https://github.com/Living-with-machines/lwm_GIR19_resolving_places/tree/master/gazetteer_construction) and obtain the minimal version used in our experiments by running the code [here](https://github.com/Living-with-machines/LwM_SIGSPATIAL2020_ToponymMatching/blob/master/processing/gazetteers/generate_wikigazetteers.ipynb).
 
-#### Wikipedia 
+### Wikipedia 
 
 We share a pickled `Counter` object (`overall_entity_freq.pickle`) that maps Wikipedia pages to the number of inlinks (e.g. `Archway, London` has 64 inlinks and `London` has 75678 inlinks), a common measure of entity relevance.
 
