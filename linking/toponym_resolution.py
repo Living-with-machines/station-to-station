@@ -45,7 +45,7 @@ for num_candidates in num_candidates_list:
         print("Applying methods and baselines to " + candrank_method + " with " + str(num_candidates) + " nv.")
 
         # We will store the results of all methods/baselines as columns in the original structured dataframe:
-        results_test_df = pd.read_csv("../processed/quicks/quicks_test.tsv", sep="\t")
+        results_test_df = pd.read_csv("../resources/quicks/quicks_test.tsv", sep="\t")
         features_dev_df = pd.read_csv("../processed/resolution/features_" + candrank_method + "_dev" + str(num_candidates) + ".tsv",sep='\t', index_col=0)
         features_test_df = pd.read_csv("../processed/resolution/features_" + candrank_method + "_test" + str(num_candidates) + ".tsv",sep='\t', index_col=0)
 
