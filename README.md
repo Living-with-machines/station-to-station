@@ -1,16 +1,16 @@
 <div align="center">
     <h1>Station to Station:<br>
-        Linking and enriching historical British railway data</h1>
+        Linking and Enriching Historical British Railway Data</h1>
  
 <p align="center">
-    <a href="https://github.com/Living-with-machines/station-to-station/blob/master/LICENSE">
+    <a href="https://github.com/Living-with-machines/station-to-station/blob/main/LICENSE">
         <img alt="License" src="https://img.shields.io/badge/License-MIT-yellow.svg">
     </a>
     <br/>
 </p>
 </div>
 
-This repository provides underlying code and materials for the paper `Station to Station: Linking and enriching historical British railway data`.
+This repository provides underlying code and materials for the paper `Station to Station: Linking and Enriching Historical British Railway Data`.
 
 
 Table of contents
@@ -59,10 +59,9 @@ pip install -r requirements.txt
 python -m ipykernel install --user --name py37station --display-name "Python (py37station)"
 ```
 
-
 ## Directory structure
 
-Our code relies on the following directory structure:
+Our code assumes the following directory structure:
 
 ```bash
 station-to-station/
@@ -83,13 +82,14 @@ station-to-station/
 │   └── wikipedia/
 ├── quicks/
 ├── wikidata/
-├── toponym_matching/
-└── toponym_resolution/
+├── deezymatch/
+└── linking/
     └── tools/
 ```
 
-
 ## Content overview
+
+This is a summary of the contents of each folder:
 
 * Resources, inputs and outputs:
     * `resources/`: folder where resources required to run the experiments are stored.
@@ -97,57 +97,62 @@ station-to-station/
 * Processing code:
     * `quick/`: code for parsing and processing Quick's _Chronology_.
     * `wikidata`: code for processing Wikidata, to be used in the linking experiments.
-    * `toponym_matching`: code to create the DeezyMatch datasets and models.
+    * `deezymatch`: code to create the DeezyMatch datasets and models used for linking.
 * Linking code:
-    * `toponym_resolution`: code for linking Quick's _Chronology_ to Wikidata.
+    * `linking`: code for reproducing the experiments and for linking StopsGB to Wikidata.
     
-    
-To run the experiments, follow the instructions in this order:
-* Resources [README](https://github.com/Living-with-machines/station-to-station/blob/master/resources/README.md).
-* Processed [README](https://github.com/Living-with-machines/station-to-station/blob/master/processed/README.md).
-* Quicks [README](https://github.com/Living-with-machines/station-to-station/blob/master/quicks/README.md).
-* Wikidata [README](https://github.com/Living-with-machines/station-to-station/blob/master/wikidata/README.md).
-* Toponym matching [README](https://github.com/Living-with-machines/station-to-station/blob/master/toponym_matching/README.md).
-* Toponym resolution [README](https://github.com/Living-with-machines/station-to-station/blob/master/toponym_resolution/README.md).
+### Reproducing the experiments
 
+To run the linking experiments, follow the instructions in this order:
+1. Prepare the resources → [resources readme](https://github.com/Living-with-machines/station-to-station/blob/main/resources.md).
+2. Process Wikidata → [Wikidata readme](https://github.com/Living-with-machines/station-to-station/blob/main/wikidata/README.md).
+3. Create DeezyMatch datasets and models → [DeezyMatch readme](https://github.com/Living-with-machines/station-to-station/blob/main/deezymatch/README.md).
+4. Reproduce the linking experiments → [Readme: reproduce linking experiments](https://github.com/Living-with-machines/station-to-station/blob/main/linking/README_reproduce_experiments.md).
+    
+### Creating StopsGB from scratch
+
+:warning: You will only be able to create StopsGB from scratch if you have a copy of the MS Word version of _Railway Passenger Stations in Great Britain: a Chronology_ by Michael Quick.
+
+To create the full `StopsGB`, follow the instructions in this order:
+1. Prepare the `resources` folder → [resources readme](https://github.com/Living-with-machines/station-to-station/blob/main/resources.md).
+2. Process Wikidata → [Wikidata readme](https://github.com/Living-with-machines/station-to-station/blob/main/wikidata/README.md).
+3. Create DeezyMatch datasets and models → [DeezyMatch readme](https://github.com/Living-with-machines/station-to-station/blob/main/deezymatch/README.md).
+4. Process Quick's Chronology into StopsGB → [Quicks readme](https://github.com/Living-with-machines/station-to-station/blob/main/quicks/README.md).
+5. Resolve and georeference StopsGB → [Readme: create StopsGB](https://github.com/Living-with-machines/station-to-station/blob/main/linking/README_create_StopsGB.md).
 
 ## Citation
 
 Please acknowledge our work if you use the code or derived data, by citing:
 
 ```
-Kaspar Beelen, Mariona Coll Ardanuy, Jon Lawrence, Katherine McDonough, Federico Nanni, Joshua Rhodes, Giorgia Tolfo, and Daniel CS Wilson. "Station to Station: linking and enriching historical British railway data." In XXXXXX (XXXX), pp. XXX--XXX. 2021.
+Mariona Coll Ardanuy, Kaspar Beelen, Jon Lawrence, Katherine McDonough, Federico Nanni, Joshua Rhodes, Giorgia Tolfo, and Daniel C.S. Wilson. "Station to Station: Linking and Enriching Historical British Railway Data." In Computational Humanities Research (CHR2021). 2021.
 ```
 
 ```bibtex
 @inproceedings{lwm-station-to-station-2021,
-    title = "Station to Station: linking and enriching historical British railway data",
-    author = "Beelen, Kaspar and
-      Coll Ardanuy, Mariona and
+    title = "Station to Station: Linking and Enriching Historical British Railway Data",
+    author = "Coll Ardanuy, Mariona and
+      Beelen, Kaspar and
       Lawrence, Jon and
       McDonough, Katherine and
       Nanni, Federico and
       Rhodes, Joshua and
       Tolfo, Giorgia and
       Wilson, Daniel CS",
-    booktitle = "XXXXXXXXXXX",
+    booktitle = "Computational Humanities Research",
     year = "2021",
-    address = "XXXXXXX",
-    publisher = "XXXXXXX",
-    url = "XXXXXXX",
-    pages = "XXX--XXX",
 }
 ```
 
 #### Author contributions
-In the paper, authors are listed in alphabetical order. The following are sorted by amount of contribution and, if equal, alphabetically:
+
 * **Conceptualization:** KM, JL, DW
 * **Methodology:** MCA, FN, KB
 * **Implementation:** MCA, FN, KB, GT
 * **Reprodducibility:** FN, MCA
 * **Historical Analysis:** KB, KM, JL, JR, DW
 * **Data Acquisition and Curation:** MCA, GT, FN, DW
-* **Annotation:** JL KM
+* **Annotation:** JL, KM
 * **Project Management:** MCA
 * **Writing and Editing:** all authors
  
@@ -159,5 +164,6 @@ Work for this paper was produced as part of Living with Machines. This project, 
 
 ## License
 
-- The source code is licensed under MIT License.
-- Copyright (c) 2020 The Alan Turing Institute, British Library Board, Queen Mary University of London, University of Exeter, University of East Anglia and University of Cambridge.
+The source code is licensed under MIT License.
+
+Copyright © 2021 The Alan Turing Institute, British Library Board, Queen Mary University of London, University of Exeter, University of East Anglia and University of Cambridge.

@@ -609,5 +609,4 @@ def prepare_alt_queries(parsedf, scen, split):
     df_tmp[scen] = names
     df_tmp["MainId"] = mainId
     df_tmp["SubId"] = substId
-#     df_tmp.to_pickle("../processed/quicks/quicks_" + scen.lower() + "_" + split.lower() + ".pkl")
-    df_tmp.to_csv("../processed/quicks/quicks_" + scen.lower() + "_" + split.lower() + ".tsv", sep="\t", index=False)
+    df_tmp.to_csv("../resources/quicks/quicks_" + scen.lower() + "_" + split.lower() + ".tsv", sep="\t", index=False)

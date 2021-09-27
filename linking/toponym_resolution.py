@@ -45,7 +45,7 @@ for num_candidates in num_candidates_list:
         print("Applying methods and baselines to " + candrank_method + " with " + str(num_candidates) + " nv.")
 
         # We will store the results of all methods/baselines as columns in the original structured dataframe:
-        results_test_df = pd.read_csv("../processed/quicks/quicks_test.tsv", sep="\t")
+        results_test_df = pd.read_csv("../resources/quicks/quicks_test.tsv", sep="\t")
         features_dev_df = pd.read_csv("../processed/resolution/features_" + candrank_method + "_dev" + str(num_candidates) + ".tsv",sep='\t', index_col=0)
         features_test_df = pd.read_csv("../processed/resolution/features_" + candrank_method + "_test" + str(num_candidates) + ".tsv",sep='\t', index_col=0)
 
@@ -122,7 +122,7 @@ for num_candidates in num_candidates_list:
         keep_acc = 0.0
         for th in np.arange(0, 1, 0.05):
             th = round(th, 2)
-            results_dev_df = pd.read_csv("../processed/quicks/quicks_dev.tsv", sep="\t")
+            results_dev_df = pd.read_csv("../resources/quicks/quicks_dev.tsv", sep="\t")
             results_dev_df = resolution_methods.our_method_comb(features_dev_df, clf_stations, use_cols_stations, clf_places, use_cols_places, gazetteer_df, th, results_dev_df)
             acc = eval_methods.topres_exactmetrics(results_dev_df, "our_method_comb", False)
             if acc >= keep_acc:

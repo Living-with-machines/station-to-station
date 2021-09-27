@@ -39,8 +39,8 @@ if candrank_metric in ['cosine', 'conf']:
 
 if not Path("../processed/resolution/candranking_" + setting + ".pkl").is_file():
 
-    df = pd.read_pickle("../processed/quicks/quicks_parsed.pkl")
-    alts_df = pd.read_csv("../processed/quicks/quicks_altname_" + setting + ".tsv", sep="\t")
+    df = pd.read_pickle("../resources/quicks/quicks_parsed.pkl")
+    alts_df = pd.read_csv("../resources/quicks/quicks_altname_" + setting + ".tsv", sep="\t")
     wkdt_df_places = pd.read_csv("../processed/wikidata/altname_gb_gazetteer.tsv", sep="\t")
     wkdt_df_stations = pd.read_csv("../processed/wikidata/altname_gb_stations_gazetteer.tsv", sep="\t")
     
@@ -140,7 +140,7 @@ optimal_threshold = 0.0
 keep_acc = 0.0
 for th in np.arange(0, 1, 0.05):
     th = round(th, 2)
-    results_dev_df = pd.read_csv("../processed/quicks/quicks_dev.tsv", sep="\t")
+    results_dev_df = pd.read_csv("../resources/quicks/quicks_dev.tsv", sep="\t")
     results_dev_df = resolution_methods.our_method_comb(features_dev_df, clf_stations, use_cols_stations, clf_places, use_cols_places, gazetteer_df, th, results_dev_df)
     acc = eval_methods.topres_exactmetrics(results_dev_df, "our_method_comb", False)
     if acc >= keep_acc:
@@ -150,7 +150,7 @@ for th in np.arange(0, 1, 0.05):
 print(optimal_threshold, keep_acc)
 
 features_test_df = pd.read_csv("../processed/resolution/features_allquicks_deezy_match.tsv",sep='\t', index_col=0)
-results_test_df = pd.read_pickle("../processed/quicks/quicks_parsed.pkl")
+results_test_df = pd.read_pickle("../resources/quicks/quicks_parsed.pkl")
 
 # Apply our classification methods:
 results_test_df = resolution_methods.our_method_comb_keepconf(features_test_df, clf_stations, use_cols_stations, clf_places, use_cols_places, gazetteer_df, optimal_threshold, results_test_df)
