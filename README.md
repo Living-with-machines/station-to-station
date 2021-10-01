@@ -12,6 +12,7 @@
 
 This repository provides underlying code and materials for the paper `Station to Station: Linking and Enriching Historical British Railway Data`.
 
+The **StopsGB** dataset is available on the British Library research repository via https://doi.org/10.23636/wvva-3d67.
 
 Table of contents
 --------------------
@@ -93,15 +94,15 @@ This is a summary of the contents of each folder:
 
 * Resources, inputs and outputs:
     * `resources/`: folder where resources required to run the experiments are stored.
-    * `processed/`: folder where processed data and resources are stored.
+    * `processed/`: folder where processed data, resources, and results are stored.
 * Processing code:
     * `quick/`: code for parsing and processing Quick's _Chronology_.
     * `wikidata`: code for processing Wikidata, to be used in the linking experiments.
     * `deezymatch`: code to create the DeezyMatch datasets and models used for linking.
 * Linking code:
     * `linking`: code for reproducing the experiments and for linking StopsGB to Wikidata.
-    
-### Reproducing the experiments
+
+### Option 1: Reproducing the experiments
 
 To run the linking experiments, follow the instructions in this order:
 1. Prepare the resources → [resources readme](https://github.com/Living-with-machines/station-to-station/blob/main/resources.md).
@@ -109,7 +110,7 @@ To run the linking experiments, follow the instructions in this order:
 3. Create DeezyMatch datasets and models → [DeezyMatch readme](https://github.com/Living-with-machines/station-to-station/blob/main/deezymatch/README.md).
 4. Reproduce the linking experiments → [Readme: reproduce linking experiments](https://github.com/Living-with-machines/station-to-station/blob/main/linking/README_reproduce_experiments.md).
     
-### Creating StopsGB from scratch
+### Option 2: Creating StopsGB from scratch
 
 :warning: You will only be able to create StopsGB from scratch if you have a copy of the MS Word version of _Railway Passenger Stations in Great Britain: a Chronology_ by Michael Quick.
 
@@ -146,15 +147,15 @@ Mariona Coll Ardanuy, Kaspar Beelen, Jon Lawrence, Katherine McDonough, Federico
 
 #### Author contributions
 
-* **Conceptualization:** KM, JL, DW
-* **Methodology:** MCA, FN, KB
-* **Implementation:** MCA, FN, KB, GT
-* **Reprodducibility:** FN, MCA
-* **Historical Analysis:** KB, KM, JL, JR, DW
-* **Data Acquisition and Curation:** MCA, GT, FN, DW
-* **Annotation:** JL, KM
-* **Project Management:** MCA
-* **Writing and Editing:** all authors
+* _Conceptualization:_ Katherine McDonough, Jon Lawrence and Daniel C. S. Wilson.
+* _Methodology:_ Mariona Coll Ardanuy, Federico Nanni and Kaspar Beelen.
+* _Implementation:_ Mariona Coll Ardanuy, Federico Nanni, Kaspar Beelen and Giorgia Tolfo.
+* _Reproducibility:_ Federico Nanni and Mariona Coll Ardanuy.
+* _Historical Analysis:_ Kaspar Beelen, Katherine McDonough, Jon Lawrence, Joshua Rhodes and Daniel C. S. Wilson.
+* _Data Acquisition and Curation:_ Daniel C. S. Wilson, Mariona Coll Ardanuy, Giorgia Tolfo and Federico Nanni.
+* _Annotation:_ Jon Lawrence and Katherine McDonough.
+* _Project Management:_ Mariona Coll Ardanuy.
+* _Writing and Editing:_ all authors.
  
 ## Acknowledgements
 
