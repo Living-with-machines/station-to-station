@@ -10,7 +10,7 @@
 </p>
 </div>
 
-This repository provides underlying code and materials for the paper `Station to Station: Linking and Enriching Historical British Railway Data`.
+This repository provides underlying code and materials for the paper _'Station to Station: Linking and Enriching Historical British Railway Data'_.
 
 The **StopsGB** dataset is available on the British Library research repository via https://doi.org/10.23636/wvva-3d67.
 
@@ -32,13 +32,13 @@ Table of contents
 * Create a new environment:
 
 ```bash
-conda create -n py37station python=3.7
+conda create -n py39station python=3.9
 ```
 
 * Activate the environment:
 
 ```bash
-conda activate py37station
+conda activate py39station
 ```
 
 * Clone the repository:
@@ -54,10 +54,16 @@ cd /path/to/my/station-to-station
 pip install -r requirements.txt
 ```
 
-* To allow the newly created `py37station` environment to show up in the notebooks, run:
+* Install python-levenshtein separately with conda:
 
 ```bash
-python -m ipykernel install --user --name py37station --display-name "Python (py37station)"
+conda install -c conda-forge python-levenshtein
+```
+
+* To allow the newly created `py39station` environment to show up in the notebooks, run:
+
+```bash
+python -m ipykernel install --user --name py39station --display-name "Python (py39station)"
 ```
 
 ## Directory structure
