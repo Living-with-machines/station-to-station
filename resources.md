@@ -11,7 +11,7 @@ Several external resources have been employed in our experiments.
 
 ## Download resources from Zenodo
 
-Many of the resources we use for our experiments can be downloaded from [here](https://thealanturininstitute-my.sharepoint.com/:u:/g/personal/mcollardanuy_turing_ac_uk/Ecmzmb2pwolKuFQMMbjYcWQBN3kYoXB2xRgZdRCP2ZVyEQ?e=eAadQH).
+Many of the resources we use for our experiments can be downloaded from [here](https://zenodo.org/record/5520883).
 
 Download the compressed file `resources.zip` and unzip it. Our code assumes the following directory structure:
 
