@@ -118,12 +118,7 @@ We are providing the following datasets used for the experiments on parsing the 
 
 ### Wikigaz
 
-We share a minimal version of the English WikiGazetteer (`wikigaz_en_basic.pkl`), obtained from the [Zenodo repository](https://zenodo.org/record/4034819#.YL8m8TZKi-8) of the following paper (see its [Github respository](https://github.com/Living-with-machines/LwM_SIGSPATIAL2020_ToponymMatching) as well):
-> ```
-> Mariona Coll Ardanuy, Kasra Hosseini, Katherine McDonough, Amrey Krause, Daniel van Strien, and Federico Nanni. "A Deep Learning Approach to Geographical Candidate Selection through Toponym Matching." arxiv:2009.08114. 2020.
-> ```
-
-You can generate the complete WikiGazetteer from scratch following the instructions [here](https://github.com/Living-with-machines/lwm_GIR19_resolving_places/tree/master/gazetteer_construction) and obtain the minimal version used in our experiments by running the code [here](https://github.com/Living-with-machines/LwM_SIGSPATIAL2020_ToponymMatching/blob/master/processing/gazetteers/generate_wikigazetteers.ipynb).
+We share a minimal version of the English WikiGazetteer (`wikigaz_en_basic.pkl`). You can generate the complete WikiGazetteer from scratch following the instructions [here](https://github.com/Living-with-machines/lwm_GIR19_resolving_places/tree/master/gazetteer_construction) and obtain the minimal version used in our experiments by running the code [here](https://github.com/Living-with-machines/LwM_SIGSPATIAL2020_ToponymMatching/blob/master/processing/gazetteers/generate_wikigazetteers.ipynb).
 
 ### Wikipedia inlinks
 
