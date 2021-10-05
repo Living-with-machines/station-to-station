@@ -7,7 +7,7 @@ Several external resources have been employed in our experiments.
 - [Download resources from Zenodo](#download-resources-from-zenodo)
 - [Obtain remaining resources](#obtain-remaining-resources)
 - [Resources file structure](#resources-file-structure)
-- [Additional information](#additional-information)
+- [Additional information on shared resources](#additional-information-on-shared-resources)
 
 ## Download resources from Zenodo
 
@@ -97,13 +97,13 @@ station-to-station/
 └── ...
 ```
 
-## Additional information
+## Additional information on shared resources
 
 In this section, we provide additional information on the resources that we share via Zenodo.
 
 ### DeezyMatch
 
-The DeezyMatch input file and vocabulary file have been adapted from the original files in the [DeezyMatch github repository](https://github.com/Living-with-machines/DeezyMatch/).
+The DeezyMatch input file and vocabulary file have been adapted from the original files (which can be found in the [DeezyMatch github repository](https://github.com/Living-with-machines/DeezyMatch/)).
 
 ### Quicks
 
