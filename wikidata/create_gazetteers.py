@@ -38,6 +38,7 @@ def filter_uk(lat, lon, countries):
 if not Path("../processed/wikidata/uk_approx_gazetteer.csv").exists():
     path = r"../resources/wikidata/extracted/"
     Path(path).mkdir(parents=True, exist_ok=True)
+    Path("../processed/wikidata/").mkdir(parents=True, exist_ok=True)
 
     all_files = glob.glob(path + "/*.csv")
 
@@ -77,7 +78,7 @@ gbdf = pd.read_csv("../processed/wikidata/uk_approx_gazetteer.csv", header=0, in
 
 # Load Great Britain shapefile:
 # Boundary-Line™ ESRI Shapefile from https://osdatahub.os.uk/downloads/open/BoundaryLine (licence: http://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/)
-shapefile = gpd.read_file("../resources/geoshapefiles/european_region_region.shp")
+shapefile = gpd.read_file("../resources/geoshapefiles/country_region.shp")
 
 # Set coordinate system converter:
 bng=pyproj.Proj('epsg:27700')
