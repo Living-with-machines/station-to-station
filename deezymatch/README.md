@@ -2,7 +2,7 @@
 
 ### Create a toponym matching dataset
 
-Run [deezy_dataset_creation.py] to create a toponym pairs dataset from the `station-to-station/processed/wikidata/altname_gb_gazetteer.tsv` dataframe (created from [these steps](https://github.com/Living-with-machines/station-to-station/blob/main/wikidata/README.md)), which will be used to train a DeezyMatch model. Run the script with `gb` as parameter (this parameter specifies that we're using the `gb` gazetteer to create the toponym pairs dataset):
+Run `deezy_dataset_creation.py` to create a toponym pairs dataset from the `station-to-station/processed/wikidata/altname_gb_gazetteer.tsv` dataframe (created from [these steps](https://github.com/Living-with-machines/station-to-station/blob/main/wikidata/README.md)), which will be used to train a DeezyMatch model. Run the script with `gb` as parameter (this parameter specifies that we're using the `gb` gazetteer to create the toponym pairs dataset):
 
 ```bash
 python deezy_dataset_creation.py -g gb
