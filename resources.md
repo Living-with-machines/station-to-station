@@ -125,7 +125,7 @@ We share a minimal version of the English WikiGazetteer (`wikigaz_en_basic.pkl`)
 
 You can generate the complete WikiGazetteer from scratch following the instructions [here](https://github.com/Living-with-machines/lwm_GIR19_resolving_places/tree/master/gazetteer_construction) and obtain the minimal version used in our experiments by running the code [here](https://github.com/Living-with-machines/LwM_SIGSPATIAL2020_ToponymMatching/blob/master/processing/gazetteers/generate_wikigazetteers.ipynb).
 
-### Wikipedia 
+### Wikipedia inlinks
 
 We share a pickled `Counter` object (`overall_entity_freq.pickle`) that maps Wikipedia pages to the number of inlinks (e.g. `Archway, London` has 64 inlinks and `London` has 75678 inlinks), a common measure of entity relevance.
 
