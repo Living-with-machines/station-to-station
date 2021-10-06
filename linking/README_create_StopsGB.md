@@ -1,6 +1,6 @@
 # Create a linked version of StopsGB
 
-We assume you have followed the instructions described in the main [Readme](https://github.com/Living-with-machines/station-to-station/tree/44-improve-documentation#creating-stopsgb-from-scratch) file in order to create the StopsGB dataset from scratch. If you have, you will only need to run the following script (warning: it will take several hours):
+We assume you have followed the instructions described in the main [Readme](https://github.com/Living-with-machines/station-to-station#option-2-creating-stopsgb-from-scratch) file in order to create the StopsGB dataset from scratch. If you have, you will only need to run the following script (warning: it will take several hours):
 
 ```bash
 python apply_to_all_stations.py
