@@ -3,7 +3,7 @@ lxml>=4.6.5
 numpy==1.21.2
 dateparser==1.0.0
 geopy==2.2.0
-ipython==7.28.0
+ipython>=7.31.1
 ipython-genutils==0.2.0
 tqdm==4.62.3
 DeezyMatch==1.2.4
