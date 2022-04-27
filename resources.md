@@ -4,63 +4,27 @@ Several external resources have been employed in our experiments.
 
 ## Table of contents
 
-- [Download resources from Zenodo](#download-resources-from-zenodo)
-- [Obtain remaining resources](#obtain-remaining-resources)
-- [Resources file structure](#resources-file-structure)
-- [Additional information on shared resources](#additional-information-on-shared-resources)
+- [Resources](#resources)
+  - [Table of contents](#table-of-contents)
+  - [Obtaining the Resources](#obtaining-the-resources)
+  - [Resources file structure](#resources-file-structure)
+  - [Additional information on shared resources](#additional-information-on-shared-resources)
+    - [DeezyMatch](#deezymatch)
+    - [Quicks](#quicks)
+    - [Wikigaz](#wikigaz)
+    - [Wikipedia inlinks](#wikipedia-inlinks)
 
-## Download resources from Zenodo
 
-Many of the resources we use for our experiments can be downloaded from [here](https://zenodo.org/record/5520883).
+## Obtaining the Resources
 
-Download the compressed file `resources.zip` and unzip it. Our code assumes the following directory structure:
+Several external resources have been employed in our experiments.
 
-```
-station-to-station/
-├── ...
-├── resources/
-│   ├── deezymatch/
-│   ├── geonames/
-│   ├── geoshapefiles/
-│   ├── quicks/
-│   ├── ranklib/
-│   ├── wikidata/
-│   ├── wikigaz/
-│   └── wikipedia/
-└── ...
-```
+This can all be automatically downloaded using the [get_resources.ipynb](get_resources.ipynb) notebook. Manual instructions for obtaining the resources are included in the notebook too.
 
-Some of the directories will be empty, because we cannot share all the resources we used in our experiments. Please follow the instructions below to obtain the remaining files and store them in the right location.
-
-## Obtain remaining resources
-
-### Geonames
-
-Download the [GB table](http://download.geonames.org/export/dump/GB.zip), and store the unzipped file (`GB.txt`) under `resources/geonames/`.
-> For reference, we have used the `2021-04-26 09:01` version in our experiments.
-
-Download the [alternateNameV2 table](http://download.geonames.org/export/dump/alternateNamesV2.zip), and store the unzipped files (`alternateNamesV2.txt` and `iso-languagecodes.txt`) under `resources/geonames/`.
-> For reference, we have used the `2021-04-26 09:11` version in our experiments.
-
-### Geoshapefiles
-
-Download the Boundary-Line™ ESRI Shapefile from https://osdatahub.os.uk/downloads/open/BoundaryLine (see [licence](http://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/)). Unzip it and copy the following files under the `geoshapefiles/` folder:
-* `Data/Supplementary_Country/country_region.dbf`
-* `Data/Supplementary_Country/country_region.prj`
-* `Data/Supplementary_Country/country_region.shp`
-* `Data/Supplementary_Country/country_region.shx`
-
-### Ranklib
-
-Download the Ranklib `.jar` file from the Lemur project [RankLib page](https://sourceforge.net/p/lemur/wiki/RankLib/) and store it in `ranklib/`. In our experiments, we have used version 2.13, available [here](https://sourceforge.net/projects/lemur/files/lemur/RankLib-2.13/). If this is not available anymore, we would suggest that you get the most recent binary [from here](https://sourceforge.net/projects/lemur/files/lemur/).
-
-### Wikidata
-
-Download a full Wikidata dump from [here](https://dumps.wikimedia.org/wikidatawiki/entities/latest-all.json.bz2) and store the `latest-all.json.bz2` file in `wikidata/`.
 
 ## Resources file structure
 
-After following the steps above, you should have the following file structure:
+After following the steps in the `get_resources.ipynb`, you should have the following file structure:
 ```
 station-to-station/
 ├── ...
