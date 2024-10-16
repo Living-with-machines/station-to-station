@@ -16,6 +16,8 @@ Table of contents
 - [Acknowledgements](#acknowledgements)
 - [License](#license)
 
+---
+
 ## Introduction
 
 This repository provides underlying code and materials for the paper [_'Station to Station: Linking and Enriching Historical British Railway Data'_](https://ceur-ws.org/Vol-2989/long_paper29.pdf).
