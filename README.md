@@ -1,8 +1,9 @@
 # Station to Station:<br />Linking and Enriching Historical British Railway Data
 
-[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/Living-with-machines/station-to-station/blob/main/LICENSE)
-[![Link to dataset in the British Library Research Repository](https://img.shields.io/badge/dataset-British_Library-red)](https://doi.org/10.23636/wvva-3d67)
+[![DOI link to this repository](https://zenodo.org/badge/DOI/10.5281/zenodo.13941022.svg)](https://doi.org/10.5281/zenodo.13941022)
 [![Link to paper in Computational Humanities Research proceedings 2021](https://img.shields.io/badge/paper-Computational_Humanities_Research-blue)](https://ceur-ws.org/Vol-2989/long_paper29.pdf)
+[![Link to dataset in the British Library Research Repository](https://img.shields.io/badge/dataset-British_Library-red)](https://doi.org/10.23636/wvva-3d67)
+[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/Living-with-machines/station-to-station/blob/main/LICENSE)
 
 Table of contents
 --------------------
