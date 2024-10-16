@@ -1,22 +1,13 @@
-<div align="center">
-    <h1>Station to Station:<br>
-        Linking and Enriching Historical British Railway Data</h1>
- 
-<p align="center">
-    <a href="https://github.com/Living-with-machines/station-to-station/blob/main/LICENSE">
-        <img alt="License" src="https://img.shields.io/badge/License-MIT-yellow.svg">
-    </a>
-    <br/>
-</p>
-</div>
+# Station to Station:<br />Linking and Enriching Historical British Railway Data
 
-This repository provides underlying code and materials for the paper _'Station to Station: Linking and Enriching Historical British Railway Data'_.
-
-The **StopsGB** dataset is available on the British Library research repository via https://doi.org/10.23636/wvva-3d67.
+[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/Living-with-machines/station-to-station/blob/main/LICENSE)
+[![Link to dataset in the British Library Research Repository](https://img.shields.io/badge/dataset-British_Library-red)](https://doi.org/10.23636/wvva-3d67)
+[![Link to paper in Computational Humanities Research proceedings 2021](https://img.shields.io/badge/paper-Computational_Humanities_Research-blue)](https://ceur-ws.org/Vol-2989/long_paper29.pdf)
 
 Table of contents
 --------------------
 
+- [Introduction](#introduction)
 - [Installation and setup](#installation)
 - [Directory structure](#directory-structure)
 - [Content overview](#content-overview)
@@ -24,6 +15,11 @@ Table of contents
 - [Acknowledgements](#acknowledgements)
 - [License](#license)
 
+## Introduction
+
+This repository provides underlying code and materials for the paper [_'Station to Station: Linking and Enriching Historical British Railway Data'_](https://ceur-ws.org/Vol-2989/long_paper29.pdf).
+
+The **StopsGB** dataset is available on the [British Library research repository](https://doi.org/10.23636/wvva-3d67).
 
 ## Installation
 
@@ -121,6 +117,7 @@ To run the linking experiments, follow the instructions in this order:
 :warning: You will only be able to create StopsGB from scratch if you have a copy of the MS Word version of _Railway Passenger Stations in Great Britain: a Chronology_ by Michael Quick.
 
 To create the full `StopsGB`, follow the instructions in this order:
+
 1. Prepare the `resources` folder → [resources readme](https://github.com/Living-with-machines/station-to-station/blob/main/resources.md).
 2. Process Wikidata → [Wikidata readme](https://github.com/Living-with-machines/station-to-station/blob/main/wikidata/README.md).
 3. Create DeezyMatch datasets and models → [DeezyMatch readme](https://github.com/Living-with-machines/station-to-station/blob/main/deezymatch/README.md).
